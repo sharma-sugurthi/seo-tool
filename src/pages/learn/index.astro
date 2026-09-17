@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+const guides = (await getCollection('blog', ({ data }) => !data.draft && data.tags.some((t) => ['how to', 'AI policy', 'directories', 'launch'].includes(t))))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+<Base title="Learn: free tools, checklists and definitions for finance teams" description="A savings calculator, a month end close checklist, a plain English glossary and practical guides. Free, no signup.">
+  <section class="hero">
+    <h1>Learn</h1>
+    <p class="lead">Free, practical resources for finance teams evaluating AI and for founders trying to get their tools found. No signup, no gated PDFs.</p>
+  </section>
+
+  <section class="section">
+    <h2 style="margin-top:0">Tools you can use right now</h2>
+    <div class="grid">
+      <div class="card">
+        <span class="pill">Calculator</span>
+        <h3><a href="/learn/bookkeeping-automation-roi-calculator/">Bookkeeping automation savings</a></h3>
+        <p class="muted" style="flex:1">Transactions, minutes per transaction, hourly cost and an automation rate. Out comes hours and money saved per month and per year.</p>
+      </div>
+      <div class="card">
+        <span class="pill">Checklist</span>
+        <h3><a href="/learn/month-end-close-checklist/">Month end close checklist</a></h3>
+        <p class="muted" style="flex:1">Thirty items across pre close, close and review. Tick them in the browser, progress is remembered on this device.</p>
+      </div>
+      <div class="card">
+        <span class="pill">Reference</span>
+        <h3><a href="/learn/glossary/">Glossary</a></h3>
+        <p class="muted" style="flex:1">Finance, AI and search terms defined in a sentence or two each, with links to where they matter on this site.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 style="margin-top:0">Guides</h2>
+    <div class="grid">
+      {guides.map((g) => (
+        <div class="card">
+          <h3><a href={`/blog/${g.id}/`}>{g.data.title}</a></h3>
+          <p class="muted" style="flex:1; font-size:.93rem">{g.data.description}</p>
+        </div>
+      ))}
+    </div>
+    <p style="margin-top:1rem"><a href="/blog/">All articles</a></p>
+  </section>
+
+  <section class="section">
+    <h2 style="margin-top:0">Something missing?</h2>
+    <p class="muted">Tell us what would help: a template, a comparison, a definition. <a href="/contact/">Contact us</a> and we will build it if enough people ask.</p>
+  </section>
+</Base>

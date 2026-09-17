@@ -190,6 +190,12 @@ p, li { color: var(--text-2); }
 /* ── Flex / Grid utilities ────────────────────────────── */
 .row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
 .grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+/* Price cards: always four in a row on desktop, two on tablet, one on phone */
+.price-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.price-grid .card { padding: 1.25rem; }
+.price-grid .card ul { padding-left: 1rem; font-size: 0.9rem; }
+.price-grid .price { font-size: 1.6rem; }
+@media (max-width: 1024px) { .price-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ── Cards ────────────────────────────────────────────── */
 .card {
@@ -697,7 +703,7 @@ footer.site .bottom-bar {
 
   .hero { padding: 3rem 0 2rem; }
   h1 { font-size: clamp(1.75rem, 5vw, 2.4rem); }
-  .grid { grid-template-columns: 1fr; }
+  .grid, .price-grid { grid-template-columns: 1fr; }
   .kpis { grid-template-columns: repeat(2, 1fr); }
   .stats-bar { gap: 1.5rem; }
   .scroll-top { bottom: 1.25rem; right: 1.25rem; width: 38px; height: 38px; }
@@ -708,4 +714,23 @@ footer.site .bottom-bar {
   .wrap { padding: 0 16px; }
   .card { padding: 1.2rem; }
   .steps { grid-template-columns: 1fr; }
+}
+
+/* ── Learn section ────────────────────────────────────── */
+.glossary { margin: 0; }
+.glossary-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+.glossary-item:last-child { border-bottom: 0; }
+.glossary dt { font-weight: 700; margin-bottom: 0.2rem; }
+.glossary dt a { color: var(--text); }
+.glossary dd { margin: 0; color: var(--text-2, var(--muted)); }
+.checklist { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+.checklist li { margin: 0; }
+.check-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.55rem 0.25rem; border-bottom: 1px solid var(--border); font-weight: 400; cursor: pointer; }
+.check-item input { width: 1.1rem; height: 1.1rem; margin-top: 0.2rem; flex: none; accent-color: var(--accent); }
+.check-item input:checked + span { text-decoration: line-through; color: var(--muted); }
+.calc form.stack { max-width: 40rem; }
+.calc input[type=range] { padding: 0; accent-color: var(--accent); }
+@media print {
+  header.site, footer.site, .hero .row, .scroll-top, .notice { display: none !important; }
+  .check-item { border-bottom: 0; padding: 0.25rem 0; }
 }

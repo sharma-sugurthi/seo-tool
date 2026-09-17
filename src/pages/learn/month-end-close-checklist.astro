@@ -1,0 +1,106 @@
+---
+import Base from '../../layouts/Base.astro';
+const sections = [
+  { title: 'Before the month ends (days -3 to -1)', items: [
+    'Chase missing receipts and vendor invoices, with a named owner per item',
+    'Confirm all bank, card and payment processor feeds are connected and current',
+    'Review uncategorised transactions and clear them daily',
+    'Confirm payroll has been run and the journal is scheduled',
+    'Send customer statements for overdue invoices',
+    'Lock the prior period so nobody posts into it by mistake',
+  ]},
+  { title: 'Day 1: cash and subledgers', items: [
+    'Reconcile every bank and credit card account to the statement',
+    'Reconcile payment processors (Stripe, PayPal, Shopify) to the ledger',
+    'Match AP invoices to purchase orders and receipts, post accruals for goods received not invoiced',
+    'Review AR ageing, write off or reserve anything clearly uncollectable',
+    'Reconcile intercompany balances if you have more than one entity',
+  ]},
+  { title: 'Day 2: accruals, prepaids and fixed assets', items: [
+    'Post recurring accruals (rent, utilities, contractors, bonuses)',
+    'Amortise prepaid expenses per the schedule',
+    'Recognise deferred revenue per the schedule, check new contracts were added',
+    'Post depreciation and record any asset additions or disposals',
+    'Accrue payroll for days worked but not yet paid',
+    'Review credit card spend for personal or duplicate charges',
+  ]},
+  { title: 'Day 3: review and report', items: [
+    'Run P&L versus prior month and versus budget, explain every line over 15 percent variance',
+    'Review the balance sheet: every account has a reconciliation or a reason',
+    'Check gross margin, cash balance and burn against expectations',
+    'Prepare the management report pack and share as a live link, not a PDF',
+    'Record open questions and who owns them',
+    'Log close duration in business days and one thing to fix next month',
+  ]},
+  { title: 'Quarterly and annual add ons', items: [
+    'Sales tax and VAT returns filed and paid',
+    'Estimated tax payments made',
+    '1099 or equivalent contractor information collected and current',
+    'Review the chart of accounts for accounts that should be merged or closed',
+    'Back up or export the ledger and store it outside the accounting system',
+  ]},
+];
+const total = sections.reduce((n, s) => n + s.items.length, 0);
+---
+<Base title="Month end close checklist: 30 items for a three day close" description="A working month end close checklist for small finance teams and bookkeepers, grouped by day. Tick items in your browser, print it, or copy it into your task tool.">
+  <section class="hero">
+    <p class="meta"><a href="/learn/">Learn</a> / checklist</p>
+    <h1>Month end close checklist</h1>
+    <p class="lead">{total} items, grouped by when they happen. Progress is saved in this browser only. Print it, or copy the text into your own task tool.</p>
+    <div class="row">
+      <span class="pill" id="progress">0 of {total} done</span>
+      <button class="btn ghost" type="button" id="reset">Reset</button>
+      <button class="btn ghost" type="button" id="copy">Copy as text</button>
+      <button class="btn ghost" type="button" onclick="window.print()">Print</button>
+    </div>
+  </section>
+
+  <section class="section prose" id="checklist">
+    {sections.map((s, si) => (
+      <div class="check-group">
+        <h2 style={si === 0 ? 'margin-top:0' : ''}>{s.title}</h2>
+        <ul class="checklist">
+          {s.items.map((item, ii) => {
+            const id = `c-${si}-${ii}`;
+            return (
+              <li>
+                <label class="check-item" for={id}>
+                  <input type="checkbox" id={id} data-key={id} />
+                  <span>{item}</span>
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </section>
+
+  <section class="section prose">
+    <h2 style="margin-top:0">Make it shorter next month</h2>
+    <p>Most of the day one and day two items can be automated. Card and expense platforms deliver receipts already coded, AI categorisation clears the uncategorised queue, and scheduled journals post accruals and amortisation on their own. Read <a href="/blog/cut-month-end-close-with-ai/">how to cut the close from ten days to three</a> or estimate the saving with the <a href="/learn/bookkeeping-automation-roi-calculator/">calculator</a>.</p>
+  </section>
+
+  <script>
+    const KEY = 'lantle-close-checklist';
+    const boxes = Array.from(document.querySelectorAll<HTMLInputElement>('input[type=checkbox][data-key]'));
+    const progress = document.getElementById('progress');
+    const load = (): Record<string, boolean> => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+    const save = (state: Record<string, boolean>) => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+    const render = () => {
+      const done = boxes.filter((b) => b.checked).length;
+      if (progress) progress.textContent = `${done} of ${boxes.length} done`;
+    };
+    const state = load();
+    boxes.forEach((b) => { b.checked = !!state[b.dataset.key!]; b.addEventListener('change', () => { state[b.dataset.key!] = b.checked; save(state); render(); }); });
+    render();
+    document.getElementById('reset')?.addEventListener('click', () => { boxes.forEach((b) => (b.checked = false)); save({}); render(); });
+    document.getElementById('copy')?.addEventListener('click', async () => {
+      const lines: string[] = [];
+      document.querySelectorAll('.check-group').forEach((g) => {
+        lines.push(g.querySelector('h2')?.textContent ?? '', ...Array.from(g.querySelectorAll('.check-item span')).map((s) => `- [ ] ${s.textContent}`), '');
+      });
+      try { await navigator.clipboard.writeText(lines.join('\n')); const btn = document.getElementById('copy'); if (btn) btn.textContent = 'Copied'; } catch {}
+    });
+  </script>
+</Base>

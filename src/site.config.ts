@@ -14,7 +14,6 @@ export const SITE = {
   formEndpoint: 'https://formspree.io/f/REPLACE_ME',
   social: {
     linkedin: 'https://www.linkedin.com/company/REPLACE_ME',
-    twitter: 'https://x.com/REPLACE_ME',
   },
   // How advertisers pay. Shown on the Advertise page. Change when you add Stripe or another processor.
   paymentMethods: 'PayPal invoice or bank transfer',
@@ -124,17 +123,6 @@ export const SERVICE_PRICES: Price[] = [
       'Hooks, carousels and comment replies',
       'Repurposed from your blog, podcast or customer calls',
       'Weekly performance summary',
-    ],
-  },
-  {
-    name: 'AI visibility audit',
-    price: '$99',
-    unit: 'one time',
-    points: [
-      'How often ChatGPT, Perplexity, Gemini and Google AI Overviews mention you versus competitors',
-      'Which sources they cite for your category',
-      'Prioritised 90 day plan to earn those citations',
-      'Free with any monthly plan',
     ],
   },
 ];

@@ -1,0 +1,80 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Bookkeeping automation savings calculator" description="Estimate the hours and money AI categorisation, receipt matching and reconciliation would save your finance team each month. Free, runs in your browser.">
+  <section class="hero">
+    <p class="meta"><a href="/learn/">Learn</a> / calculator</p>
+    <h1>Bookkeeping automation savings calculator</h1>
+    <p class="lead">A back of the envelope estimate. Change the assumptions to match your team. Nothing you enter leaves your browser.</p>
+  </section>
+
+  <section class="section calc">
+    <form class="stack" id="calc" onsubmit="return false">
+      <label>Transactions per month (bank, card, invoices, receipts)
+        <input type="number" id="tx" value="800" min="0" step="10" />
+      </label>
+      <label>Minutes a person spends per transaction today (coding, matching, chasing)
+        <input type="number" id="mins" value="3" min="0" step="0.5" />
+      </label>
+      <label>Fully loaded hourly cost of that person, in your currency
+        <input type="number" id="rate" value="45" min="0" step="1" />
+      </label>
+      <label>Share of transactions automation will handle with no human touch after tuning
+        <input type="range" id="auto" value="75" min="0" max="100" step="5" />
+        <span class="meta"><span id="auto-label">75</span> percent. Realistic after 90 days: 60 to 90 for clean books, 40 to 60 for messy ones.</span>
+      </label>
+      <label>Monthly cost of the automation tools you are considering
+        <input type="number" id="cost" value="300" min="0" step="10" />
+      </label>
+    </form>
+
+    <div class="kpis" style="margin-top:1.5rem">
+      <div class="card"><span class="meta">Hours today</span><strong id="hours-now">0</strong><span class="meta">per month</span></div>
+      <div class="card"><span class="meta">Hours after automation</span><strong id="hours-after">0</strong><span class="meta">per month</span></div>
+      <div class="card"><span class="meta">Hours saved</span><strong id="hours-saved">0</strong><span class="meta">per month</span></div>
+      <div class="card"><span class="meta">Net saving</span><strong id="net">0</strong><span class="meta">per month after tool cost</span></div>
+      <div class="card"><span class="meta">Net saving</span><strong id="net-year">0</strong><span class="meta">per year</span></div>
+      <div class="card"><span class="meta">Payback</span><strong id="payback">0</strong><span class="meta">months of setup effort covered</span></div>
+    </div>
+    <p class="notice" id="verdict"></p>
+  </section>
+
+  <section class="section prose">
+    <h2 style="margin-top:0">How to read the result</h2>
+    <ul>
+      <li><strong>Hours saved</strong> is the honest number. Money saved assumes those hours were paid for, which is true for outsourced bookkeeping and overtime, less true for a salaried controller who will simply do better work with the time.</li>
+      <li><strong>The automation rate is the assumption that matters.</strong> Ask any vendor for the straight through processing rate their customers reach after 90 days. Plug that in, not the demo number.</li>
+      <li><strong>Setup effort is real.</strong> Budget 10 to 30 hours to connect feeds, clean the chart of accounts and correct the first month of suggestions. The payback figure counts that.</li>
+    </ul>
+    <p>Tools that move these numbers: <a href="/tools/ramp/">Ramp</a> and <a href="/tools/brex/">Brex</a> for card spend, <a href="/tools/digits/">Digits</a> and <a href="/tools/quickbooks-intuit-assist/">QuickBooks</a> for categorisation, <a href="/tools/bill/">BILL</a> and <a href="/tools/stampli/">Stampli</a> for invoices. See the full <a href="/tools/">directory</a>.</p>
+  </section>
+
+  <script>
+    const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+    const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const calc = () => {
+      const tx = +$('tx').value || 0, mins = +$('mins').value || 0, rate = +$('rate').value || 0, auto = +$('auto').value || 0, cost = +$('cost').value || 0;
+      const hoursNow = (tx * mins) / 60;
+      const hoursAfter = hoursNow * (1 - auto / 100);
+      const saved = hoursNow - hoursAfter;
+      const net = saved * rate - cost;
+      const setupHours = 20;
+      const payback = net > 0 ? (setupHours * rate) / net : 0;
+      $('auto-label').textContent = String(auto);
+      $('hours-now').textContent = fmt(hoursNow);
+      $('hours-after').textContent = fmt(hoursAfter);
+      $('hours-saved').textContent = fmt(saved);
+      $('net').textContent = fmt(net);
+      $('net-year').textContent = fmt(net * 12);
+      $('payback').textContent = net > 0 ? payback.toFixed(1) : 'n/a';
+      const v = document.getElementById('verdict');
+      if (v) v.textContent = net <= 0
+        ? 'At these numbers the tools cost more than the time they save. Automation still helps accuracy and close speed, but do not justify it on labour cost alone.'
+        : saved < 10
+          ? `Saving about ${fmt(saved)} hours a month is real but modest. Start with the cheapest fix, usually card spend with receipts captured at purchase.`
+          : `About ${fmt(saved)} hours a month back, worth roughly ${fmt(net * 12)} a year after tool costs. Assuming 20 hours of setup, it pays back in ${payback.toFixed(1)} months.`;
+    };
+    document.querySelectorAll('#calc input').forEach((el) => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Base>

@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import { GLOSSARY } from '../../data/glossary';
+const groups = [...new Set(GLOSSARY.map((t) => t.group))];
+const byGroup = (g: string) => GLOSSARY.filter((t) => t.group === g).sort((a, b) => a.term.localeCompare(b.term));
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'DefinedTermSet',
+  name: 'Finance, AI and search glossary',
+  hasDefinedTerm: GLOSSARY.map((t) => ({ '@type': 'DefinedTerm', name: t.term, description: t.definition })),
+};
+---
+<Base title="Glossary: finance, AI and search terms in plain English" description="Short definitions of the terms in AI finance tool reviews, vendor pitches and SEO reports: accruals, straight through processing, domain rating, GEO and more." jsonLd={jsonLd}>
+  <section class="hero">
+    <p class="meta"><a href="/learn/">Learn</a> / glossary</p>
+    <h1>Glossary</h1>
+    <p class="lead">{GLOSSARY.length} terms. Each one defined in a sentence or two, with a note on why it matters.</p>
+    <div class="row">{groups.map((g) => <a class="pill" href={`#${slug(g)}`}>{g}</a>)}</div>
+  </section>
+  {groups.map((g) => (
+    <section class="section prose" id={slug(g)}>
+      <h2 style="margin-top:0">{g}</h2>
+      <dl class="glossary">
+        {byGroup(g).map((t) => (
+          <div class="glossary-item" id={slug(t.term)}>
+            <dt><a href={`#${slug(t.term)}`}>{t.term}</a></dt>
+            <dd>{t.definition} {t.link && <a href={t.link}>Read more</a>}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  ))}
+  <p class="notice">Missing a term or disagree with a definition? <a href="/contact/">Tell us</a>. Corrections go live within 48 hours.</p>
+</Base>

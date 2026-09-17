@@ -3,7 +3,7 @@ import type { Price } from '../site.config';
 interface Props { items: Price[]; ctaHref: string; ctaLabel?: string }
 const { items, ctaHref, ctaLabel = 'Get started' } = Astro.props;
 ---
-<div class="grid">
+<div class="grid price-grid">
   {items.map((p) => (
     <div class={`card ${p.badge ? 'highlighted' : ''}`}>
       {p.badge && <span class="pill">{p.badge}</span>}
