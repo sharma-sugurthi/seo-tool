@@ -1,0 +1,55 @@
+---
+import { SITE } from '../site.config';
+const path = Astro.url.pathname;
+const links = [
+  { href: '/tools/', label: 'Tools' },
+  { href: '/blog/', label: 'Blog' },
+  { href: '/services/', label: 'Services' },
+  { href: '/advertise/', label: 'Advertise' },
+  { href: '/write-for-us/', label: 'Write for us' },
+];
+---
+<header class="site" id="site-header">
+  <div class="wrap">
+    <a class="brand" href="/">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="26" height="26" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#156b52"/>
+        <path d="M20 16v32h24" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {SITE.name}
+    </a>
+    <button class="burger" id="burger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav id="nav-menu" aria-label="Main">
+      {links.map(({ href, label }) => (
+        <a href={href} class={path.startsWith(href) ? 'active' : ''}>{label}</a>
+      ))}
+      <a class="cta" href="/submit-tool/">Submit a tool</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const burger = document.getElementById('burger');
+  const nav = document.getElementById('nav-menu');
+  burger?.addEventListener('click', () => {
+    const expanded = burger.getAttribute('aria-expanded') === 'true';
+    burger.setAttribute('aria-expanded', String(!expanded));
+    nav?.classList.toggle('open');
+  });
+
+  // Close menu when a nav link is clicked
+  nav?.querySelectorAll('a').forEach((a) => {
+    a.addEventListener('click', () => {
+      burger?.setAttribute('aria-expanded', 'false');
+      nav.classList.remove('open');
+    });
+  });
+
+  // Header scroll shadow
+  const header = document.getElementById('site-header');
+  const onScroll = () => header?.classList.toggle('scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>

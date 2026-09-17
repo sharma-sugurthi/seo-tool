@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+import PriceTable from '../components/PriceTable.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { ADVERTISE_PRICES, SITE } from '../site.config';
+
+const faqs = [
+  {
+    q: 'Are the links dofollow?',
+    a: 'Yes. Sponsored articles include up to 2 dofollow links with rel="sponsored". Link insertions are also dofollow. This is transparent to search engines and compliant with Google\'s link spam policies.',
+  },
+  {
+    q: 'How long does the content stay live?',
+    a: 'All placements are permanent. Sponsored articles and link insertions remain on the site indefinitely and stay indexed.',
+  },
+  {
+    q: 'Can I write the article myself?',
+    a: 'Yes, you can provide a draft and we will edit it for our audience. Or we can write it for you for an additional fee of $60. Either way, articles must teach the reader something, not just promote.',
+  },
+  {
+    q: 'What topics do you accept?',
+    a: 'Finance, accounting, fintech, B2B SaaS, business operations and related technology. We decline casinos, crypto trading, adult content, payday loans and essay mills, with no exceptions.',
+  },
+  {
+    q: 'How do I pay?',
+    a: 'Payment is upfront by card or PayPal invoice. If we decline the content after reviewing it, you receive a full refund.',
+  },
+];
+---
+<Base title="Advertise: sponsored posts, link insertions and featured listings" description="Reach accountants, finance leaders and founders evaluating AI tools. Sponsored articles, contextual link insertions, featured directory listings and homepage spotlights.">
+  <section class="hero">
+    <h1>Advertise with {SITE.name}</h1>
+    <p class="lead">Our readers are accountants, controllers, bookkeepers and founders comparing AI tools before they buy. Put your product in front of them with content that stays live and indexed.</p>
+    <div class="kpis" style="margin-top:1.5rem;">
+      <div class="card"><span class="meta">Domain rating</span><strong style="font-size:1.05rem">{SITE.domainRating}</strong></div>
+      <div class="card"><span class="meta">Niche</span><strong style="font-size:1.05rem">Finance and accounting software</strong></div>
+      <div class="card"><span class="meta">Turnaround</span><strong style="font-size:1.05rem">48 to 72 hours</strong></div>
+      <div class="card"><span class="meta">Links</span><strong style="font-size:1.05rem">Permanent, dofollow, rel="sponsored"</strong></div>
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Options and pricing</h2>
+    <PriceTable items={ADVERTISE_PRICES} ctaHref="#order" ctaLabel="Order" />
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Guidelines</h2>
+    <ul>
+      <li><strong>Relevance.</strong> Finance, accounting, fintech, B2B SaaS and business operations only. We decline casinos, crypto trading, adult, payday loans and essay mills, with no exceptions.</li>
+      <li><strong>Disclosure.</strong> Sponsored articles carry a visible label and paid links use rel="sponsored". This protects your site and ours under Google's link spam policies.</li>
+      <li><strong>Quality.</strong> Articles must teach the reader something. We edit for clarity and may reject thin or AI generated filler. Draft writing is available for an extra fee.</li>
+      <li><strong>Anchor text.</strong> Brand names, URLs and natural phrases. No exact match money keywords.</li>
+      <li><strong>Payment.</strong> Upfront by card or PayPal invoice. Refunded in full if we decline the content.</li>
+    </ul>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Frequently asked questions</h2>
+    <div class="faq-list">
+      {faqs.map(({ q, a }) => (
+        <details class="faq">
+          <summary>{q}</summary>
+          <div class="faq-body"><p>{a}</p></div>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <section class="section fade-in" id="order">
+    <h2 style="margin-top:0">Order or ask a question</h2>
+    <ContactForm subject="Advertising order" options={ADVERTISE_PRICES.map((a) => a.name).concat(['Something else'])} optionsLabel="What would you like?" />
+  </section>
+</Base>

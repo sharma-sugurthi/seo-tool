@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+---
+<Base title="About and editorial policy" description="Who runs the site, how tools get listed, how sponsored content is labelled and how we make money.">
+  <section class="hero">
+    <h1>About {SITE.name}</h1>
+    <p class="lead">A small, independent publication about the AI tools finance teams actually use, plus a growth studio for the companies that build them.</p>
+  </section>
+  <section class="section prose fade-in">
+    <h2 style="margin-top:0">How we make money</h2>
+    <p>Three ways, all listed on this site: sponsored articles and link insertions, featured directory listings, and growth services for software companies. We do not run display ads and we do not sell reader data.</p>
+    <h2>Editorial policy</h2>
+    <ul>
+      <li>Every tool listing is checked by a person. Paid listings are labelled "Featured".</li>
+      <li>Sponsored articles carry a visible label at the top and paid links use rel="sponsored".</li>
+      <li>Reviews are based on hands on use or documented customer experience. Sponsors cannot buy a rating.</li>
+      <li>Corrections are published within 48 hours of being verified. Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</li>
+    </ul>
+    <h2>Who is behind it</h2>
+    <p>Replace this paragraph with two or three sentences about you: your background, why you care about finance tooling, and a link to your LinkedIn profile. A real face and name raises trust with readers, advertisers and search engines.</p>
+  </section>
+</Base>

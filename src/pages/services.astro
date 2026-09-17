@@ -1,0 +1,89 @@
+---
+import Base from '../layouts/Base.astro';
+import PriceTable from '../components/PriceTable.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { SERVICE_PRICES } from '../site.config';
+
+const faqs = [
+  {
+    q: 'How quickly will I see results?',
+    a: 'Reddit presence and directory placements often show within weeks. SEO content and link building take 2 to 4 months to move rankings meaningfully. AI citation improvements depend on model update cycles but typically surface within 6 to 8 weeks of new content being indexed.',
+  },
+  {
+    q: 'Do I need to sign a long contract?',
+    a: 'No. Every plan is month to month. We keep clients by delivering results, not by locking them in. Bundle two or more services and save 15 percent.',
+  },
+  {
+    q: 'Will people know the Reddit posts are from you?',
+    a: 'We use real, aged accounts and only post genuinely helpful content. We never pretend to be your customers or use vote manipulation. The goal is authentic presence, not astroturfing.',
+  },
+  {
+    q: 'Can I see examples of your work?',
+    a: 'Yes. On a discovery call we share anonymised examples of Reddit threads, LinkedIn content and SEO articles we have produced for similar companies. We also run this site as a live portfolio.',
+  },
+  {
+    q: 'What industries do you specialise in?',
+    a: 'Finance, accounting, fintech and B2B SaaS. This focus means we already understand the buyers, the subreddits, the keywords and the publications that matter in your space.',
+  },
+];
+
+const steps = [
+  { title: 'Discovery call', body: '30 minutes on your buyers, competitors and the questions they ask. We check where you already show up in AI answers.' },
+  { title: 'Plan and targets', body: 'You get a one page plan: subreddits, keywords, listicles, directories and a posting calendar. You approve before we start.' },
+  { title: 'Execution', body: 'We do the work. Anything published in your name or about your brand is shared for approval first.' },
+  { title: 'Monthly report', body: 'Links live, threads, mentions, rankings and AI citations found, in a spreadsheet you own.' },
+];
+---
+<Base title="Growth services for B2B SaaS: Reddit, LinkedIn, SEO and AI visibility" description="Done-for-you Reddit presence, LinkedIn ghostwriting, SEO and GEO content, directory placement and guest post outreach for fintech and B2B software companies.">
+  <section class="hero">
+    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">For fintech and B2B SaaS teams</p>
+    <h1>Get found on Google, Reddit, LinkedIn and inside AI answers</h1>
+    <p class="lead">Buyers now ask ChatGPT and Google's AI Overviews before they book a demo. Those answers are built from Reddit threads, listicles, review sites and expert content. We build that footprint for you, one channel at a time, with a monthly report you can forward to your CEO.</p>
+    <div class="row" style="margin-top:1rem;"><a class="btn" href="#quote">Request a quote</a><a class="btn ghost" href="#how">How it works</a></div>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Services and pricing</h2>
+    <p class="muted" style="margin-bottom:1.5rem;">Transparent starting prices. Every plan is month to month, no long contracts. Bundle two or more and save 15 percent.</p>
+    <PriceTable items={SERVICE_PRICES} ctaHref="#quote" ctaLabel="Request a quote" />
+  </section>
+
+  <section class="section fade-in" id="how">
+    <h2 style="margin-top:0">How it works</h2>
+    <div class="steps">
+      {steps.map((s, i) => (
+        <div class="card">
+          <div class="step-num">{i + 1}</div>
+          <h3>{s.title}</h3>
+          <p class="muted" style="font-size:.93rem;">{s.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">What we will not do</h2>
+    <ul style="padding-left:1.25rem; display:grid; gap:.5rem;">
+      <li>Fake reviews, vote manipulation or astroturfing that breaks a community's rules. It gets accounts banned and brands named in threads.</li>
+      <li>Private blog networks or spun content. Links from sites with no real traffic do not move rankings in 2026.</li>
+      <li>Promise a ranking or a number of AI citations. We show you the work and the movement every month.</li>
+    </ul>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Frequently asked questions</h2>
+    <div class="faq-list">
+      {faqs.map(({ q, a }) => (
+        <details class="faq">
+          <summary>{q}</summary>
+          <div class="faq-body"><p>{a}</p></div>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <section class="section fade-in" id="quote">
+    <h2 style="margin-top:0">Request a quote</h2>
+    <ContactForm subject="Services enquiry" options={SERVICE_PRICES.map((s) => s.name).concat(['Bundle or something else'])} optionsLabel="Which service?" />
+  </section>
+</Base>

@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getCollection } from 'astro:content';
+import { slugify } from './tag/[tag].astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const tagCounts = new Map<string, number>();
+posts.forEach((p) => p.data.tags.forEach((t) => tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1)));
+const tags = [...tagCounts].sort((a, b) => b[1] - a[1]);
+---
+<Base title="Blog: AI for finance teams, explained by practitioners" description="Reviews, comparisons and how-tos on AI bookkeeping, accounts payable automation, forecasting and closing the books faster.">
+  <section class="hero">
+    <h1>Blog</h1>
+    <p class="lead">Practical writing on using AI to close faster, spend smarter and keep the auditors happy.</p>
+    <div class="row" style="margin-top:.75rem;">{tags.map(([t, n]) => <a class="pill" href={`/blog/tag/${slugify(t)}/`}>{t} ({n})</a>)}</div>
+  </section>
+  <div class="grid fade-in">{posts.map((p) => <PostCard post={p} />)}</div>
+</Base>

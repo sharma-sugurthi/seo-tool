@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactForm from '../components/ContactForm.astro';
+---
+<Base title="Contact" description="Get in touch about listings, advertising, guest posts or growth services.">
+  <section class="hero">
+    <h1>Contact</h1>
+    <p class="lead">One form for everything. We reply within one business day.</p>
+  </section>
+  <section class="section fade-in">
+    <ContactForm subject="Contact form" options={['Advertising or sponsored post', 'Growth services', 'Guest post pitch', 'Tool listing', 'Correction', 'Other']} />
+  </section>
+</Base>

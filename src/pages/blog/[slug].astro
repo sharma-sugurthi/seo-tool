@@ -1,0 +1,87 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getCollection, render } from 'astro:content';
+import { SITE } from '../../site.config';
+import { slugify } from './tag/[tag].astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((p) => ({ params: { slug: p.id }, props: { post: p } }));
+}
+const { post } = Astro.props;
+const d = post.data;
+const { Content, headings } = await render(post);
+
+// Read time estimate
+const wordCount = post.body ? post.body.split(/\s+/).length : 0;
+const readMin = Math.max(1, Math.ceil(wordCount / 200));
+
+// Table of contents (h2 headings)
+const toc = headings.filter((h) => h.depth === 2);
+
+// Related articles (share at least one tag, exclude current)
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft)).filter((p) => p.id !== post.id);
+const related = allPosts
+  .map((p) => ({
+    post: p,
+    overlap: p.data.tags.filter((t) => d.tags.includes(t)).length,
+  }))
+  .filter((r) => r.overlap > 0)
+  .sort((a, b) => b.overlap - a.overlap || b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf())
+  .slice(0, 3)
+  .map((r) => r.post);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: d.title,
+  description: d.description,
+  datePublished: d.pubDate.toISOString(),
+  dateModified: (d.updatedDate ?? d.pubDate).toISOString(),
+  author: { '@type': 'Organization', name: d.author },
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).toString(),
+};
+---
+<Base title={d.title} description={d.description} type="article" jsonLd={jsonLd}>
+  <article class="section prose">
+    <p class="meta">
+      <a href="/blog/">Blog</a> ·
+      <time datetime={d.pubDate.toISOString()}>{d.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+      · {d.author}
+      · <span class="read-time">📖 {readMin} min read</span>
+    </p>
+    <h1>{d.title}</h1>
+    <p class="lead muted">{d.description}</p>
+    {d.sponsored && (
+      <p class="notice"><strong>Sponsored content.</strong> This article was paid for by the company featured in it. Links to the sponsor carry rel="sponsored". Our <a href="/about/">editorial policy</a> explains what we do and do not accept.</p>
+    )}
+
+    {toc.length > 2 && (
+      <details class="toc" open>
+        <summary>Table of contents</summary>
+        <ol>
+          {toc.map((h) => (
+            <li><a href={`#${h.slug}`}>{h.text}</a></li>
+          ))}
+        </ol>
+      </details>
+    )}
+
+    <Content />
+    <hr />
+    <div class="row">{d.tags.map((t) => <a class="pill" href={`/blog/tag/${slugify(t)}/`}>{t}</a>)}</div>
+    {d.authorBio && <p class="notice"><strong>About the author.</strong> {d.authorBio}</p>}
+    <p class="meta" style="margin-top:1.5rem">Want to publish here? Read <a href="/write-for-us/">write for us</a> or see <a href="/advertise/">sponsored article options</a>.</p>
+  </article>
+
+  {related.length > 0 && (
+    <section class="section fade-in">
+      <div class="related-section">
+        <h3>Related articles</h3>
+        <div class="grid">{related.map((p) => <PostCard post={p} />)}</div>
+      </div>
+    </section>
+  )}
+</Base>

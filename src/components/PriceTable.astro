@@ -1,0 +1,16 @@
+---
+import type { Price } from '../site.config';
+interface Props { items: Price[]; ctaHref: string; ctaLabel?: string }
+const { items, ctaHref, ctaLabel = 'Get started' } = Astro.props;
+---
+<div class="grid">
+  {items.map((p) => (
+    <div class={`card ${p.badge ? 'highlighted' : ''}`}>
+      {p.badge && <span class="pill">{p.badge}</span>}
+      <h3>{p.name}</h3>
+      <div class="price">{p.price} {p.unit && <small>{p.unit}</small>}</div>
+      <ul>{p.points.map((pt) => <li>{pt}</li>)}</ul>
+      <a class={`btn ${p.badge ? '' : 'ghost'}`} href={ctaHref} style="align-self:flex-start; margin-top:auto;">{ctaLabel}</a>
+    </div>
+  ))}
+</div>

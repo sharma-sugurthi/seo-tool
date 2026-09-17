@@ -1,0 +1,78 @@
+---
+import Base from '../../layouts/Base.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import { getCollection, render } from 'astro:content';
+import { SITE } from '../../site.config';
+
+export async function getStaticPaths() {
+  const tools = await getCollection('tools');
+  return tools.map((t) => ({ params: { slug: t.id }, props: { tool: t } }));
+}
+const { tool } = Astro.props;
+const d = tool.data;
+const { Content } = await render(tool);
+// Paid (featured) listings get a dofollow link. Free listings are nofollow. Both are marked so search engines understand the relationship.
+const rel = d.featured ? 'sponsored noopener' : 'nofollow noopener';
+const fullStars = d.rating ?? 0;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: d.name,
+  url: d.website,
+  applicationCategory: 'BusinessApplication',
+  description: d.tagline,
+  offers: { '@type': 'Offer', price: d.pricing === 'Free' ? '0' : undefined, priceCurrency: 'USD' },
+  ...(d.rating ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: d.rating, bestRating: 5, ratingCount: 1 } } : {}),
+};
+
+// Get similar tools (same category, exclude current)
+const allTools = await getCollection('tools');
+const similar = allTools
+  .filter((t) => t.data.category === d.category && t.id !== tool.id)
+  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured))
+  .slice(0, 3);
+---
+<Base title={`${d.name} review: ${d.tagline}`} description={`${d.name} for ${d.category.toLowerCase()}. ${d.tagline} Pricing: ${d.pricing}. Best for ${d.bestFor}.`} jsonLd={jsonLd}>
+  <article class="section prose">
+    <p class="meta"><a href="/tools/">Tools</a> / {d.category}</p>
+    <div class="row">
+      <span class="pill">{d.category}</span>
+      {d.featured && <span class="pill warn">Featured listing (paid)</span>}
+    </div>
+    <h1>{d.name}</h1>
+    <p class="lead muted">{d.tagline}</p>
+    <div class="kpis">
+      <div class="card">
+        <span class="meta">Pricing</span>
+        <strong>{d.pricing}</strong>
+      </div>
+      <div class="card">
+        <span class="meta">Best for</span>
+        <strong style="font-size:1.05rem">{d.bestFor}</strong>
+      </div>
+      {d.rating && (
+        <div class="card">
+          <span class="meta">Our rating</span>
+          <div class="stars" style="font-size:1.2rem;" aria-label={`Rating: ${d.rating} out of 5`}>
+            {[1,2,3,4,5].map((i) => (
+              <span class={`star ${i <= fullStars ? 'filled' : ''}`}>★</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+    <p style="margin-top:1.25rem"><a class="btn" href={d.website} rel={rel} target="_blank">Visit {d.name} →</a></p>
+    <Content />
+    <hr />
+    <p class="meta">Listing added {d.addedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}. Spotted an error? <a href={`mailto:${SITE.email}`}>Tell us</a>. Want this listing featured? <a href="/advertise/">See options</a>.</p>
+  </article>
+
+  {similar.length > 0 && (
+    <section class="section fade-in">
+      <div class="related-section">
+        <h3>Similar tools in {d.category}</h3>
+        <div class="grid">{similar.map((t) => <ToolCard tool={t} />)}</div>
+      </div>
+    </section>
+  )}
+</Base>

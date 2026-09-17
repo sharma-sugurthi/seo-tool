@@ -1,0 +1,26 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { getCollection } from 'astro:content';
+
+export const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const tags = new Map<string, string>();
+  posts.forEach((p) => p.data.tags.forEach((t) => tags.set(slugify(t), t)));
+  return [...tags].map(([slug, name]) => ({ params: { tag: slug }, props: { name } }));
+}
+const { tag } = Astro.params;
+const { name } = Astro.props;
+const posts = (await getCollection('blog', ({ data }) => !data.draft && data.tags.some((t) => slugify(t) === tag)))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+<Base title={`${name}: articles`} description={`All articles tagged ${name} on AI for finance and accounting teams.`}>
+  <section class="hero">
+    <p class="meta"><a href="/blog/">Blog</a> / tag</p>
+    <h1>{name}</h1>
+    <p class="lead">{posts.length} {posts.length === 1 ? 'article' : 'articles'}</p>
+  </section>
+  <div class="grid">{posts.map((p) => <PostCard post={p} />)}</div>
+</Base>

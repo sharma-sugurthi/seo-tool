@@ -1,0 +1,92 @@
+---
+import Base from '../../layouts/Base.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import { getCollection } from 'astro:content';
+
+const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.name.localeCompare(b.data.name));
+const categories = [...new Set(tools.map((t) => t.data.category))].sort();
+const categoryCounts = new Map<string, number>();
+tools.forEach((t) => categoryCounts.set(t.data.category, (categoryCounts.get(t.data.category) ?? 0) + 1));
+---
+<Base title="AI tools for finance and accounting: the directory" description="Every AI bookkeeping, accounts payable, expense, forecasting and tax tool we have reviewed, by category and pricing.">
+  <section class="hero">
+    <h1>AI tools directory</h1>
+    <p class="lead">Hand curated. Every listing is checked by a human before it goes live. Featured listings are paid and marked.</p>
+
+    <div class="search-bar" style="margin-top:1rem;">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="tool-search" placeholder={`Search ${tools.length} tools...`} autocomplete="off" />
+    </div>
+
+    <div class="filter-pills" id="filter-pills">
+      <button class="pill active" data-category="all">All ({tools.length})</button>
+      {categories.map((c) => (
+        <button class="pill" data-category={c}>{c} ({categoryCounts.get(c)})</button>
+      ))}
+    </div>
+  </section>
+
+  {categories.map((c) => (
+    <section class="section tool-section fade-in" id={c.toLowerCase().replace(/[^a-z0-9]+/g, '-')} data-cat={c}>
+      <h2 style="margin-top:0">{c}</h2>
+      <div class="grid">{tools.filter((t) => t.data.category === c).map((t) => <ToolCard tool={t} />)}</div>
+    </section>
+  ))}
+
+  <p class="notice" style="margin-top:1rem;">Missing a tool? <a href="/submit-tool/">Submit it</a>. Basic listings are free.</p>
+
+  <script>
+    // Category filter
+    const pills = document.querySelectorAll<HTMLButtonElement>('#filter-pills .pill');
+    const sections = document.querySelectorAll<HTMLElement>('.tool-section');
+
+    pills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const cat = pill.dataset.category;
+        pills.forEach((p) => p.classList.remove('active'));
+        pill.classList.add('active');
+
+        sections.forEach((section) => {
+          if (cat === 'all' || section.dataset.cat === cat) {
+            section.classList.remove('hidden');
+          } else {
+            section.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // Search filter
+    const searchInput = document.getElementById('tool-search') as HTMLInputElement;
+    searchInput?.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase().trim();
+      const cards = document.querySelectorAll<HTMLElement>('.tool-section .card');
+
+      if (!q) {
+        cards.forEach((c) => c.style.display = '');
+        sections.forEach((s) => s.classList.remove('hidden'));
+        // Reset pill to "All"
+        pills.forEach((p) => p.classList.remove('active'));
+        pills[0]?.classList.add('active');
+        return;
+      }
+
+      // Reset filter to all when searching
+      pills.forEach((p) => p.classList.remove('active'));
+      pills[0]?.classList.add('active');
+      sections.forEach((s) => s.classList.remove('hidden'));
+
+      cards.forEach((c) => {
+        const name = c.dataset.name || '';
+        const text = c.textContent?.toLowerCase() || '';
+        c.style.display = (name.includes(q) || text.includes(q)) ? '' : 'none';
+      });
+
+      // Hide sections where all cards are hidden
+      sections.forEach((s) => {
+        const visibleCards = s.querySelectorAll('.card:not([style*="display: none"])');
+        s.classList.toggle('hidden', visibleCards.length === 0);
+      });
+    });
+  </script>
+</Base>

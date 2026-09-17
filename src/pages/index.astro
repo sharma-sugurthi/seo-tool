@@ -1,0 +1,86 @@
+---
+import Base from '../layouts/Base.astro';
+import ToolCard from '../components/ToolCard.astro';
+import PostCard from '../components/PostCard.astro';
+import { getCollection } from 'astro:content';
+import { SITE } from '../site.config';
+
+const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const categories = [...new Set(tools.map((t) => t.data.category))];
+---
+<Base title={SITE.name} description={SITE.description}>
+  <section class="hero">
+    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Finance, accounting and bookkeeping</p>
+    <h1>{SITE.tagline}</h1>
+    <p class="lead">Independent reviews and a curated directory of AI tools for finance teams, accountants and founders who want the books closed and the cash understood. We also help B2B software companies get found on Google, Reddit, LinkedIn and inside AI answers.</p>
+    <div class="row" style="margin-top:1.25rem;">
+      <a class="btn" href="/tools/">Browse the tools</a>
+      <a class="btn ghost" href="/services/">Grow your SaaS with us</a>
+    </div>
+    <div class="stats-bar fade-in">
+      <div class="stat">
+        <span class="stat-number">{tools.length}</span>
+        <span class="stat-label">Tools reviewed</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">{posts.length}</span>
+        <span class="stat-label">Articles</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">{categories.length}</span>
+        <span class="stat-label">Categories</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <div class="row" style="justify-content:space-between; margin-bottom:1.25rem;">
+      <h2 style="margin:0;">Latest tools</h2>
+      <a href="/submit-tool/" style="font-size:.9rem; font-weight:500;">Submit yours, free</a>
+    </div>
+    <div class="grid">{tools.slice(0, 6).map((t) => <ToolCard tool={t} />)}</div>
+    {tools.length > 6 && <p style="margin-top:1rem;"><a href="/tools/">View all {tools.length} tools</a></p>}
+  </section>
+
+  <section class="section fade-in">
+    <div class="row" style="justify-content:space-between; margin-bottom:1.25rem;">
+      <h2 style="margin:0;">From the blog</h2>
+      <a href="/blog/" style="font-size:.9rem; font-weight:500;">All articles</a>
+    </div>
+    <div class="grid">{posts.slice(0, 3).map((p) => <PostCard post={p} />)}</div>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0; margin-bottom:1.25rem;">Work with us</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Get in front of finance buyers</h3>
+        <p class="muted" style="flex:1; font-size:.93rem;">Sponsored articles, link insertions and featured listings, read by accountants, controllers and founders.</p>
+        <a href="/advertise/" style="font-size:.9rem; font-weight:500;">See advertising options</a>
+      </div>
+      <div class="card">
+        <h3>Get cited by AI and ranked on Google</h3>
+        <p class="muted" style="flex:1; font-size:.93rem;">Reddit presence, LinkedIn ghostwriting, SEO content and directory placement, done for you.</p>
+        <a href="/services/" style="font-size:.9rem; font-weight:500;">See growth services</a>
+      </div>
+      <div class="card">
+        <h3>Share your expertise</h3>
+        <p class="muted" style="flex:1; font-size:.93rem;">Practitioners and founders can publish free guest posts if they teach something real.</p>
+        <a href="/write-for-us/" style="font-size:.9rem; font-weight:500;">Read the guidelines</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="fade-in" style="padding-bottom:2rem;">
+    <div class="newsletter-cta">
+      <h2>Stay ahead of AI in finance</h2>
+      <p>New tool reviews, comparison guides and AI visibility tips, delivered monthly. No spam, unsubscribe anytime.</p>
+      <form class="newsletter-form" action={SITE.formEndpoint} method="POST">
+        <input type="hidden" name="_subject" value="Newsletter signup" />
+        <input type="email" name="email" placeholder="your@email.com" required autocomplete="email" />
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </section>
+</Base>

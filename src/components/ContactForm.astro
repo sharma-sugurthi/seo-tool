@@ -1,0 +1,20 @@
+---
+import { SITE } from '../site.config';
+interface Props { subject: string; options?: string[]; optionsLabel?: string }
+const { subject, options, optionsLabel = 'What are you interested in?' } = Astro.props;
+---
+<form class="stack" action={SITE.formEndpoint} method="POST">
+  <input type="hidden" name="_subject" value={subject} />
+  <label>Name <input name="name" required autocomplete="name" /></label>
+  <label>Work email <input type="email" name="email" required autocomplete="email" /></label>
+  <label>Company or website <input name="company" placeholder="https://" /></label>
+  {options && (
+    <label>{optionsLabel}
+      <select name="interest">{options.map((o) => <option>{o}</option>)}</select>
+    </label>
+  )}
+  <label>Details <textarea name="message" required placeholder="Tell us what you need, target pages, anchor text, budget or timeline."></textarea></label>
+  <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+  <button class="btn" type="submit">Send</button>
+  <p class="meta">We reply within one business day. Or email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+</form>
