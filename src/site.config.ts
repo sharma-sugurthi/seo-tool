@@ -23,15 +23,15 @@ export const SITE = {
 
 export type Price = { name: string; price: string; unit?: string; points: string[]; badge?: string };
 
-/** What advertisers can buy on THIS site. */
+/** What advertisers can buy on THIS site. Founding rates: raise them as domain rating and traffic grow. */
 export const ADVERTISE_PRICES: Price[] = [
   {
     name: 'Sponsored article',
-    price: '$120',
+    price: '$60',
     unit: 'per article',
     points: [
       'Up to 2 dofollow links (rel="sponsored")',
-      '800 to 1,500 words, written by you or by us (+$60)',
+      '800 to 1,500 words, written by you or by us (+$40)',
       'Permanent, indexed, shared on LinkedIn and Reddit',
       'Live within 3 business days',
     ],
@@ -39,7 +39,7 @@ export const ADVERTISE_PRICES: Price[] = [
   },
   {
     name: 'Link insertion',
-    price: '$70',
+    price: '$35',
     unit: 'per link',
     points: [
       '1 contextual link in an existing, indexed article',
@@ -50,7 +50,7 @@ export const ADVERTISE_PRICES: Price[] = [
   },
   {
     name: 'Featured tool listing',
-    price: '$90',
+    price: '$49',
     unit: 'per year',
     points: [
       'Dedicated tool page with dofollow link, logo and screenshots',
@@ -61,7 +61,7 @@ export const ADVERTISE_PRICES: Price[] = [
   },
   {
     name: 'Homepage spotlight',
-    price: '$150',
+    price: '$79',
     unit: 'per month',
     points: [
       'Tool of the month card above the fold',
@@ -71,45 +71,30 @@ export const ADVERTISE_PRICES: Price[] = [
   },
 ];
 
-/** Done-for-you services you sell to other companies. */
+/** Extra fee when we write a sponsored article for the advertiser. Shown in the Advertise FAQ. */
+export const SPONSORED_WRITING_FEE = '$40';
+
+/**
+ * Done-for-you services you sell to other companies.
+ * Order matters: it is the order shown on the Services page and in the quote form.
+ * Founding client rates. Lock them for the first 10 clients, then raise.
+ */
 export const SERVICE_PRICES: Price[] = [
   {
-    name: 'Reddit presence and citations',
-    price: 'from $350',
-    unit: 'per month',
-    badge: 'Best for AI visibility',
+    name: 'Guest post outreach and placement',
+    price: 'from $80',
+    unit: 'per placement',
+    badge: 'Start here',
     points: [
-      'Aged, reputable accounts engaged in your buyers\' subreddits',
-      '15 to 20 genuinely helpful comments and 4 posts a month that mention your product where it fits',
-      'Reddit threads are heavily cited by Google AI Overviews, ChatGPT and Perplexity',
-      'Monthly report: threads, upvotes, mentions, AI citations spotted',
-    ],
-  },
-  {
-    name: 'LinkedIn ghostwriting for founders',
-    price: 'from $400',
-    unit: 'per month',
-    points: [
-      '12 posts a month in the founder\'s voice, from a 30 minute interview',
-      'Hooks, carousels and comment replies',
-      'Repurposed from your blog, podcast or customer calls',
-      'Weekly performance summary',
-    ],
-  },
-  {
-    name: 'SEO and GEO blog content',
-    price: 'from $90',
-    unit: 'per article',
-    points: [
-      'Keyword and AI search research (what ChatGPT and Google actually cite)',
-      '1,200 to 2,000 words, expert reviewed, with schema markup',
-      'Internal links, meta tags and a featured image',
-      'Bundles of 4 or 8 a month at a discount',
+      'We find, vet (real traffic, DR 30+) and negotiate niche finance and SaaS sites',
+      'Article written and placed, dofollow link to your page',
+      'Pay per live link, not per attempt',
+      'Replacement guarantee for 6 months',
     ],
   },
   {
     name: 'Directory and listicle placement',
-    price: '$150',
+    price: '$99',
     unit: 'one time',
     points: [
       'Submission to 100+ AI and SaaS directories (Product Hunt, SaaSHub, AlternativeTo, G2, Capterra and more)',
@@ -119,25 +104,48 @@ export const SERVICE_PRICES: Price[] = [
     ],
   },
   {
-    name: 'Guest post outreach and placement',
-    price: 'from $120',
-    unit: 'per placement',
+    name: 'SEO and GEO blog content',
+    price: 'from $60',
+    unit: 'per article',
     points: [
-      'We find, vet (real traffic, DR 30+) and negotiate niche sites',
-      'Article written and placed, dofollow link to your page',
-      'Pay per live link, not per attempt',
-      'Replacement guarantee for 6 months',
+      'Keyword and AI search research (what ChatGPT and Google actually cite)',
+      '1,200 to 2,000 words, expert reviewed, with schema markup',
+      'Internal links, meta tags and a featured image',
+      'Bundles of 4 or 8 a month at a discount',
+    ],
+  },
+  {
+    name: 'LinkedIn ghostwriting for founders',
+    price: 'from $250',
+    unit: 'per month',
+    points: [
+      '12 posts a month in the founder\'s voice, from a 30 minute interview',
+      'Hooks, carousels and comment replies',
+      'Repurposed from your blog, podcast or customer calls',
+      'Weekly performance summary',
+    ],
+  },
+  {
+    name: 'Reddit presence and citations',
+    price: 'from $200',
+    unit: 'per month',
+    badge: 'Best for AI visibility',
+    points: [
+      'Real, established accounts engaged in your buyers\' subreddits',
+      '15 to 20 genuinely helpful comments and 4 posts a month that mention your product where it fits',
+      'Reddit threads are heavily cited by Google AI Overviews, ChatGPT and Perplexity',
+      'Monthly report: threads, upvotes, mentions, AI citations spotted',
     ],
   },
   {
     name: 'AI visibility audit',
-    price: '$250',
+    price: '$99',
     unit: 'one time',
     points: [
       'How often ChatGPT, Perplexity, Gemini and Google AI Overviews mention you versus competitors',
       'Which sources they cite for your category',
       'Prioritised 90 day plan to earn those citations',
-      'Credited toward any monthly plan',
+      'Free with any monthly plan',
     ],
   },
 ];

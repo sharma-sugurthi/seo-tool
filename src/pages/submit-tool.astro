@@ -1,6 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE } from '../site.config';
+import { SITE, ADVERTISE_PRICES } from '../site.config';
+const featured = ADVERTISE_PRICES.find((p) => p.name === 'Featured tool listing')!;
+const featuredPrice = `${featured.price} ${featured.unit}`;
 ---
 <Base title="Submit an AI finance or accounting tool" description="Add your AI tool to our finance and accounting directory. Free basic listing, or a featured listing with a dofollow link and category placement.">
   <section class="hero">
@@ -17,7 +19,7 @@ import { SITE } from '../site.config';
     <div class="card highlighted">
       <span class="pill">Recommended</span>
       <h3>Featured listing</h3>
-      <div class="price">$90 <small>per year</small></div>
+      <div class="price">{featured.price} <small>{featured.unit}</small></div>
       <ul><li>Everything in basic</li><li>Dofollow link, logo and screenshots</li><li>Pinned to the top of your category</li><li>Considered for "best tools" roundups</li></ul>
     </div>
   </section>
@@ -36,7 +38,7 @@ import { SITE } from '../site.config';
       </label>
       <label>Pricing model <select name="pricing"><option>Free</option><option>Freemium</option><option>Paid</option><option>Enterprise</option></select></label>
       <label>Who is it best for? <input name="best_for" placeholder="e.g. bookkeeping firms with 20 to 200 clients" /></label>
-      <label>Listing type <select name="listing_type"><option>Basic (free)</option><option>Featured ($90 per year)</option></select></label>
+      <label>Listing type <select name="listing_type"><option>Basic (free)</option><option>Featured ({featuredPrice})</option></select></label>
       <label>Your email <input type="email" name="email" required /></label>
       <label>Anything else <textarea name="message" placeholder="Short description, what makes it different, link to a demo or press kit."></textarea></label>
       <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
