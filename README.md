@@ -1,4 +1,4 @@
-# LedgerStack AI (working name)
+# Lantle
 
 A content site plus directory for AI tools in finance, accounting and bookkeeping, with pages that sell sponsored posts, link insertions, featured listings and done-for-you growth services (Reddit, LinkedIn, SEO content, directory placement, outreach).
 

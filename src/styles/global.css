@@ -708,7 +708,7 @@ footer.site .bottom-bar {
 .scroll-top:hover { background: var(--accent-hover); transform: translateY(-2px); }
 
 /* ── Fade-in animation ───────────────────────────────── */
-.fade-in { opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; }
+html.js .fade-in { opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; }
 .fade-in.visible { opacity: 1; transform: translateY(0); }
 
 /* ── Mobile ──────────────────────────────────────────── */

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ledgerstack.ai/sitemap-index.xml
+Sitemap: https://lantle.ai/sitemap-index.xml

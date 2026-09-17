@@ -8,7 +8,7 @@ const blog = defineCollection({
     description: z.string().max(200),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
-    author: z.string().default('LedgerStack AI Editorial'),
+    author: z.string().default('Lantle Editorial'),
     // One or two sentences shown at the end of the post. Real bios help E-E-A-T and guest posters expect it.
     authorBio: z.string().optional(),
     tags: z.array(z.string()).default([]),

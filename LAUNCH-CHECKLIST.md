@@ -2,7 +2,7 @@
 
 ## Week 1: ship
 
-- [ ] Buy the domain (ideas: ledgerstack.ai, closebooks.ai, finopstools.ai, aiforaccountants.io). Short, finance flavoured, .ai or .com.
+- [ ] Buy the domain (ideas: lantle.ai, closebooks.ai, finopstools.ai, aiforaccountants.io). Short, finance flavoured, .ai or .com.
 - [ ] Edit `src/site.config.ts` (brand, URL, email, form endpoint, prices) and `public/robots.txt`.
 - [ ] Write the About page as yourself. Add a photo and LinkedIn link.
 - [ ] Deploy to Cloudflare Pages. Add the domain. Turn on HTTPS.
