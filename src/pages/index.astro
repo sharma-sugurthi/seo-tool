@@ -5,7 +5,7 @@ import PostCard from '../components/PostCard.astro';
 import { getCollection } from 'astro:content';
 import { SITE } from '../site.config';
 
-const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
+const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick) || b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const categories = [...new Set(tools.map((t) => t.data.category))];
 ---
@@ -13,7 +13,7 @@ const categories = [...new Set(tools.map((t) => t.data.category))];
   <section class="hero">
     <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Finance, accounting and bookkeeping</p>
     <h1>{SITE.tagline}</h1>
-    <p class="lead">Independent reviews and a curated directory of AI tools for finance teams, accountants and founders who want the books closed and the cash understood. We also help B2B software companies get found on Google, Reddit, LinkedIn and inside AI answers.</p>
+    <p class="lead">Independent reviews and a curated directory of AI tools for finance teams, accountants and founders who want the books closed and the cash understood. We also help B2B software companies get found on Google, LinkedIn and inside AI answers.</p>
     <div class="row" style="margin-top:1.25rem;">
       <a class="btn" href="/tools/">Browse the tools</a>
       <a class="btn ghost" href="/services/">Grow your SaaS with us</a>
@@ -61,7 +61,7 @@ const categories = [...new Set(tools.map((t) => t.data.category))];
       </div>
       <div class="card">
         <h3>Get cited by AI and ranked on Google</h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Reddit presence, LinkedIn ghostwriting, SEO content and directory placement, done for you.</p>
+        <p class="muted" style="flex:1; font-size:.93rem;">Guest post placement, directory submissions, SEO content and LinkedIn ghostwriting, done for you.</p>
         <a href="/services/" style="font-size:.9rem; font-weight:500;">See growth services</a>
       </div>
       <div class="card">
@@ -72,15 +72,4 @@ const categories = [...new Set(tools.map((t) => t.data.category))];
     </div>
   </section>
 
-  <section class="fade-in" style="padding-bottom:2rem;">
-    <div class="newsletter-cta">
-      <h2>Stay ahead of AI in finance</h2>
-      <p>New tool reviews, comparison guides and AI visibility tips, delivered monthly. No spam, unsubscribe anytime.</p>
-      <form class="newsletter-form" action={SITE.formEndpoint} method="POST">
-        <input type="hidden" name="_subject" value="Newsletter signup" />
-        <input type="email" name="email" placeholder="your@email.com" required autocomplete="email" />
-        <button type="submit">Subscribe</button>
-      </form>
-    </div>
-  </section>
 </Base>

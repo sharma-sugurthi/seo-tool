@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: "Who should buy this, in one phrase"
 rating: 4
 featured: false
+editorsPick: false
 addedDate: 2026-01-01
 ---
 

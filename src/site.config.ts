@@ -8,15 +8,16 @@ export const SITE = {
   // Replace with your real domain once bought. Used for canonical URLs, sitemap and RSS.
   url: 'https://lantle.ai',
   description:
-    'Independent reviews, comparisons and a curated directory of AI tools for finance, accounting, bookkeeping and business operations. Plus done-for-you SEO, Reddit and LinkedIn growth services for B2B SaaS.',
+    'Independent reviews, comparisons and a curated directory of AI tools for finance, accounting, bookkeeping and business operations. Plus done-for-you SEO, link building and LinkedIn growth services for B2B SaaS.',
   email: 'hello@lantle.ai',
   // Create a free form at https://formspree.io (or Tally / Basin) and paste the endpoint here.
   formEndpoint: 'https://formspree.io/f/REPLACE_ME',
   social: {
     linkedin: 'https://www.linkedin.com/company/REPLACE_ME',
     twitter: 'https://x.com/REPLACE_ME',
-    reddit: 'https://www.reddit.com/user/REPLACE_ME',
   },
+  // How advertisers pay. Shown on the Advertise page. Change when you add Stripe or another processor.
+  paymentMethods: 'PayPal invoice or bank transfer',
   // Current domain rating. Update as the site grows; it is shown on the Advertise page.
   domainRating: 'New site (building authority)',
 };
@@ -32,7 +33,7 @@ export const ADVERTISE_PRICES: Price[] = [
     points: [
       'Up to 2 dofollow links (rel="sponsored")',
       '800 to 1,500 words, written by you or by us (+$40)',
-      'Permanent, indexed, shared on LinkedIn and Reddit',
+      'Permanent, indexed, shared on LinkedIn',
       'Live within 3 business days',
     ],
     badge: 'Most popular',
@@ -65,7 +66,7 @@ export const ADVERTISE_PRICES: Price[] = [
     unit: 'per month',
     points: [
       'Tool of the month card above the fold',
-      'Mention in that month\'s newsletter and LinkedIn post',
+      'Mention in that month\'s LinkedIn post from our page',
       'Limited to 1 sponsor per month',
     ],
   },
@@ -123,18 +124,6 @@ export const SERVICE_PRICES: Price[] = [
       'Hooks, carousels and comment replies',
       'Repurposed from your blog, podcast or customer calls',
       'Weekly performance summary',
-    ],
-  },
-  {
-    name: 'Reddit presence and citations',
-    price: 'from $200',
-    unit: 'per month',
-    badge: 'Best for AI visibility',
-    points: [
-      'Real, established accounts engaged in your buyers\' subreddits',
-      '15 to 20 genuinely helpful comments and 4 posts a month that mention your product where it fits',
-      'Reddit threads are heavily cited by Google AI Overviews, ChatGPT and Perplexity',
-      'Monthly report: threads, upvotes, mentions, AI citations spotted',
     ],
   },
   {

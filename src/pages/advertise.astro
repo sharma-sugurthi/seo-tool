@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: 'How do I pay?',
-    a: 'Payment is upfront by card or PayPal invoice. If we decline the content after reviewing it, you receive a full refund.',
+    a: `Payment is upfront by ${SITE.paymentMethods}. If we decline the content after reviewing it, you receive a full refund.`,
   },
 ];
 ---
@@ -51,7 +51,7 @@ const faqs = [
       <li><strong>Disclosure.</strong> Sponsored articles carry a visible label and paid links use rel="sponsored". This protects your site and ours under Google's link spam policies.</li>
       <li><strong>Quality.</strong> Articles must teach the reader something. We edit for clarity and may reject thin or AI generated filler. Draft writing is available for an extra fee.</li>
       <li><strong>Anchor text.</strong> Brand names, URLs and natural phrases. No exact match money keywords.</li>
-      <li><strong>Payment.</strong> Upfront by card or PayPal invoice. Refunded in full if we decline the content.</li>
+      <li><strong>Payment.</strong> Upfront by {SITE.paymentMethods}. Refunded in full if we decline the content.</li>
     </ul>
   </section>
 

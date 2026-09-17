@@ -6,6 +6,7 @@ category: Business operations
 pricing: Paid
 bestFor: Accounting and bookkeeping firms with 5 to 200 staff
 rating: 4
+editorsPick: true
 addedDate: 2026-09-18
 ---
 

@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import ToolCard from '../../components/ToolCard.astro';
 import { getCollection } from 'astro:content';
 
-const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.name.localeCompare(b.data.name));
+const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick) || a.data.name.localeCompare(b.data.name));
 const categories = [...new Set(tools.map((t) => t.data.category))].sort();
 const categoryCounts = new Map<string, number>();
 tools.forEach((t) => categoryCounts.set(t.data.category, (categoryCounts.get(t.data.category) ?? 0) + 1));
@@ -11,7 +11,7 @@ tools.forEach((t) => categoryCounts.set(t.data.category, (categoryCounts.get(t.d
 <Base title="AI tools for finance and accounting: the directory" description="Every AI bookkeeping, accounts payable, expense, forecasting and tax tool we have reviewed, by category and pricing.">
   <section class="hero">
     <h1>AI tools directory</h1>
-    <p class="lead">Hand curated. Every listing is checked by a human before it goes live. Featured listings are paid and marked.</p>
+    <p class="lead">Hand curated. Every listing is checked by a human before it goes live. Featured listings are paid and marked. Editor's picks are our own recommendations and are never paid.</p>
 
     <div class="search-bar" style="margin-top:1rem;">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>

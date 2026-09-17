@@ -29,7 +29,7 @@ const jsonLd = {
 const allTools = await getCollection('tools');
 const similar = allTools
   .filter((t) => t.data.category === d.category && t.id !== tool.id)
-  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured))
+  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick))
   .slice(0, 3);
 ---
 <Base title={`${d.name} review: ${d.tagline}`} description={`${d.name} for ${d.category.toLowerCase()}. ${d.tagline} Pricing: ${d.pricing}. Best for ${d.bestFor}.`} jsonLd={jsonLd}>
@@ -38,6 +38,7 @@ const similar = allTools
     <div class="row">
       <span class="pill">{d.category}</span>
       {d.featured && <span class="pill warn">Featured listing (paid)</span>}
+      {!d.featured && d.editorsPick && <span class="pill">Editor's pick (not paid)</span>}
     </div>
     <h1>{d.name}</h1>
     <p class="lead muted">{d.tagline}</p>

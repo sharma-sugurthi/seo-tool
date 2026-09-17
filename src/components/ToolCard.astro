@@ -9,6 +9,7 @@ const fullStars = d.rating ?? 0;
   <div class="row" style="justify-content:space-between; margin-bottom:.1rem;">
     <span class="pill">{d.category}</span>
     {d.featured && <span class="pill warn">Featured</span>}
+    {!d.featured && d.editorsPick && <span class="pill">Editor's pick</span>}
   </div>
   <h3><a href={`/tools/${tool.id}/`}>{d.name}</a></h3>
   <p class="muted" style="margin:0; flex:1; font-size:.93rem;">{d.tagline}</p>

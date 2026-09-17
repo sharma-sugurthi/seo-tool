@@ -6,6 +6,7 @@ category: Bookkeeping
 pricing: Paid
 bestFor: Startups that want a live view of the books, and firms serving them
 rating: 4
+editorsPick: true
 addedDate: 2026-09-17
 ---
 

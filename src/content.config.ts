@@ -39,6 +39,8 @@ const tools = defineCollection({
     rating: z.number().min(1).max(5).optional(),
     // featured: paid listing, dofollow link, pinned to top of category. Basic listings are nofollow.
     featured: z.boolean().default(false),
+    // editorsPick: our own recommendation. Shown with a pill and sorted after featured. Link stays nofollow. Never paid.
+    editorsPick: z.boolean().default(false),
     logo: z.string().optional(),
     addedDate: z.coerce.date(),
   }),
