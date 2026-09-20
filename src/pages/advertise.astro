@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
 import PriceTable from '../components/PriceTable.astro';
-import ContactForm from '../components/ContactForm.astro';
 import { ADVERTISE_PRICES, SITE, SPONSORED_WRITING_FEE } from '../site.config';
 
 const faqs = [
@@ -31,29 +30,12 @@ const faqs = [
   <section class="hero">
     <h1>Advertise with {SITE.name}</h1>
     <p class="lead">Our readers are accountants, controllers, bookkeepers and founders comparing AI tools before they buy. Put your product in front of them with content that stays live and indexed.</p>
-    <div class="kpis" style="margin-top:1.5rem;">
-      <div class="card"><span class="meta">Domain rating</span><strong style="font-size:1.05rem">{SITE.domainRating}</strong></div>
-      <div class="card"><span class="meta">Niche</span><strong style="font-size:1.05rem">Finance and accounting software</strong></div>
-      <div class="card"><span class="meta">Turnaround</span><strong style="font-size:1.05rem">48 to 72 hours</strong></div>
-      <div class="card"><span class="meta">Links</span><strong style="font-size:1.05rem">Permanent, dofollow, rel="sponsored"</strong></div>
-    </div>
   </section>
 
   <section class="section fade-in">
     <h2 style="margin-top:0">Options and pricing</h2>
     <PriceTable items={ADVERTISE_PRICES} ctaHref="#order" ctaLabel="Order" />
-    <p class="muted" style="margin-top:1rem; font-size:.9rem;">Need a link inserted into an existing article, or a homepage spotlight? <a href="#order">Email us</a>. We offer those for established partners.</p>
-  </section>
-
-  <section class="section fade-in">
-    <h2 style="margin-top:0">Guidelines</h2>
-    <ul>
-      <li><strong>Relevance.</strong> Finance, accounting, fintech, B2B SaaS and business operations only. We decline casinos, crypto trading, adult, payday loans and essay mills, with no exceptions.</li>
-      <li><strong>Disclosure.</strong> Sponsored articles carry a visible label and paid links use rel="sponsored". This protects your site and ours under Google's link spam policies.</li>
-      <li><strong>Quality.</strong> Articles must teach the reader something. We edit for clarity and may reject thin or AI generated filler. Draft writing is available for an extra fee.</li>
-      <li><strong>Anchor text.</strong> Brand names, URLs and natural phrases. No exact match money keywords.</li>
-      <li><strong>Payment.</strong> Upfront by {SITE.paymentMethods}. Refunded in full if we decline the content.</li>
-    </ul>
+    <p class="muted" style="margin-top:1rem; font-size:.9rem;">Need a link inserted into an existing article, or a homepage spotlight? <a href="#order">Email us</a> -- we offer those for established partners.</p>
   </section>
 
   <section class="section fade-in">
@@ -70,7 +52,20 @@ const faqs = [
 
   <section class="section fade-in" id="order">
     <h2 style="margin-top:0">Place your order</h2>
-    <p class="muted" style="margin-bottom:1rem;">We send a PayPal invoice within 4 hours. Your content goes live within 3 business days of payment.</p>
-    <ContactForm subject="Advertising order" options={ADVERTISE_PRICES.map((a) => a.name).concat(['Link insertion', 'Something else'])} optionsLabel="What would you like?" />
+    <p class="muted" style="margin-bottom:1rem;">Tell us what you need and we send a PayPal invoice within 4 hours. Your content goes live within 3 business days of payment.</p>
+    <form class="stack" action={SITE.formEndpoint} method="POST" style="max-width:28rem;">
+      <input type="hidden" name="_subject" value="Advertising order" />
+      <label>Work email <input type="email" name="email" required autocomplete="email" placeholder="you@company.com" /></label>
+      <label>What would you like?
+        <select name="interest">
+          <option>Sponsored article</option>
+          <option>Featured tool listing</option>
+          <option>Something else</option>
+        </select>
+      </label>
+      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+      <button class="btn" type="submit">Send</button>
+    </form>
+    <p class="meta" style="margin-top:.75rem;">Prefer email? Write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
   </section>
 </Base>
