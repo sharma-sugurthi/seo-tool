@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import ToolCard from '../components/ToolCard.astro';
 import PostCard from '../components/PostCard.astro';
+import Newsletter from '../components/Newsletter.astro';
 import { getCollection } from 'astro:content';
 import { SITE } from '../site.config';
 
@@ -91,6 +92,10 @@ const categories = [...new Set(tools.map((t) => t.data.category))];
         <a href="/write-for-us/" style="font-size:.9rem; font-weight:500;">Read the guidelines</a>
       </div>
     </div>
+  </section>
+
+  <section class="section fade-in">
+    <Newsletter />
   </section>
 
 </Base>

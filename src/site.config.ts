@@ -54,7 +54,7 @@ export const ADVERTISE_PRICES: Price[] = [
 export const SPONSORED_WRITING_FEE = '$40';
 
 /**
- * Done-for-you services — split into Content (we write) and Distribution (we place).
+ * Done-for-you services, split into Content (we write) and Distribution (we place).
  * Founding client rates. Lock them for the first 10 clients, then raise.
  */
 export const CONTENT_SERVICES: Price[] = [

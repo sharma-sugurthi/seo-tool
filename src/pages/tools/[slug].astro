@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import ToolCard from '../../components/ToolCard.astro';
+import Newsletter from '../../components/Newsletter.astro';
 import { getCollection, render } from 'astro:content';
 import { SITE } from '../../site.config';
 
@@ -82,4 +83,18 @@ const similar = allTools
       </div>
     </section>
   )}
+
+  <section class="section fade-in" style="text-align:center;">
+    <div class="row" style="justify-content:center;">
+      <a class="btn ghost" href={`/tools/alternatives/${tool.id}/`}>Alternatives to {d.name}</a>
+      {similar.length > 0 && similar.slice(0, 1).map((t) => {
+        const [first, second] = [tool.id, t.id].sort();
+        return <a class="btn ghost" href={`/tools/compare/${first}-vs-${second}/`}>{d.name} vs {t.data.name}</a>;
+      })}
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <Newsletter />
+  </section>
 </Base>

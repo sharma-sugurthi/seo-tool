@@ -1,0 +1,139 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ToolCard from '../../../components/ToolCard.astro';
+import { getCollection } from 'astro:content';
+import { SITE } from '../../../site.config';
+
+export async function getStaticPaths() {
+  const tools = await getCollection('tools');
+  const paths: { params: { slugs: string }; props: { toolA: any; toolB: any } }[] = [];
+
+  for (let i = 0; i < tools.length; i++) {
+    for (let j = i + 1; j < tools.length; j++) {
+      if (tools[i].data.category === tools[j].data.category) {
+        const a = tools[i];
+        const b = tools[j];
+        const [first, second] = [a, b].sort((x, y) => x.id.localeCompare(y.id));
+        paths.push({
+          params: { slugs: `${first.id}-vs-${second.id}` },
+          props: { toolA: first, toolB: second },
+        });
+      }
+    }
+  }
+
+  return paths;
+}
+
+const { toolA, toolB } = Astro.props;
+const a = toolA.data;
+const b = toolB.data;
+
+const fields = [
+  { label: 'Category', valA: a.category, valB: b.category },
+  { label: 'Pricing', valA: a.pricing, valB: b.pricing },
+  { label: 'Best for', valA: a.bestFor, valB: b.bestFor },
+  { label: 'Rating', valA: a.rating ? `${a.rating} / 5` : 'Not rated', valB: b.rating ? `${b.rating} / 5` : 'Not rated' },
+];
+
+const relA = a.featured ? 'sponsored noopener' : 'nofollow noopener';
+const relB = b.featured ? 'sponsored noopener' : 'nofollow noopener';
+
+const allTools = await getCollection('tools');
+const related = allTools
+  .filter((t) => t.data.category === a.category && t.id !== toolA.id && t.id !== toolB.id)
+  .sort((x, y) => Number(y.data.featured) - Number(x.data.featured) || Number(y.data.editorsPick) - Number(x.data.editorsPick))
+  .slice(0, 3);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: `${a.name} vs ${b.name}`,
+  description: `Side by side comparison of ${a.name} and ${b.name} for ${a.category.toLowerCase()}.`,
+  url: new URL(Astro.url.pathname, Astro.site).toString(),
+};
+---
+<Base title={`${a.name} vs ${b.name}: which is better for ${a.category.toLowerCase()}?`} description={`Compare ${a.name} and ${b.name} side by side. Pricing, ratings, best use cases and key differences for ${a.category.toLowerCase()} teams.`} jsonLd={jsonLd}>
+  <section class="hero">
+    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">{a.category}</p>
+    <h1>{a.name} vs {b.name}</h1>
+    <p class="lead">A side by side look at two {a.category.toLowerCase()} tools to help you pick the right one for your team.</p>
+  </section>
+
+  <section class="section fade-in">
+    <div class="compare-grid">
+      <div class="compare-col">
+        {a.thumbnail ? (
+          <img class="compare-thumb" src={a.thumbnail} alt={a.name} width="600" height="400" loading="lazy" />
+        ) : (
+          <div class="compare-thumb-placeholder"><span>{a.name.charAt(0)}</span></div>
+        )}
+        <h2 style="margin-top:.75rem;">{a.name}</h2>
+        <p class="muted" style="font-size:.93rem;">{a.tagline}</p>
+        <div class="row" style="margin-top:.5rem;">
+          <a class="btn ghost" href={`/tools/${toolA.id}/`} style="font-size:.85rem; padding:.4rem .9rem;">Read review</a>
+          <a class="btn ghost" href={a.website} target="_blank" rel={relA} style="font-size:.85rem; padding:.4rem .9rem;">Visit site</a>
+        </div>
+      </div>
+      <div class="compare-vs">vs</div>
+      <div class="compare-col">
+        {b.thumbnail ? (
+          <img class="compare-thumb" src={b.thumbnail} alt={b.name} width="600" height="400" loading="lazy" />
+        ) : (
+          <div class="compare-thumb-placeholder"><span>{b.name.charAt(0)}</span></div>
+        )}
+        <h2 style="margin-top:.75rem;">{b.name}</h2>
+        <p class="muted" style="font-size:.93rem;">{b.tagline}</p>
+        <div class="row" style="margin-top:.5rem;">
+          <a class="btn ghost" href={`/tools/${toolB.id}/`} style="font-size:.85rem; padding:.4rem .9rem;">Read review</a>
+          <a class="btn ghost" href={b.website} target="_blank" rel={relB} style="font-size:.85rem; padding:.4rem .9rem;">Visit site</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0;">Quick comparison</h2>
+    <div class="compare-table-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>{a.name}</th>
+            <th>{b.name}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {fields.map(({ label, valA, valB }) => (
+            <tr>
+              <td class="compare-label">{label}</td>
+              <td>{valA}</td>
+              <td>{valB}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section fade-in prose">
+    <h2>When to pick {a.name}</h2>
+    <p>{a.name} is best for {a.bestFor.toLowerCase()}. It uses a {a.pricing.toLowerCase()} pricing model{a.rating ? ` and we rated it ${a.rating} out of 5` : ''}. <a href={`/tools/${toolA.id}/`}>Read the full review</a> to see where it shines and where it falls short.</p>
+
+    <h2>When to pick {b.name}</h2>
+    <p>{b.name} is best for {b.bestFor.toLowerCase()}. It uses a {b.pricing.toLowerCase()} pricing model{b.rating ? ` and we rated it ${b.rating} out of 5` : ''}. <a href={`/tools/${toolB.id}/`}>Read the full review</a> to see where it shines and where it falls short.</p>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section fade-in">
+      <div class="related-section">
+        <h3>Other {a.category.toLowerCase()} tools to consider</h3>
+        <div class="grid">{related.map((t) => <ToolCard tool={t} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="section fade-in" style="text-align:center;">
+    <p class="muted">Looking for more? <a href="/tools/">Browse all tools</a> or see <a href={`/tools/alternatives/${toolA.id}/`}>alternatives to {a.name}</a>.</p>
+  </section>
+</Base>
