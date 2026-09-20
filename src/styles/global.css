@@ -759,6 +759,35 @@ footer.site .bottom-bar {
   .steps { grid-template-columns: 1fr; }
 }
 
+/* ── Badge page ──────────────────────────────────────── */
+.badge-preview {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.code-block {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+}
+.code-block pre {
+  margin: 0;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+.code-block code {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 /* ── Learn section ────────────────────────────────────── */
 .glossary { margin: 0; }
 .glossary-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }

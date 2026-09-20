@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: 'How do I pay?',
-    a: `Payment is upfront by ${SITE.paymentMethods}. If we decline the content after reviewing it, you receive a full refund.`,
+    a: `We send a PayPal invoice within 4 hours of your order. Payment is upfront by ${SITE.paymentMethods}. If we decline the content after reviewing it, you receive a full refund.`,
   },
 ];
 ---
@@ -69,7 +69,8 @@ const faqs = [
   </section>
 
   <section class="section fade-in" id="order">
-    <h2 style="margin-top:0">Order or ask a question</h2>
-    <ContactForm subject="Advertising order" options={ADVERTISE_PRICES.map((a) => a.name).concat(['Something else'])} optionsLabel="What would you like?" />
+    <h2 style="margin-top:0">Place your order</h2>
+    <p class="muted" style="margin-bottom:1rem;">We send a PayPal invoice within 4 hours. Your content goes live within 3 business days of payment.</p>
+    <ContactForm subject="Advertising order" options={ADVERTISE_PRICES.map((a) => a.name).concat(['Link insertion', 'Something else'])} optionsLabel="What would you like?" />
   </section>
 </Base>

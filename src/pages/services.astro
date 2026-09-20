@@ -1,15 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
+import PriceTable from '../components/PriceTable.astro';
 import ContactForm from '../components/ContactForm.astro';
+import { CONTENT_SERVICES, DISTRIBUTION_SERVICES } from '../site.config';
 
 const faqs = [
   {
     q: 'How quickly will I see results?',
-    a: 'Directory placements and guest post links go live within weeks. SEO content and link building take 2 to 4 months to move rankings meaningfully. AI citation improvements depend on model update cycles but typically surface within 6 to 8 weeks of new content being indexed.',
+    a: 'Guest post links go live within 2 to 3 weeks. SEO content takes 2 to 4 months to move rankings meaningfully. AI citation improvements depend on model update cycles but typically surface within 6 to 8 weeks of new content being indexed.',
   },
   {
     q: 'Do I need to sign a long contract?',
-    a: 'No. Every plan is month to month. We keep clients by delivering results, not by locking them in. Bundle two or more services and save 15 percent.',
+    a: 'No. Every service is pay per deliverable or month to month. We keep clients by delivering results, not by locking them in. Bundle content and distribution and save 15 percent.',
   },
   {
     q: 'Where do the guest post links come from?',
@@ -21,7 +23,11 @@ const faqs = [
   },
   {
     q: 'Do you offer an AI visibility audit?',
-    a: 'Yes, and it is free with any plan. Before we start we check how often ChatGPT, Perplexity, Gemini and Google AI Overviews mention you versus competitors, and which sources they cite. That check sets the targets for the work.',
+    a: 'Yes, and it is free with any order. Before we start we check how often ChatGPT, Perplexity, Gemini and Google AI Overviews mention you versus competitors, and which sources they cite. That check sets the targets for the work.',
+  },
+  {
+    q: 'How do I pay?',
+    a: 'We send a PayPal invoice within 4 hours of your order. Work starts the same day the invoice is paid. No upfront retainers, no long contracts.',
   },
   {
     q: 'What industries do you specialise in?',
@@ -30,30 +36,42 @@ const faqs = [
 ];
 
 const steps = [
-  { title: 'Discovery call', body: '30 minutes on your buyers, competitors and the questions they ask. We check where you already show up in AI answers.' },
-  { title: 'Plan and targets', body: 'You get a one page plan: target publications, keywords, listicles, directories and a publishing calendar. You approve before we start.' },
+  { title: 'Place your order', body: 'Pick the services you need below. We send a PayPal invoice within 4 hours.' },
+  { title: 'Kickoff call', body: '30 minutes on your buyers, competitors and the questions they ask. We check where you already show up in AI answers.' },
   { title: 'Execution', body: 'We do the work. Anything published in your name or about your brand is shared for approval first.' },
-  { title: 'Monthly report', body: 'Links live, threads, mentions, rankings and AI citations found, in a spreadsheet you own.' },
+  { title: 'Delivery report', body: 'Links live, content published, rankings and AI citations found, in a spreadsheet you own.' },
 ];
 ---
 <Base title="Growth services for B2B SaaS: link building, directories, content and LinkedIn" description="Done-for-you guest post placement, directory and listicle submissions, SEO and GEO content, and LinkedIn ghostwriting for fintech and B2B software companies.">
   <section class="hero">
     <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">For fintech and B2B SaaS teams</p>
     <h1>Get found on Google, LinkedIn and inside AI answers</h1>
-    <p class="lead">Buyers now ask ChatGPT and Google's AI Overviews before they book a demo. Those answers are built from listicles, directories, review sites and expert content. We build that footprint for you, one channel at a time, with a monthly report you can forward to your CEO.</p>
-    <div class="row" style="margin-top:1rem;"><a class="btn" href="#quote">Request a quote</a><a class="btn ghost" href="#how">How it works</a></div>
+    <p class="lead">Buyers now ask ChatGPT and Google's AI Overviews before they book a demo. Those answers are built from listicles, directories, review sites and expert content. We build that footprint for you.</p>
+    <div class="row" style="margin-top:1rem;"><a class="btn" href="#order">Order now</a><a class="btn ghost" href="#how">How it works</a></div>
   </section>
 
   <section class="section fade-in">
-    <h2 style="margin-top:0">What we do</h2>
-    <p class="muted" style="margin-bottom:1rem;">Founding client rates, month to month, no long contracts.</p>
-    <ul style="padding-left:1.25rem; display:grid; gap:.5rem;">
-      <li><strong>Guest post outreach and placement</strong> — we find real finance and SaaS publications (DR 30+), write the article, place it with a dofollow link. Pay per live link.</li>
-      <li><strong>SEO and GEO blog content</strong> — keyword and AI search research, 1,200 to 2,000 word articles with schema markup, built to rank on Google and get cited by ChatGPT.</li>
-      <li><strong>Directory and listicle submissions</strong> — bulk submission to 100+ directories and pitches for "best tools" roundups.</li>
-    </ul>
-    <p class="muted" style="margin-top:1rem; font-size:.9rem;">We also offer LinkedIn ghostwriting for founders and custom bundles. <a href="#quote">Tell us what you need</a> and we will send a quote within 24 hours.</p>
-    <div style="margin-top:1.25rem;"><a class="btn" href="#quote">Request a quote</a></div>
+    <div class="service-category">
+      <p class="meta" style="margin:0 0 .25rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Content</p>
+      <h2 style="margin-top:0">We write, you publish</h2>
+      <p class="muted" style="margin-bottom:1rem;">Founding client rates. Pay per deliverable, no retainers.</p>
+      <PriceTable items={CONTENT_SERVICES} ctaHref="#order" ctaLabel="Order" />
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <div class="service-category">
+      <p class="meta" style="margin:0 0 .25rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Distribution</p>
+      <h2 style="margin-top:0">We place, you get links</h2>
+      <p class="muted" style="margin-bottom:1rem;">Founding client rates. Pay per live link, not per attempt.</p>
+      <PriceTable items={DISTRIBUTION_SERVICES} ctaHref="#order" ctaLabel="Order" />
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <div class="notice">
+      <strong>Bundle and save.</strong> Order from both Content and Distribution and get 15% off the total. Just mention it in your order and we will apply the discount to your invoice.
+    </div>
   </section>
 
   <section class="section fade-in" id="how">
@@ -90,8 +108,9 @@ const steps = [
     </div>
   </section>
 
-  <section class="section fade-in" id="quote">
-    <h2 style="margin-top:0">Request a quote</h2>
-    <ContactForm subject="Services enquiry" options={['Guest post outreach', 'SEO and GEO content', 'Directory submissions', 'LinkedIn ghostwriting', 'Bundle or something else']} optionsLabel="Which service?" />
+  <section class="section fade-in" id="order">
+    <h2 style="margin-top:0">Place your order</h2>
+    <p class="muted" style="margin-bottom:1rem;">Tell us what you need. We send a PayPal invoice within 4 hours and work starts the same day.</p>
+    <ContactForm subject="Service order" options={['SEO and GEO content', 'LinkedIn ghostwriting', 'Guest post placement', 'Directory and listicle package', 'Bundle (content + distribution)']} optionsLabel="Which service?" />
   </section>
 </Base>

@@ -54,16 +54,41 @@ export const ADVERTISE_PRICES: Price[] = [
 export const SPONSORED_WRITING_FEE = '$40';
 
 /**
- * Done-for-you services you sell to other companies.
- * Order matters: it is the order shown on the Services page and in the quote form.
+ * Done-for-you services — split into Content (we write) and Distribution (we place).
  * Founding client rates. Lock them for the first 10 clients, then raise.
  */
-export const SERVICE_PRICES: Price[] = [
+export const CONTENT_SERVICES: Price[] = [
+  {
+    name: 'SEO and GEO blog content',
+    price: 'from $60',
+    unit: 'per article',
+    badge: 'Start here',
+    points: [
+      'Keyword and AI search research (what ChatGPT and Google actually cite)',
+      '1,200 to 2,000 words, expert reviewed, with schema markup',
+      'Internal links, meta tags and a featured image',
+      'Bundles of 4 or 8 a month at a discount',
+    ],
+  },
+  {
+    name: 'LinkedIn ghostwriting',
+    price: 'from $150',
+    unit: 'per month',
+    points: [
+      '8 posts per month: hooks, carousels and text posts',
+      'Written in your voice after a 30 minute briefing',
+      'Engagement strategy and posting schedule included',
+      'Cancel any time, no lock in',
+    ],
+  },
+];
+
+export const DISTRIBUTION_SERVICES: Price[] = [
   {
     name: 'Guest post outreach and placement',
     price: 'from $80',
     unit: 'per placement',
-    badge: 'Start here',
+    badge: 'Most popular',
     points: [
       'We find, vet (real traffic, DR 30+) and negotiate niche finance and SaaS sites',
       'Article written and placed, dofollow link to your page',
@@ -72,14 +97,14 @@ export const SERVICE_PRICES: Price[] = [
     ],
   },
   {
-    name: 'SEO and GEO blog content',
-    price: 'from $60',
-    unit: 'per article',
+    name: 'Directory and listicle package',
+    price: '$149',
+    unit: 'for 50 directories',
     points: [
-      'Keyword and AI search research (what ChatGPT and Google actually cite)',
-      '1,200 to 2,000 words, expert reviewed, with schema markup',
-      'Internal links, meta tags and a featured image',
-      'Bundles of 4 or 8 a month at a discount',
+      'Bulk submission to 50+ vetted directories and listings sites',
+      'Pitches for "best tools" roundup articles in your category',
+      'Spreadsheet of every live listing with link and status',
+      'One time fee, all listings are permanent',
     ],
   },
 ];

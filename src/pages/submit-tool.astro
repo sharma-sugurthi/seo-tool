@@ -15,17 +15,20 @@ const featuredPrice = `${featured.price} ${featured.unit}`;
       <h3>Basic listing</h3>
       <div class="price">Free</div>
       <ul><li>Name, tagline, category, pricing</li><li>Nofollow link to your site</li><li>Reviewed within 5 business days</li></ul>
+      <a class="btn ghost" href="#listing-form" style="align-self:flex-start; margin-top:auto;">Submit free listing</a>
     </div>
     <div class="card highlighted">
       <span class="pill">Recommended</span>
       <h3>Featured listing</h3>
       <div class="price">{featured.price} <small>{featured.unit}</small></div>
       <ul><li>Everything in basic</li><li>Dofollow link and custom thumbnail</li><li>Pinned to the top of your category</li><li>Considered for "best tools" roundups</li></ul>
+      <a class="btn" href="#listing-form" id="order-featured" style="align-self:flex-start; margin-top:auto;">Order featured listing</a>
     </div>
   </section>
 
-  <section class="section fade-in">
+  <section class="section fade-in" id="listing-form">
     <h2 style="margin-top:0">Listing details</h2>
+    <p class="muted" style="margin-bottom:1rem;">Fill in the form below. For featured listings ({featuredPrice}), we send a PayPal invoice within 4 hours and your listing goes live the same day.</p>
     <form class="stack" action={SITE.formEndpoint} method="POST">
       <input type="hidden" name="_subject" value="Tool submission" />
       <label>Tool name <input name="tool_name" required /></label>
@@ -40,11 +43,19 @@ const featuredPrice = `${featured.price} ${featured.unit}`;
       <label>Who is it best for? <input name="best_for" placeholder="e.g. bookkeeping firms with 20 to 200 clients" /></label>
       <label>Screenshot or product image URL (optional) <input type="url" name="thumbnail_url" placeholder="https://yoursite.com/screenshot.png" /></label>
       <p class="muted" style="margin:-.5rem 0 0; font-size:.84rem;">Link to a screenshot of your dashboard or your logo. PNG or WebP, at least 600px wide. If you skip this, we will use a screenshot from your website.</p>
-      <label>Listing type <select name="listing_type"><option>Basic (free)</option><option>Featured ({featuredPrice})</option></select></label>
+      <label>Listing type <select name="listing_type" id="listing-type"><option value="basic">Basic (free)</option><option value="featured">Featured ({featuredPrice})</option></select></label>
       <label>Your email <input type="email" name="email" required /></label>
       <label>Anything else <textarea name="message" placeholder="Short description, what makes it different, link to a demo or press kit."></textarea></label>
       <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
       <button class="btn" type="submit">Submit tool</button>
+      <p class="meta">We reply within one business day. Or email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
     </form>
   </section>
+
+  <script>
+    document.getElementById('order-featured')?.addEventListener('click', () => {
+      const sel = document.getElementById('listing-type') as HTMLSelectElement | null;
+      if (sel) sel.value = 'featured';
+    });
+  </script>
 </Base>

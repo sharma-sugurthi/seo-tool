@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+
+const badgeSvg = `<a href="${SITE.url}" target="_blank" rel="noopener"><img src="${SITE.url}/badge-lantle.svg" alt="Reviewed on ${SITE.name}" width="160" height="36" /></a>`;
+const badgeMd = `[![Reviewed on ${SITE.name}](${SITE.url}/badge-lantle.svg)](${SITE.url})`;
+---
+<Base title="Verified by Lantle badge" description="Embed the Lantle badge on your site to show your tool has been independently reviewed. Free for every listed tool.">
+  <section class="hero">
+    <h1>Show you are reviewed on {SITE.name}</h1>
+    <p class="lead">Every tool listed in our directory can embed this badge on their website. It tells visitors your product has been independently reviewed by a finance and accounting specialist.</p>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">The badge</h2>
+    <div class="badge-preview">
+      <img src="/badge-lantle.svg" alt={`Reviewed on ${SITE.name}`} width="160" height="36" />
+    </div>
+    <p class="muted" style="margin-top:1rem;">Free for every listed tool. No featured listing required.</p>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Embed code</h2>
+
+    <h3>HTML</h3>
+    <p class="muted" style="margin-bottom:.5rem;">Copy and paste this into your website footer, about page or integrations page.</p>
+    <div class="code-block">
+      <pre><code>{badgeSvg}</code></pre>
+      <button class="btn ghost copy-btn" data-copy={badgeSvg} style="margin-top:.5rem; font-size:.82rem; padding:.4rem .9rem;">Copy HTML</button>
+    </div>
+
+    <h3 style="margin-top:1.5rem;">Markdown</h3>
+    <p class="muted" style="margin-bottom:.5rem;">For GitHub READMEs and documentation sites.</p>
+    <div class="code-block">
+      <pre><code>{badgeMd}</code></pre>
+      <button class="btn ghost copy-btn" data-copy={badgeMd} style="margin-top:.5rem; font-size:.82rem; padding:.4rem .9rem;">Copy Markdown</button>
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Why add the badge?</h2>
+    <ul style="padding-left:1.25rem; display:grid; gap:.5rem;">
+      <li><strong>Trust signal.</strong> Visitors see that an independent reviewer has looked at your product.</li>
+      <li><strong>Free backlink.</strong> The badge links back to your tool page on {SITE.name}, improving your search visibility.</li>
+      <li><strong>Zero effort.</strong> Copy the code, paste it, done. No approval process or ongoing cost.</li>
+    </ul>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Not listed yet?</h2>
+    <p class="muted">Submit your tool for free and get the badge within 5 business days.</p>
+    <div style="margin-top:.75rem;"><a class="btn" href="/submit-tool/">Submit your tool</a></div>
+  </section>
+
+  <script>
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const text = (btn as HTMLElement).dataset.copy || '';
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = orig; }, 2000);
+        });
+      });
+    });
+  </script>
+</Base>
