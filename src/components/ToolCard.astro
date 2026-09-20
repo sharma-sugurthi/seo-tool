@@ -5,6 +5,7 @@ const { tool } = Astro.props;
 const d = tool.data;
 const fullStars = d.rating ?? 0;
 const initial = d.name.charAt(0).toUpperCase();
+const rel = d.featured ? 'sponsored noopener' : 'nofollow noopener';
 ---
 <article class="card tool-card" data-category={d.category} data-name={d.name.toLowerCase()}>
   {d.thumbnail ? (
@@ -26,5 +27,8 @@ const initial = d.name.charAt(0).toUpperCase();
       ))}
     </div>
   )}
-  <p class="meta" style="margin:0;">{d.pricing}</p>
+  <div class="row" style="justify-content:space-between; margin-top:auto;">
+    <p class="meta" style="margin:0;">{d.pricing}</p>
+    <a class="btn ghost" href={d.website} target="_blank" rel={rel} style="font-size:.78rem; padding:.3rem .7rem;">Visit</a>
+  </div>
 </article>
