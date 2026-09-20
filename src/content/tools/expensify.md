@@ -7,6 +7,7 @@ pricing: Freemium
 bestFor: Small teams that need expense reports done with minimal training
 rating: 3.5
 addedDate: 2026-09-18
+thumbnail: /tools/expensify.webp
 ---
 
 ## What it does

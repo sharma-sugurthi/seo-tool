@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: Small businesses and the accountants who serve them
 rating: 4
 addedDate: 2026-09-17
+thumbnail: /tools/quickbooks-intuit-assist.webp
 ---
 
 ## What it does

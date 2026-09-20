@@ -38,35 +38,14 @@ export const ADVERTISE_PRICES: Price[] = [
     badge: 'Most popular',
   },
   {
-    name: 'Link insertion',
-    price: '$35',
-    unit: 'per link',
-    points: [
-      '1 contextual link in an existing, indexed article',
-      'You choose the article and anchor text (within guidelines)',
-      'Permanent placement',
-      'Live within 48 hours',
-    ],
-  },
-  {
     name: 'Featured tool listing',
     price: '$49',
     unit: 'per year',
     points: [
-      'Dedicated tool page with dofollow link, logo and screenshots',
+      'Dedicated tool page with dofollow link and custom thumbnail',
       'Pinned to the top of your category for 12 months',
       'Included in our "best tools" roundups where relevant',
       'Free basic listing (nofollow) is always available',
-    ],
-  },
-  {
-    name: 'Homepage spotlight',
-    price: '$79',
-    unit: 'per month',
-    points: [
-      'Tool of the month card above the fold',
-      'Mention in that month\'s LinkedIn post from our page',
-      'Limited to 1 sponsor per month',
     ],
   },
 ];
@@ -93,17 +72,6 @@ export const SERVICE_PRICES: Price[] = [
     ],
   },
   {
-    name: 'Directory and listicle placement',
-    price: '$99',
-    unit: 'one time',
-    points: [
-      'Submission to 100+ AI and SaaS directories (Product Hunt, SaaSHub, AlternativeTo, G2, Capterra and more)',
-      'Pitch for inclusion in 10 "best X tools" listicles',
-      'Spreadsheet of every submission with status and live links',
-      'Delivered in 10 business days',
-    ],
-  },
-  {
     name: 'SEO and GEO blog content',
     price: 'from $60',
     unit: 'per article',
@@ -112,17 +80,6 @@ export const SERVICE_PRICES: Price[] = [
       '1,200 to 2,000 words, expert reviewed, with schema markup',
       'Internal links, meta tags and a featured image',
       'Bundles of 4 or 8 a month at a discount',
-    ],
-  },
-  {
-    name: 'LinkedIn ghostwriting for founders',
-    price: 'from $250',
-    unit: 'per month',
-    points: [
-      '12 posts a month in the founder\'s voice, from a 30 minute interview',
-      'Hooks, carousels and comment replies',
-      'Repurposed from your blog, podcast or customer calls',
-      'Weekly performance summary',
     ],
   },
 ];

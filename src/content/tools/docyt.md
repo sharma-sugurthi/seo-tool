@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: Franchises, hospitality groups and firms with many entities
 rating: 3.5
 addedDate: 2026-09-17
+thumbnail: /tools/docyt.webp
 ---
 
 ## What it does

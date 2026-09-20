@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: Small businesses and accounting firms that pay a lot of vendor bills
 rating: 4
 addedDate: 2026-09-18
+thumbnail: /tools/bill.webp
 ---
 
 ## What it does

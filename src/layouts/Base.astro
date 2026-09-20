@@ -15,7 +15,7 @@ interface Props {
 const { title, description = SITE.description, type = 'website', image, jsonLd, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const fullTitle = title === SITE.name ? title : `${title} | ${SITE.name}`;
-const ogImage = image ? new URL(image, Astro.site).toString() : undefined;
+const ogImage = image ? new URL(image, Astro.site).toString() : new URL('/og-default.png', Astro.site).toString();
 const org = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -50,8 +50,8 @@ const ld = [org, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])]
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json" set:html={JSON.stringify(ld)} />
   </head>
   <body>

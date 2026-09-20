@@ -8,6 +8,7 @@ bestFor: Accounting and bookkeeping firms with 5 to 200 staff
 rating: 4
 editorsPick: true
 addedDate: 2026-09-18
+thumbnail: /tools/karbon.webp
 ---
 
 ## What it does

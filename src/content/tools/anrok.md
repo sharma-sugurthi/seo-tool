@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: SaaS and digital product companies selling across US states and countries
 rating: 4
 addedDate: 2026-09-18
+thumbnail: /tools/anrok.webp
 ---
 
 ## What it does

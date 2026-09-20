@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: Small businesses outside the US and advisory firms on Xero
 rating: 4
 addedDate: 2026-09-17
+thumbnail: /tools/xero-jax.webp
 ---
 
 ## What it does

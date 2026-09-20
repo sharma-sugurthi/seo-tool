@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: Mid market finance teams that want AP automation without changing their ERP
 rating: 4
 addedDate: 2026-09-18
+thumbnail: /tools/stampli.webp
 ---
 
 ## What it does

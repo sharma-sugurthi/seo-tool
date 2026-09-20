@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: Accounting firms that want to scale bookkeeping without hiring proportionally
 rating: 3.5
 addedDate: 2026-09-18
+thumbnail: /tools/botkeeper.webp
 ---
 
 ## What it does

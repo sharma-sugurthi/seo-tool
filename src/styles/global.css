@@ -190,12 +190,11 @@ p, li { color: var(--text-2); }
 /* ── Flex / Grid utilities ────────────────────────────── */
 .row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
 .grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-/* Price cards: always four in a row on desktop, two on tablet, one on phone */
-.price-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+/* Price cards: two in a row on desktop, one on phone */
+.price-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .price-grid .card { padding: 1.25rem; }
 .price-grid .card ul { padding-left: 1rem; font-size: 0.9rem; }
 .price-grid .price { font-size: 1.6rem; }
-@media (max-width: 1024px) { .price-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ── Cards ────────────────────────────────────────────── */
 .card {
@@ -223,6 +222,50 @@ p, li { color: var(--text-2); }
 }
 .card.highlighted:hover {
   box-shadow: var(--shadow-md), 0 0 0 1px var(--accent);
+}
+
+/* ── Tool card thumbnails ────────────────────────────── */
+.tool-card { padding: 0; overflow: hidden; }
+.tool-card > :not(.card-thumb):not(.card-thumb-placeholder) { padding-left: 1.5rem; padding-right: 1.5rem; }
+.tool-card > :last-child { padding-bottom: 1.5rem; }
+.tool-card > .row:first-of-type { padding-top: 1rem; }
+
+.card-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  display: block;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-thumb-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent-soft), var(--surface-2));
+  border-bottom: 1px solid var(--border);
+}
+.card-thumb-placeholder span {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--accent);
+  opacity: 0.5;
+}
+
+/* Tool detail hero image */
+.tool-hero-img {
+  margin: 1.25rem 0;
+  padding: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.tool-hero-img img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* ── Pills ────────────────────────────────────────────── */

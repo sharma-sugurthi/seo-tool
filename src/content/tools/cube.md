@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: Growing companies moving from ad hoc spreadsheets to a repeatable planning process
 rating: 4
 addedDate: 2026-09-18
+thumbnail: /tools/cube.webp
 ---
 
 ## What it does

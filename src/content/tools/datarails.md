@@ -7,6 +7,7 @@ pricing: Enterprise
 bestFor: Mid sized finance teams that live in Excel and do not want to leave
 rating: 4
 addedDate: 2026-09-18
+thumbnail: /tools/datarails.webp
 ---
 
 ## What it does

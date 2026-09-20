@@ -7,6 +7,7 @@ pricing: Freemium
 bestFor: Companies where travel is the biggest expense category
 rating: 4
 addedDate: 2026-09-18
+thumbnail: /tools/navan.webp
 ---
 
 ## What it does

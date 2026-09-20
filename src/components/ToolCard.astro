@@ -4,8 +4,14 @@ interface Props { tool: CollectionEntry<'tools'> }
 const { tool } = Astro.props;
 const d = tool.data;
 const fullStars = d.rating ?? 0;
+const initial = d.name.charAt(0).toUpperCase();
 ---
-<article class="card" data-category={d.category} data-name={d.name.toLowerCase()}>
+<article class="card tool-card" data-category={d.category} data-name={d.name.toLowerCase()}>
+  {d.thumbnail ? (
+    <img class="card-thumb" src={d.thumbnail} alt={d.name} width="600" height="400" loading="lazy" />
+  ) : (
+    <div class="card-thumb-placeholder" aria-hidden="true"><span>{initial}</span></div>
+  )}
   <div class="row" style="justify-content:space-between; margin-bottom:.1rem;">
     <span class="pill">{d.category}</span>
     {d.featured && <span class="pill warn">Featured</span>}
@@ -20,5 +26,5 @@ const fullStars = d.rating ?? 0;
       ))}
     </div>
   )}
-  <p class="meta" style="margin:0;">{d.pricing} &middot; {d.bestFor}</p>
+  <p class="meta" style="margin:0;">{d.pricing}</p>
 </article>

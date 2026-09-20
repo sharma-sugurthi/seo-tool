@@ -23,6 +23,7 @@ const jsonLd = {
   description: d.tagline,
   offers: { '@type': 'Offer', price: d.pricing === 'Free' ? '0' : undefined, priceCurrency: 'USD' },
   ...(d.rating ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: d.rating, bestRating: 5, ratingCount: 1 } } : {}),
+  ...(d.thumbnail ? { image: new URL(d.thumbnail, Astro.site).toString() } : {}),
 };
 
 // Get similar tools (same category, exclude current)
@@ -32,7 +33,7 @@ const similar = allTools
   .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick))
   .slice(0, 3);
 ---
-<Base title={`${d.name} review: ${d.tagline}`} description={`${d.name} for ${d.category.toLowerCase()}. ${d.tagline} Pricing: ${d.pricing}. Best for ${d.bestFor}.`} jsonLd={jsonLd}>
+<Base title={`${d.name} review: ${d.tagline}`} description={`${d.name} for ${d.category.toLowerCase()}. ${d.tagline} Pricing: ${d.pricing}. Best for ${d.bestFor}.`} jsonLd={jsonLd} image={d.thumbnail}>
   <article class="section prose">
     <p class="meta"><a href="/tools/">Tools</a> / {d.category}</p>
     <div class="row">
@@ -42,6 +43,11 @@ const similar = allTools
     </div>
     <h1>{d.name}</h1>
     <p class="lead muted">{d.tagline}</p>
+    {d.thumbnail && (
+      <figure class="tool-hero-img">
+        <img src={d.thumbnail} alt={`${d.name} screenshot`} width="600" height="400" />
+      </figure>
+    )}
     <div class="kpis">
       <div class="card">
         <span class="meta">Pricing</span>

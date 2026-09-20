@@ -7,6 +7,7 @@ pricing: Freemium
 bestFor: Companies with international teams and travel heavy spend
 rating: 4
 addedDate: 2026-09-17
+thumbnail: /tools/brex.webp
 ---
 
 ## What it does

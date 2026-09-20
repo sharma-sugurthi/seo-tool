@@ -7,6 +7,7 @@ pricing: Paid
 bestFor: Businesses with many invoices outstanding and a small finance team
 rating: 4
 addedDate: 2026-09-18
+thumbnail: /tools/chaser.webp
 ---
 
 ## What it does

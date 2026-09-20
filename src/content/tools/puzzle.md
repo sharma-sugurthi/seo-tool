@@ -7,6 +7,7 @@ pricing: Freemium
 bestFor: Early stage startups and the bookkeepers who support them
 rating: 4
 addedDate: 2026-09-17
+thumbnail: /tools/puzzle.webp
 ---
 
 ## What it does

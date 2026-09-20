@@ -1,8 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import PriceTable from '../components/PriceTable.astro';
 import ContactForm from '../components/ContactForm.astro';
-import { SERVICE_PRICES } from '../site.config';
 
 const faqs = [
   {
@@ -47,9 +45,15 @@ const steps = [
   </section>
 
   <section class="section fade-in">
-    <h2 style="margin-top:0">Services and pricing</h2>
-    <p class="muted" style="margin-bottom:1.5rem;">Founding client rates, locked for 12 months for our first 10 clients. Every plan is month to month, no long contracts. Bundle two or more and save 15 percent.</p>
-    <PriceTable items={SERVICE_PRICES} ctaHref="#quote" ctaLabel="Request a quote" />
+    <h2 style="margin-top:0">What we do</h2>
+    <p class="muted" style="margin-bottom:1rem;">Founding client rates, month to month, no long contracts.</p>
+    <ul style="padding-left:1.25rem; display:grid; gap:.5rem;">
+      <li><strong>Guest post outreach and placement</strong> — we find real finance and SaaS publications (DR 30+), write the article, place it with a dofollow link. Pay per live link.</li>
+      <li><strong>SEO and GEO blog content</strong> — keyword and AI search research, 1,200 to 2,000 word articles with schema markup, built to rank on Google and get cited by ChatGPT.</li>
+      <li><strong>Directory and listicle submissions</strong> — bulk submission to 100+ directories and pitches for "best tools" roundups.</li>
+    </ul>
+    <p class="muted" style="margin-top:1rem; font-size:.9rem;">We also offer LinkedIn ghostwriting for founders and custom bundles. <a href="#quote">Tell us what you need</a> and we will send a quote within 24 hours.</p>
+    <div style="margin-top:1.25rem;"><a class="btn" href="#quote">Request a quote</a></div>
   </section>
 
   <section class="section fade-in" id="how">
@@ -88,6 +92,6 @@ const steps = [
 
   <section class="section fade-in" id="quote">
     <h2 style="margin-top:0">Request a quote</h2>
-    <ContactForm subject="Services enquiry" options={SERVICE_PRICES.map((s) => s.name).concat(['Bundle or something else'])} optionsLabel="Which service?" />
+    <ContactForm subject="Services enquiry" options={['Guest post outreach', 'SEO and GEO content', 'Directory submissions', 'LinkedIn ghostwriting', 'Bundle or something else']} optionsLabel="Which service?" />
   </section>
 </Base>

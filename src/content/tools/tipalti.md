@@ -7,6 +7,7 @@ pricing: Enterprise
 bestFor: Companies paying suppliers, partners or creators in many countries
 rating: 4
 addedDate: 2026-09-18
+thumbnail: /tools/tipalti.webp
 ---
 
 ## What it does

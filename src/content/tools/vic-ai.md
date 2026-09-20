@@ -7,6 +7,7 @@ pricing: Enterprise
 bestFor: Companies processing thousands of invoices a month
 rating: 4
 addedDate: 2026-09-17
+thumbnail: /tools/vic-ai.webp
 ---
 
 ## What it does

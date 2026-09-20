@@ -8,6 +8,7 @@ bestFor: Venture backed startups and growing companies in the US
 rating: 5
 editorsPick: true
 addedDate: 2026-09-17
+thumbnail: /tools/ramp.webp
 ---
 
 ## What it does

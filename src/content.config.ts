@@ -41,7 +41,7 @@ const tools = defineCollection({
     featured: z.boolean().default(false),
     // editorsPick: our own recommendation. Shown with a pill and sorted after featured. Link stays nofollow. Never paid.
     editorsPick: z.boolean().default(false),
-    logo: z.string().optional(),
+    thumbnail: z.string().optional(),
     addedDate: z.coerce.date(),
   }),
 });
