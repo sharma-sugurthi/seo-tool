@@ -6,6 +6,7 @@ category: FP&A and forecasting
 pricing: Paid
 bestFor: Growing companies moving from ad hoc spreadsheets to a repeatable planning process
 rating: 4
+featured: true
 addedDate: 2026-09-18
 thumbnail: /tools/cube.webp
 ---

@@ -225,15 +225,36 @@ p, li { color: var(--text-2); }
 }
 
 /* ── Tool card thumbnails ────────────────────────────── */
-.tool-card { padding: 0; overflow: hidden; }
-.tool-card > :not(.card-thumb):not(.card-thumb-placeholder) { padding-left: 1.5rem; padding-right: 1.5rem; }
-.tool-card > :last-child { padding-bottom: 1.5rem; }
+.tool-card { padding: 0; overflow: hidden; position: relative; }
+.tool-card > :not(.card-thumb):not(.card-thumb-placeholder):not(.card-overlay) { padding-left: 1.5rem; padding-right: 1.5rem; }
+.tool-card > :nth-last-child(2) { padding-bottom: 1.5rem; }
 .tool-card > .row:first-of-type { padding-top: 1rem; }
+
+/* Stretched overlay — makes the whole card clickable */
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+}
+/* Buttons must sit above the overlay to be independently clickable */
+.card-action-btn {
+  position: relative;
+  z-index: 1;
+}
+/* Hover effect when cursor is anywhere on the card */
+.tool-card:has(.card-overlay:hover) {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
 
 .card-thumb {
   width: 100%;
   aspect-ratio: 3 / 2;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: var(--surface-2);
   display: block;
   border-bottom: 1px solid var(--border);
 }

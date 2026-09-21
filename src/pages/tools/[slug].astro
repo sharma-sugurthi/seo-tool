@@ -46,7 +46,7 @@ const similar = allTools
     <p class="lead muted">{d.tagline}</p>
     {d.thumbnail && (
       <figure class="tool-hero-img">
-        <img src={d.thumbnail} alt={`${d.name} screenshot`} width="600" height="400" />
+        <img src={d.thumbnail} alt={`${d.name} screenshot`} width="1200" height="534" />
       </figure>
     )}
     <div class="kpis">
@@ -72,7 +72,7 @@ const similar = allTools
     <p style="margin-top:1.25rem"><a class="btn" href={d.website} rel={rel} target="_blank">Visit {d.name} →</a></p>
     <Content />
     <hr />
-    <p class="meta">Listing added {d.addedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}. Spotted an error? <a href={`mailto:${SITE.email}`}>Tell us</a>. Want this listing featured? <a href="/advertise/">See options</a>.</p>
+    <p class="meta">Listing added {d.addedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}. Spotted an error? <a href={`mailto:${SITE.email}`}>Tell us</a>. Want this listing featured? <a href="/submit-tool/">See options</a>.</p>
   </article>
 
   {similar.length > 0 && (

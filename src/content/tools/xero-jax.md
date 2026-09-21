@@ -4,8 +4,10 @@ website: https://www.xero.com/
 tagline: Xero's conversational assistant for reconciling, invoicing and asking questions about the books.
 category: Bookkeeping
 pricing: Paid
-bestFor: Small businesses outside the US and advisory firms on Xero
+bestFor: Small businesses working closely with an external accountant
 rating: 4
+featured: true
+editorsPick: true
 addedDate: 2026-09-17
 thumbnail: /tools/xero-jax.webp
 ---

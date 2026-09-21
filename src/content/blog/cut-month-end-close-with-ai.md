@@ -40,4 +40,4 @@ Create a report set (P&L versus budget, balance sheet, cash, AR ageing, AP agein
 
 Revenue recognition judgement, related party transactions and anything the auditor has flagged before. Automate the volume, keep the judgement.
 
-If you want a hand choosing tools for your stack, [contact us](/contact/). If you sell one of these tools and want finance teams to find it, see [advertising options](/advertise/).
+If you want a hand choosing tools for your stack, [contact us](/contact/). If you sell one of these tools and want finance teams to find it, see [advertising options](/submit-tool/).
