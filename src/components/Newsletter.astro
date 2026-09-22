@@ -9,6 +9,7 @@ import { SITE } from '../site.config';
     </div>
     <form class="newsletter-form" action={SITE.formEndpoint} method="POST">
       <input type="hidden" name="_subject" value="Newsletter signup" />
+      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
       <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address" />
       <button type="submit" class="btn">Subscribe</button>
     </form>

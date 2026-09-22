@@ -12,8 +12,8 @@ export async function getStaticPaths() {
 const { tool } = Astro.props;
 const d = tool.data;
 const { Content } = await render(tool);
-// Paid (featured) listings get a dofollow link. Free listings are nofollow. Both are marked so search engines understand the relationship.
-const rel = d.featured ? 'sponsored noopener' : 'nofollow noopener';
+// Paid (featured) listings get a dofollow link. Free listings are nofollow.
+const rel = d.featured ? 'noopener' : 'nofollow noopener';
 const fullStars = d.rating ?? 0;
 const jsonLd = {
   '@context': 'https://schema.org',

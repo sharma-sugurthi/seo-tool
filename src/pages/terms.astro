@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+---
+<Base title="Terms of service" description="The rules that apply when you use this site, buy a listing or order a service.">
+  <section class="hero">
+    <h1>Terms of service</h1>
+    <p class="lead">Last updated: September 2026</p>
+  </section>
+  <section class="section prose fade-in">
+    <h2 style="margin-top:0">Agreement</h2>
+    <p>By using {SITE.name} you agree to these terms. If you do not agree, please stop using the site.</p>
+
+    <h2>What we offer</h2>
+    <p>{SITE.name} publishes a directory of AI finance tools, editorial reviews, comparison guides, and growth services for software companies. Directory listings, blog posts and guides are provided for informational purposes only and do not constitute financial, legal or professional advice.</p>
+
+    <h2>Listings and reviews</h2>
+    <ul>
+      <li>Free tool listings are available to any legitimate software product. We reserve the right to decline or remove any listing at our discretion.</li>
+      <li>Featured (paid) listings are clearly labelled. Payment does not influence editorial ratings.</li>
+      <li>Sponsored content carries a visible disclosure and uses rel="sponsored" on paid links.</li>
+    </ul>
+
+    <h2>Purchases and refunds</h2>
+    <ul>
+      <li>Prices are listed on the site in US dollars. We send a PayPal invoice or bank transfer details after you place an order.</li>
+      <li>Sponsored articles and featured listings go live within 3 business days of payment unless agreed otherwise.</li>
+      <li>If we cannot deliver what you ordered, you get a full refund. Once a sponsored article or listing is live and matches the agreed scope, refunds are not available.</li>
+      <li>Growth services (blog content, outreach, LinkedIn ghostwriting) are billed monthly or per deliverable as stated on the services page. You can cancel any ongoing service at the end of the current billing period.</li>
+    </ul>
+
+    <h2>Your content</h2>
+    <p>If you submit content to us (a tool listing, a guest post, a sponsored article you wrote), you confirm that you have the right to publish it and that it does not infringe anyone's intellectual property. You grant us a licence to publish, edit and display that content on the site.</p>
+
+    <h2>Acceptable use</h2>
+    <p>You agree not to:</p>
+    <ul>
+      <li>Submit false or misleading information.</li>
+      <li>Use the site for anything illegal or harmful.</li>
+      <li>Scrape content or data from the site in bulk without written permission.</li>
+      <li>Attempt to interfere with the site's operation or security.</li>
+    </ul>
+
+    <h2>Intellectual property</h2>
+    <p>All original content on {SITE.name} -- text, design, graphics and code -- is our property or used under licence. You may not copy, republish or redistribute it without permission. Tool names, logos and screenshots belong to their respective owners and are used here for identification and review purposes.</p>
+
+    <h2>Limitation of liability</h2>
+    <p>{SITE.name} is provided "as is." We make no warranty that the information is complete, accurate or up to date. We are not liable for any loss or damage arising from your use of the site or reliance on its content.</p>
+
+    <h2>Changes</h2>
+    <p>We may update these terms at any time. Continued use of the site after a change means you accept the new terms. The "last updated" date at the top shows the latest revision.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about these terms: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+  </section>
+</Base>

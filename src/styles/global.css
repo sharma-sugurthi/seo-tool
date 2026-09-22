@@ -1,5 +1,4 @@
-/* ── Fonts ─────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=Instrument+Serif:ital@0;1&display=swap');
+/* Fonts are loaded via <link> in Base.astro to avoid render-blocking @import */
 
 /* ── Design Tokens ───────────────────────────────────── */
 :root {
@@ -11,7 +10,7 @@
   /* Text */
   --text:         #111c18;
   --text-2:       #3d4f47;
-  --muted:        #637068;
+  --muted:        #566058;
 
   /* Border */
   --border:       #d8e2dc;

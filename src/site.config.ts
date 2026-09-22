@@ -27,7 +27,7 @@ export type Price = { name: string; price: string; unit?: string; points: string
 export const ADVERTISE_PRICES: Price[] = [
   {
     name: 'Sponsored article',
-    price: '$60',
+    price: '$89',
     unit: 'per article',
     points: [
       'Up to 2 dofollow links (rel="sponsored")',
@@ -39,19 +39,19 @@ export const ADVERTISE_PRICES: Price[] = [
   },
   {
     name: 'Featured tool listing',
-    price: '$49',
+    price: '$99',
     unit: 'per year',
     points: [
       'Dedicated tool page with dofollow link and custom thumbnail',
       'Pinned to the top of your category for 12 months',
-      'Included in our "best tools" roundups where relevant',
+      'Eligible for our "best tools" roundup articles',
       'Free basic listing (nofollow) is always available',
     ],
   },
 ];
 
 /** Extra fee when we write a sponsored article for the advertiser. Shown in the Advertise FAQ. */
-export const SPONSORED_WRITING_FEE = '$40';
+export const SPONSORED_WRITING_FEE = '$19';
 
 /**
  * Done-for-you services, split into Content (we write) and Distribution (we place).
@@ -64,10 +64,10 @@ export const CONTENT_SERVICES: Price[] = [
     unit: 'per article',
     badge: 'Start here',
     points: [
-      'Keyword and AI search research (what ChatGPT and Google actually cite)',
-      '1,200 to 2,000 words, expert reviewed, with schema markup',
-      'Internal links, meta tags and a featured image',
-      'Bundles of 4 or 8 a month at a discount',
+      'Keyword research + AI citation research (what ChatGPT, Perplexity and Google actually cite)',
+      '1,200–2,000 words, fact-checked, with schema markup and meta tags',
+      'Optimised for both search rankings and AI Overviews',
+      '4-article bundle available at 15% off',
     ],
   },
   {
@@ -75,10 +75,10 @@ export const CONTENT_SERVICES: Price[] = [
     price: 'from $150',
     unit: 'per month',
     points: [
-      '8 posts per month: hooks, carousels and text posts',
-      'Written in your voice after a 30 minute briefing',
-      'Engagement strategy and posting schedule included',
-      'Cancel any time, no lock in',
+      '8 posts per month (2 per week): hooks, text posts and document carousels',
+      'Fully written in your voice after a 30-minute kick-off call',
+      'Posting schedule, optimal timing and hashtag strategy included',
+      'Month to month, cancel any time',
     ],
   },
 ];
@@ -86,25 +86,25 @@ export const CONTENT_SERVICES: Price[] = [
 export const DISTRIBUTION_SERVICES: Price[] = [
   {
     name: 'Guest post outreach and placement',
-    price: 'from $80',
+    price: 'from $99',
     unit: 'per placement',
     badge: 'Most popular',
     points: [
-      'We find, vet (real traffic, DR 30+) and negotiate niche finance and SaaS sites',
-      'Article written and placed, dofollow link to your page',
-      'Pay per live link, not per attempt',
-      'Replacement guarantee for 6 months',
+      'Article written and placed on vetted SaaS sites (DR 30+, no PBNs)',
+      'Permanent dofollow link to the page of your choice',
+      'Pay per live link with full domain metric reporting',
+      '6 months link monitoring (typical turnaround: 2–4 weeks)',
     ],
   },
   {
     name: 'Directory and listicle package',
-    price: '$149',
-    unit: 'for 50 directories',
+    price: '$199',
+    unit: 'one time',
     points: [
-      'Bulk submission to 50+ vetted directories and listings sites',
-      'Pitches for "best tools" roundup articles in your category',
-      'Spreadsheet of every live listing with link and status',
-      'One time fee, all listings are permanent',
+      'Manual submission to 100+ active SaaS and product directories',
+      'Works for any vertical: dev tools, fintech, ecommerce, B2B SaaS',
+      'Spreadsheet of every live listing with URL and status',
+      'One time fee, all listings are permanent (5–7 days turnaround)',
     ],
   },
 ];

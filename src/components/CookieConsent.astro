@@ -1,0 +1,59 @@
+---
+/**
+ * Lightweight cookie-consent banner.
+ * No external dependencies. Uses localStorage to remember the choice.
+ */
+---
+<div id="cookie-banner" class="cookie-banner" role="dialog" aria-label="Cookie consent" hidden>
+  <p>This site uses third-party services (Google Fonts, Formspree) that may set cookies. By continuing to browse you accept their use. <a href="/privacy/">Privacy policy</a></p>
+  <button id="cookie-accept" class="btn btn-sm">Got it</button>
+</div>
+
+<style>
+  .cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .cookie-banner[hidden] { display: none; }
+  .cookie-banner p { margin: 0; flex: 1; }
+  .cookie-banner a { color: var(--accent-soft); }
+  .cookie-banner .btn-sm {
+    padding: 0.35rem 1rem;
+    font-size: 0.82rem;
+    border-radius: var(--radius-xs);
+    white-space: nowrap;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .cookie-banner .btn-sm:hover { background: var(--accent-hover); }
+  @media (max-width: 480px) {
+    .cookie-banner { flex-direction: column; text-align: center; gap: 0.6rem; }
+  }
+</style>
+
+<script>
+  try {
+    if (!localStorage.getItem('cookie-ok')) {
+      document.getElementById('cookie-banner')?.removeAttribute('hidden');
+    }
+  } catch { /* private browsing or blocked storage -- don't show */ }
+
+  document.getElementById('cookie-accept')?.addEventListener('click', () => {
+    try { localStorage.setItem('cookie-ok', '1'); } catch {}
+    document.getElementById('cookie-banner')?.setAttribute('hidden', '');
+  });
+</script>

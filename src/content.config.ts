@@ -11,8 +11,9 @@ const blog = defineCollection({
     author: z.string().default('Lantle Editorial'),
     // One or two sentences shown at the end of the post. Real bios help E-E-A-T and guest posters expect it.
     authorBio: z.string().optional(),
+    thumbnail: z.string().optional(),
     tags: z.array(z.string()).default([]),
-    // Set true for paid posts. Outbound links in the post body get rel="sponsored" via the layout notice.
+    // Set true for paid posts. As promised in pricing, these get up to 2 dofollow links.
     sponsored: z.boolean().default(false),
     draft: z.boolean().default(false),
   }),

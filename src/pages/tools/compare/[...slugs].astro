@@ -36,8 +36,8 @@ const fields = [
   { label: 'Rating', valA: a.rating ? `${a.rating} / 5` : 'Not rated', valB: b.rating ? `${b.rating} / 5` : 'Not rated' },
 ];
 
-const relA = a.featured ? 'sponsored noopener' : 'nofollow noopener';
-const relB = b.featured ? 'sponsored noopener' : 'nofollow noopener';
+const relA = a.featured ? 'noopener' : 'nofollow noopener';
+const relB = b.featured ? 'noopener' : 'nofollow noopener';
 
 const allTools = await getCollection('tools');
 const related = allTools

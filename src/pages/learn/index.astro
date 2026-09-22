@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import PostCard from '../../components/PostCard.astro';
 import { getCollection } from 'astro:content';
 const guides = (await getCollection('blog', ({ data }) => !data.draft && data.tags.some((t) => ['how to', 'AI policy', 'directories', 'launch'].includes(t))))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -34,12 +35,7 @@ const guides = (await getCollection('blog', ({ data }) => !data.draft && data.ta
   <section class="section">
     <h2 style="margin-top:0">Guides</h2>
     <div class="grid">
-      {guides.map((g) => (
-        <div class="card">
-          <h3><a href={`/blog/${g.id}/`}>{g.data.title}</a></h3>
-          <p class="muted" style="flex:1; font-size:.93rem">{g.data.description}</p>
-        </div>
-      ))}
+      {guides.map((g) => <PostCard post={g} />)}
     </div>
     <p style="margin-top:1rem"><a href="/blog/">All articles</a></p>
   </section>
