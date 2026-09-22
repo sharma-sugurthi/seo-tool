@@ -56,6 +56,7 @@ const ld = [org, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])]
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+    <script data-goatcounter="https://devrel.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   </head>
   <body>
     <Header />
