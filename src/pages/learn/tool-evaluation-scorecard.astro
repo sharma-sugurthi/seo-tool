@@ -1,0 +1,174 @@
+---
+import Base from '../../layouts/Base.astro';
+const criteria = [
+  { name: 'Solves the problem you wrote down', hint: 'Score against the job you defined before the demo, not the feature list.', weight: 5 },
+  { name: 'Accuracy on your own samples', hint: 'Run 20 of your real records, tickets or prompts through it. Count the corrections.', weight: 5 },
+  { name: 'Setup and time to first result', hint: 'Hours from signup to one useful output with your data connected.', weight: 3 },
+  { name: 'Integrations with your stack', hint: 'Native connectors to where the data lives, not only a generic automation bridge.', weight: 4 },
+  { name: 'Data handling and security', hint: 'Training on your data, retention, region, SSO, audit log. Use the vendor checklist.', weight: 4 },
+  { name: 'Pricing at twice your current size', hint: 'Model the bill 18 months out. Per seat, per usage or per outcome.', weight: 3 },
+  { name: 'Support and documentation', hint: 'Response time on a real question during the trial. Docs you could follow without a call.', weight: 2 },
+  { name: 'Exit cost', hint: 'Can you export everything in an open format and leave within a week?', weight: 3 },
+];
+const scale = [0, 1, 2, 3, 4, 5];
+---
+<Base title="AI tool evaluation scorecard: compare up to three tools on weighted criteria" description="A weighted scorecard for choosing between software or AI tools. Eight criteria, your own weights, up to three tools side by side. Saves in your browser, prints clean.">
+  <section class="hero">
+    <p class="meta"><a href="/learn/">Learn</a> / scorecard</p>
+    <h1>Tool evaluation scorecard</h1>
+    <p class="lead">Eight criteria that decide whether a tool sticks, weighted the way most buyers wish they had weighted them. Name up to three tools, score each from 0 to 5, and see a weighted total. Everything stays in this browser.</p>
+    <div class="row">
+      <button class="btn ghost" type="button" id="reset">Reset</button>
+      <button class="btn ghost" type="button" id="copy">Copy as text</button>
+      <button class="btn ghost" type="button" onclick="window.print()">Print</button>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="score-names">
+      <span class="meta">Tools you are comparing</span>
+      <div class="score-name-row">
+        {[0, 1, 2].map((i) => <input type="text" data-tool={i} placeholder={`Tool ${i + 1}`} aria-label={`Name of tool ${i + 1}`} />)}
+      </div>
+    </div>
+
+    <div class="score-head">
+      <span>Criterion</span><span>Weight</span><span class="t" data-head="0">Tool 1</span><span class="t" data-head="1">Tool 2</span><span class="t" data-head="2">Tool 3</span>
+    </div>
+    {criteria.map((c, ci) => (
+      <div class="score-row">
+        <div class="score-label">
+          <strong>{c.name}</strong>
+          <span class="meta">{c.hint}</span>
+        </div>
+        <select data-weight={ci} aria-label={`Weight for ${c.name}`}>
+          {[1, 2, 3, 4, 5].map((w) => <option value={w} selected={w === c.weight}>{w}</option>)}
+        </select>
+        {[0, 1, 2].map((ti) => (
+          <select data-score={`${ci}-${ti}`} aria-label={`Score for ${c.name}, tool ${ti + 1}`}>
+            {scale.map((s) => <option value={s}>{s === 0 ? '-' : s}</option>)}
+          </select>
+        ))}
+      </div>
+    ))}
+
+    <div class="kpis" style="margin-top:1.5rem">
+      {[0, 1, 2].map((i) => (
+        <div class="card">
+          <span class="meta" data-kpi-name={i}>Tool {i + 1}</span>
+          <strong data-kpi-score={i}>0%</strong>
+          <span class="meta" data-kpi-sub={i}>weighted score</span>
+        </div>
+      ))}
+    </div>
+    <p class="notice" id="verdict">Score at least one tool to see a result.</p>
+  </section>
+
+  <section class="section prose">
+    <h2 style="margin-top:0">How to use it without fooling yourself</h2>
+    <ul>
+      <li><strong>Set the weights before you see any demo.</strong> Weights changed after a slick demo are the demo talking, not your requirements.</li>
+      <li><strong>Score accuracy on your data, not the vendor's.</strong> Every tool looks good on its own sample set. Bring twenty of your own ugly records.</li>
+      <li><strong>A tie on score is not a tie.</strong> Break it on exit cost. The tool you can leave cheaply is the safer bet when both look equal.</li>
+      <li><strong>Print it and attach it to the purchase request.</strong> Six months later, when someone asks why this tool, the answer is on one page.</li>
+    </ul>
+    <p>Pair it with the <a href="/learn/ai-vendor-security-checklist/">vendor security checklist</a> for the data handling row and the <a href="/learn/software-cost-calculator/">cost calculator</a> for the pricing row. Shortlists start in the <a href="/tools/">directory</a>.</p>
+  </section>
+
+  <style>
+    .score-names { max-width: 60rem; margin-bottom: 1.25rem; }
+    .score-name-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; margin-top: 0.35rem; }
+    .score-name-row input { width: 100%; }
+    .score-head, .score-row {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) 5.5rem repeat(3, minmax(0, 1fr));
+      gap: 0.6rem;
+      align-items: center;
+      max-width: 60rem;
+    }
+    .score-head { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); padding: 0 0 0.4rem; border-bottom: 1px solid var(--border); }
+    .score-row { padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .score-label { display: flex; flex-direction: column; gap: 0.15rem; }
+    .score-label .meta { margin: 0; font-size: 0.8rem; }
+    .score-row select { width: 100%; }
+    @media (max-width: 720px) {
+      .score-head { display: none; }
+      .score-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .score-label { grid-column: 1 / -1; }
+      .score-name-row { grid-template-columns: 1fr; }
+    }
+    @media print { .btn, .cookie-banner, .scroll-top { display: none !important; } }
+  </style>
+
+  <script>
+    const KEY = 'lantle-scorecard';
+    const names = Array.from(document.querySelectorAll<HTMLInputElement>('input[data-tool]'));
+    const weights = Array.from(document.querySelectorAll<HTMLSelectElement>('select[data-weight]'));
+    const scores = Array.from(document.querySelectorAll<HTMLSelectElement>('select[data-score]'));
+    const verdict = document.getElementById('verdict');
+    const load = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+    const save = () => {
+      const s: Record<string, string> = {};
+      names.forEach((n) => (s[`n${n.dataset.tool}`] = n.value));
+      weights.forEach((w) => (s[`w${w.dataset.weight}`] = w.value));
+      scores.forEach((sc) => (s[`s${sc.dataset.score}`] = sc.value));
+      try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {}
+    };
+    const label = (i: number) => names[i]?.value.trim() || `Tool ${i + 1}`;
+    const render = () => {
+      const maxTotal = weights.reduce((n, w) => n + Number(w.value) * 5, 0);
+      const results = [0, 1, 2].map((ti) => {
+        let total = 0; let scored = 0;
+        weights.forEach((w, ci) => {
+          const v = Number((document.querySelector(`select[data-score="${ci}-${ti}"]`) as HTMLSelectElement).value);
+          if (v > 0) { total += v * Number(w.value); scored += 1; }
+        });
+        return { ti, pct: maxTotal ? Math.round((total / maxTotal) * 100) : 0, scored };
+      });
+      results.forEach(({ ti, pct, scored }) => {
+        const nameEl = document.querySelector(`[data-kpi-name="${ti}"]`);
+        const scoreEl = document.querySelector(`[data-kpi-score="${ti}"]`);
+        const subEl = document.querySelector(`[data-kpi-sub="${ti}"]`);
+        const head = document.querySelector(`[data-head="${ti}"]`);
+        if (nameEl) nameEl.textContent = label(ti);
+        if (head) head.textContent = label(ti);
+        if (scoreEl) scoreEl.textContent = scored ? `${pct}%` : '-';
+        if (subEl) subEl.textContent = scored ? `weighted score, ${scored} of ${weights.length} criteria scored` : 'not scored yet';
+      });
+      const live = results.filter((r) => r.scored > 0).sort((a, b) => b.pct - a.pct);
+      if (!verdict) return;
+      if (live.length === 0) verdict.textContent = 'Score at least one tool to see a result.';
+      else if (live.length === 1) verdict.textContent = `${label(live[0].ti)} scores ${live[0].pct}% against your weights. Add a second tool to make the number mean something.`;
+      else {
+        const [a, b] = live;
+        const gap = a.pct - b.pct;
+        verdict.textContent = gap < 5
+          ? `${label(a.ti)} and ${label(b.ti)} are within ${gap} points, which is a tie. Break it on exit cost and on which one your team already wants to use.`
+          : `${label(a.ti)} leads by ${gap} points (${a.pct}% to ${b.pct}%). Re-check the two rows you weighted highest before you sign; that is where a wrong score changes the answer.`;
+      }
+    };
+    const state = load();
+    names.forEach((n) => { n.value = state[`n${n.dataset.tool}`] ?? ''; n.addEventListener('input', () => { save(); render(); }); });
+    weights.forEach((w) => { if (state[`w${w.dataset.weight}`]) w.value = state[`w${w.dataset.weight}`]; w.addEventListener('change', () => { save(); render(); }); });
+    scores.forEach((s) => { if (state[`s${s.dataset.score}`]) s.value = state[`s${s.dataset.score}`]; s.addEventListener('change', () => { save(); render(); }); });
+    render();
+    document.getElementById('reset')?.addEventListener('click', () => {
+      names.forEach((n) => (n.value = ''));
+      weights.forEach((w, i) => (w.value = String([5, 5, 3, 4, 4, 3, 2, 3][i] ?? 3)));
+      scores.forEach((s) => (s.value = '0'));
+      try { localStorage.removeItem(KEY); } catch {}
+      render();
+    });
+    document.getElementById('copy')?.addEventListener('click', async () => {
+      const lines: string[] = ['Tool evaluation scorecard', ''];
+      document.querySelectorAll('.score-row').forEach((row, ci) => {
+        const name = row.querySelector('strong')?.textContent ?? '';
+        const w = weights[ci].value;
+        const cells = [0, 1, 2].map((ti) => `${label(ti)}: ${(row.querySelector(`select[data-score="${ci}-${ti}"]`) as HTMLSelectElement).value}`);
+        lines.push(`${name} (weight ${w}) | ${cells.join(' | ')}`);
+      });
+      lines.push('', verdict?.textContent ?? '');
+      try { await navigator.clipboard.writeText(lines.join('\n')); const btn = document.getElementById('copy'); if (btn) btn.textContent = 'Copied'; } catch {}
+    });
+  </script>
+</Base>

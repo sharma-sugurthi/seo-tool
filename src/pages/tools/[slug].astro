@@ -4,6 +4,7 @@ import ToolCard from '../../components/ToolCard.astro';
 import Newsletter from '../../components/Newsletter.astro';
 import { getCollection, render } from 'astro:content';
 import { SITE } from '../../site.config';
+import { getVertical } from '../../data/taxonomy';
 
 export async function getStaticPaths() {
   const tools = await getCollection('tools');
@@ -11,6 +12,7 @@ export async function getStaticPaths() {
 }
 const { tool } = Astro.props;
 const d = tool.data;
+const v = getVertical(d.vertical);
 const { Content } = await render(tool);
 // Paid (featured) listings get a dofollow link. Free listings are nofollow.
 const rel = d.featured ? 'noopener' : 'nofollow noopener';
@@ -23,20 +25,29 @@ const jsonLd = {
   applicationCategory: 'BusinessApplication',
   description: d.tagline,
   offers: { '@type': 'Offer', price: d.pricing === 'Free' ? '0' : undefined, priceCurrency: 'USD' },
-  ...(d.rating ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: d.rating, bestRating: 5, ratingCount: 1 } } : {}),
+  // A single editorial rating is a Review, not an AggregateRating (which implies many user ratings).
+  ...(d.rating
+    ? {
+        review: {
+          '@type': 'Review',
+          reviewRating: { '@type': 'Rating', ratingValue: d.rating, bestRating: 5 },
+          author: { '@type': 'Organization', name: SITE.name },
+        },
+      }
+    : {}),
   ...(d.thumbnail ? { image: new URL(d.thumbnail, Astro.site).toString() } : {}),
 };
 
-// Get similar tools (same category, exclude current)
+// Similar tools: same category first, then the rest of the vertical
 const allTools = await getCollection('tools');
-const similar = allTools
-  .filter((t) => t.data.category === d.category && t.id !== tool.id)
-  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick))
-  .slice(0, 3);
+const rank = (a: any, b: any) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick);
+const sameCategory = allTools.filter((t) => t.data.category === d.category && t.id !== tool.id).sort(rank);
+const sameVertical = allTools.filter((t) => t.data.vertical === d.vertical && t.data.category !== d.category && t.id !== tool.id).sort(rank);
+const similar = [...sameCategory, ...sameVertical].slice(0, 3);
 ---
 <Base title={`${d.name} review: ${d.tagline}`} description={`${d.name} for ${d.category.toLowerCase()}. ${d.tagline} Pricing: ${d.pricing}. Best for ${d.bestFor}.`} jsonLd={jsonLd} image={d.thumbnail}>
   <article class="section prose">
-    <p class="meta"><a href="/tools/">Tools</a> / {d.category}</p>
+    <p class="meta"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {d.category}</p>
     <div class="row">
       <span class="pill">{d.category}</span>
       {d.featured && <span class="pill warn">Featured listing (paid)</span>}
@@ -78,7 +89,7 @@ const similar = allTools
   {similar.length > 0 && (
     <section class="section fade-in">
       <div class="related-section">
-        <h3>Similar tools in {d.category}</h3>
+        <h3>Similar tools in {sameCategory.length > 0 ? d.category : v.name}</h3>
         <div class="grid">{similar.map((t) => <ToolCard tool={t} />)}</div>
       </div>
     </section>
@@ -87,7 +98,7 @@ const similar = allTools
   <section class="section fade-in" style="text-align:center;">
     <div class="row" style="justify-content:center;">
       <a class="btn ghost" href={`/tools/alternatives/${tool.id}/`}>Alternatives to {d.name}</a>
-      {similar.length > 0 && similar.slice(0, 1).map((t) => {
+      {sameCategory.length > 0 && sameCategory.slice(0, 1).map((t) => {
         const [first, second] = [tool.id, t.id].sort();
         return <a class="btn ghost" href={`/tools/compare/${first}-vs-${second}/`}>{d.name} vs {t.data.name}</a>;
       })}

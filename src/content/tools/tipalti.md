@@ -2,6 +2,7 @@
 name: Tipalti
 website: https://tipalti.com/
 tagline: Global payables automation covering supplier onboarding, tax forms, invoice processing and mass payouts in many currencies.
+vertical: finance
 category: Accounts payable
 pricing: Enterprise
 bestFor: Companies paying suppliers, partners or creators in many countries

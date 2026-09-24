@@ -1,0 +1,103 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Software cost calculator: the three year price of a SaaS or AI tool" description="Work out what a per-seat or usage-priced tool really costs over three years, including seat growth, add-ons, implementation and the annual billing discount. Runs in your browser.">
+  <section class="hero">
+    <p class="meta"><a href="/learn/">Learn</a> / calculator</p>
+    <h1>Software cost calculator</h1>
+    <p class="lead">The pricing page shows one number. Your finance team will see a different one. This adds seat growth, usage add-ons, implementation and the annual billing question, then shows the three year total. Nothing you enter leaves your browser.</p>
+  </section>
+
+  <section class="section calc">
+    <form class="stack" id="calc" onsubmit="return false">
+      <label>Seats or users today
+        <input type="number" id="seats" value="15" min="0" step="1" />
+      </label>
+      <label>List price per seat per month, on monthly billing
+        <input type="number" id="price" value="30" min="0" step="1" />
+      </label>
+      <label>Discount for paying annually
+        <input type="range" id="disc" value="15" min="0" max="40" step="5" />
+        <span class="meta"><span id="disc-label">15</span> percent. Most vendors offer 10 to 20. Enter 0 if there is no annual plan.</span>
+      </label>
+      <label>Expected seat growth per year
+        <input type="range" id="growth" value="20" min="0" max="100" step="5" />
+        <span class="meta"><span id="growth-label">20</span> percent. Be honest: tools that work spread to neighbouring teams.</span>
+      </label>
+      <label>Usage, add-ons or overage per month (AI credits, extra storage, premium support)
+        <input type="number" id="addons" value="100" min="0" step="10" />
+      </label>
+      <label>One-off implementation, migration or training cost
+        <input type="number" id="setup" value="1500" min="0" step="100" />
+      </label>
+      <label>Chance you will still be using it in 12 months
+        <input type="range" id="keep" value="70" min="0" max="100" step="5" />
+        <span class="meta"><span id="keep-label">70</span> percent. This decides whether the annual discount is worth the lock-in.</span>
+      </label>
+    </form>
+
+    <div class="kpis" style="margin-top:1.5rem">
+      <div class="card"><span class="meta">Year 1</span><strong id="y1">0</strong><span class="meta">monthly billing, all in</span></div>
+      <div class="card"><span class="meta">Year 2</span><strong id="y2">0</strong><span class="meta">with seat growth</span></div>
+      <div class="card"><span class="meta">Year 3</span><strong id="y3">0</strong><span class="meta">with seat growth</span></div>
+      <div class="card"><span class="meta">Three year total</span><strong id="total">0</strong><span class="meta">monthly billing</span></div>
+      <div class="card"><span class="meta">Annual billing saves</span><strong id="save">0</strong><span class="meta">over three years, if you stay</span></div>
+      <div class="card"><span class="meta">Real cost per seat</span><strong id="perseat">0</strong><span class="meta">per month in year 1, add-ons and setup included</span></div>
+    </div>
+    <p class="notice" id="verdict"></p>
+  </section>
+
+  <section class="section prose">
+    <h2 style="margin-top:0">How to read the result</h2>
+    <ul>
+      <li><strong>Real cost per seat</strong> is the number to compare between vendors. A cheaper list price with heavy usage fees often loses to a dearer flat price.</li>
+      <li><strong>Annual billing is a bet on retention.</strong> The calculator weighs the discount against the chance you churn and eat the unused months. Below roughly 70 percent confidence, pay monthly and revisit at renewal.</li>
+      <li><strong>Seat growth is the quiet multiplier.</strong> A tool that spreads at 20 percent a year costs 44 percent more in year three than year one before any price rise. Ask the vendor for a price lock at renewal.</li>
+      <li><strong>Ask what happens at the tier boundary.</strong> Many plans jump in price at 25, 50 or 100 seats. If you are close to one, model the next tier instead.</li>
+    </ul>
+    <p>Use this alongside the <a href="/learn/tool-evaluation-scorecard/">evaluation scorecard</a>, where price is one row of eight. If you are pricing a finance automation tool specifically, the <a href="/learn/bookkeeping-automation-roi-calculator/">savings calculator</a> estimates the other side of the ledger.</p>
+  </section>
+
+  <script>
+    const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+    const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const calc = () => {
+      const seats = +$('seats').value || 0, price = +$('price').value || 0, disc = +$('disc').value || 0;
+      const growth = +$('growth').value || 0, addons = +$('addons').value || 0, setup = +$('setup').value || 0, keep = +$('keep').value || 0;
+      $('disc-label').textContent = String(disc);
+      $('growth-label').textContent = String(growth);
+      $('keep-label').textContent = String(keep);
+      const years = [0, 1, 2].map((y) => {
+        const s = seats * Math.pow(1 + growth / 100, y);
+        const monthly = s * price * 12 + addons * 12;
+        return { s, monthly, annual: s * price * 12 * (1 - disc / 100) + addons * 12 };
+      });
+      const y1 = years[0].monthly + setup;
+      const total = years.reduce((n, y) => n + y.monthly, 0) + setup;
+      const totalAnnual = years.reduce((n, y) => n + y.annual, 0) + setup;
+      const save = total - totalAnnual;
+      const perSeat = seats > 0 ? y1 / 12 / seats : 0;
+      // Expected value of annual billing in year one: discount if you stay, roughly half a year wasted if you leave
+      const annualCost1 = years[0].annual;
+      const expectedAnnual = (keep / 100) * annualCost1 + (1 - keep / 100) * (annualCost1 + years[0].monthly * 0.5);
+      const annualWins = disc > 0 && expectedAnnual < years[0].monthly;
+      $('y1').textContent = fmt(y1);
+      $('y2').textContent = fmt(years[1].monthly);
+      $('y3').textContent = fmt(years[2].monthly);
+      $('total').textContent = fmt(total);
+      $('save').textContent = disc > 0 ? fmt(save) : 'n/a';
+      $('perseat').textContent = perSeat.toFixed(2);
+      const v = document.getElementById('verdict');
+      if (!v) return;
+      if (seats === 0 || price === 0) { v.textContent = 'Enter seats and a price to see the three year picture.'; return; }
+      const growthNote = growth >= 20 ? ` Year three costs ${Math.round((years[2].monthly / years[0].monthly - 1) * 100)} percent more than year one from seat growth alone, so negotiate a renewal price cap now.` : '';
+      v.textContent = (annualWins
+        ? `Annual billing is worth it here: at ${keep} percent confidence you keep the tool, the ${disc} percent discount beats the risk of paying for months you do not use.`
+        : disc > 0
+          ? `Pay monthly for now. At ${keep} percent confidence, the ${disc} percent annual discount does not cover the risk of unused months. Switch to annual at the first renewal if it has stuck.`
+          : 'There is no annual discount to weigh, so the only lever is seat count and add-on usage.') + growthNote;
+    };
+    document.querySelectorAll('#calc input').forEach((el) => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Base>

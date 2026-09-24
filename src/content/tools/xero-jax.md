@@ -2,6 +2,7 @@
 name: Xero with JAX
 website: https://www.xero.com/
 tagline: Xero's conversational assistant for reconciling, invoicing and asking questions about the books.
+vertical: finance
 category: Bookkeeping
 pricing: Paid
 bestFor: Small businesses working closely with an external accountant

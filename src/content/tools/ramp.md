@@ -2,6 +2,7 @@
 name: Ramp
 website: https://ramp.com/
 tagline: Corporate cards, expense management, bill pay and accounting automation with AI built into every step.
+vertical: finance
 category: Spend cards
 pricing: Freemium
 bestFor: Venture backed startups and growing companies in the US

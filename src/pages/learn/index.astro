@@ -4,33 +4,52 @@ import PostCard from '../../components/PostCard.astro';
 import { getCollection } from 'astro:content';
 const guides = (await getCollection('blog', ({ data }) => !data.draft && data.tags.some((t) => ['how to', 'AI policy', 'directories', 'launch'].includes(t))))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const groups = [
+  {
+    title: 'For anyone choosing a tool',
+    items: [
+      { pill: 'Scorecard', href: '/learn/tool-evaluation-scorecard/', name: 'Tool evaluation scorecard', text: 'Eight weighted criteria, up to three tools side by side, one number at the end. Set the weights before the demo.' },
+      { pill: 'Calculator', href: '/learn/software-cost-calculator/', name: 'Software cost calculator', text: 'Seat growth, add-ons, implementation and the annual billing question, rolled into a three year total and a real cost per seat.' },
+      { pill: 'Checklist', href: '/learn/ai-vendor-security-checklist/', name: 'AI vendor security and data checklist', text: 'Twenty-eight questions on training data, retention, SSO, SOC 2, model behaviour and exit. The ones vendors go quiet on.' },
+      { pill: 'Reference', href: '/learn/glossary/', name: 'Glossary', text: 'Finance, AI and search terms defined in a sentence or two each, with links to where they matter on this site.' },
+    ],
+  },
+  {
+    title: 'For finance teams',
+    items: [
+      { pill: 'Calculator', href: '/learn/bookkeeping-automation-roi-calculator/', name: 'Bookkeeping automation savings', text: 'Transactions, minutes per transaction, hourly cost and an automation rate. Out comes hours and money saved per month and per year.' },
+      { pill: 'Checklist', href: '/learn/month-end-close-checklist/', name: 'Month end close checklist', text: 'Thirty items across pre close, close and review. Tick them in the browser, progress is remembered on this device.' },
+    ],
+  },
+  {
+    title: 'For founders launching a tool',
+    items: [
+      { pill: 'Checklist', href: '/learn/tool-launch-checklist/', name: 'Tool launch checklist', text: 'Assets to prepare, where to list, what social proof to collect and what to do in the 30 days after launch.' },
+    ],
+  },
+];
 ---
-<Base title="Learn: free tools, checklists and definitions for finance teams" description="A savings calculator, a month end close checklist, a plain English glossary and practical guides. Free, no signup.">
+<Base title="Learn: free scorecards, calculators and checklists for choosing and launching software" description="A tool evaluation scorecard, a software cost calculator, a vendor security checklist, a launch checklist, finance team tools and a plain English glossary. Free, no signup.">
   <section class="hero">
     <h1>Learn</h1>
-    <p class="lead">Free, practical resources for finance teams evaluating AI and for founders trying to get their tools found. No signup, no gated PDFs.</p>
+    <p class="lead">Free, practical resources for teams choosing software and for founders trying to get their tools found. No signup, no gated PDFs. Everything runs in your browser and nothing you type leaves it.</p>
   </section>
 
-  <section class="section">
-    <h2 style="margin-top:0">Tools you can use right now</h2>
-    <div class="grid">
-      <div class="card">
-        <span class="pill">Calculator</span>
-        <h3><a href="/learn/bookkeeping-automation-roi-calculator/">Bookkeeping automation savings</a></h3>
-        <p class="muted" style="flex:1">Transactions, minutes per transaction, hourly cost and an automation rate. Out comes hours and money saved per month and per year.</p>
+  {groups.map((g) => (
+    <section class="section">
+      <h2 style="margin-top:0">{g.title}</h2>
+      <div class="grid">
+        {g.items.map((it) => (
+          <div class="card">
+            <span class="pill">{it.pill}</span>
+            <h3><a href={it.href}>{it.name}</a></h3>
+            <p class="muted" style="flex:1">{it.text}</p>
+          </div>
+        ))}
       </div>
-      <div class="card">
-        <span class="pill">Checklist</span>
-        <h3><a href="/learn/month-end-close-checklist/">Month end close checklist</a></h3>
-        <p class="muted" style="flex:1">Thirty items across pre close, close and review. Tick them in the browser, progress is remembered on this device.</p>
-      </div>
-      <div class="card">
-        <span class="pill">Reference</span>
-        <h3><a href="/learn/glossary/">Glossary</a></h3>
-        <p class="muted" style="flex:1">Finance, AI and search terms defined in a sentence or two each, with links to where they matter on this site.</p>
-      </div>
-    </div>
-  </section>
+    </section>
+  ))}
 
   <section class="section">
     <h2 style="margin-top:0">Guides</h2>

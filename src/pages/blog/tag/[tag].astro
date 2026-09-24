@@ -16,7 +16,7 @@ const { name } = Astro.props;
 const posts = (await getCollection('blog', ({ data }) => !data.draft && data.tags.some((t) => slugify(t) === tag)))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
-<Base title={`${name}: articles`} description={`All articles tagged ${name} on AI for finance and accounting teams.`}>
+<Base title={`${name}: articles`} description={`All articles tagged ${name} on AI tools at work.`}>
   <section class="hero">
     <p class="meta"><a href="/blog/">Blog</a> / tag</p>
     <h1>{name}</h1>

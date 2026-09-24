@@ -229,7 +229,7 @@ p, li { color: var(--text-2); }
 .tool-card > :nth-last-child(2) { padding-bottom: 1.5rem; }
 .tool-card > .row:first-of-type { padding-top: 1rem; }
 
-/* Stretched overlay — makes the whole card clickable */
+/* Stretched overlay -- makes the whole card clickable */
 .card-overlay {
   position: absolute;
   inset: 0;
@@ -612,6 +612,9 @@ footer.site .bottom-bar {
 .filter-pills button.pill.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 .tool-section { transition: opacity 0.25s ease; }
 .tool-section.hidden { display: none; }
+.tool-group + .tool-group { margin-top: 1.75rem; }
+.tool-group.hidden { display: none; }
+.tool-group h3 { margin: 0 0 0.75rem; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); }
 
 /* ── Table of contents ───────────────────────────────── */
 .toc {

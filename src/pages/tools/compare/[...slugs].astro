@@ -2,7 +2,6 @@
 import Base from '../../../layouts/Base.astro';
 import ToolCard from '../../../components/ToolCard.astro';
 import { getCollection } from 'astro:content';
-import { SITE } from '../../../site.config';
 
 export async function getStaticPaths() {
   const tools = await getCollection('tools');

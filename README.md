@@ -1,6 +1,6 @@
 # Lantle
 
-A content site plus directory for AI tools in finance, accounting and bookkeeping, with pages that sell sponsored posts, link insertions, featured listings and done-for-you growth services (Reddit, LinkedIn, SEO content, directory placement, outreach).
+A content site plus directory for AI and software tools across every business function (finance and accounting first), with pages that sell sponsored posts, link insertions, featured listings and done-for-you growth services (Reddit, LinkedIn, SEO content, directory placement, outreach).
 
 Built with [Astro](https://astro.build). No database, no server. Content is Markdown. Hosts free on Cloudflare Pages, Netlify or Vercel.
 

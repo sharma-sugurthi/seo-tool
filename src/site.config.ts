@@ -4,24 +4,27 @@
  */
 export const SITE = {
   name: 'Lantle',
-  tagline: 'AI tools that run the money side of a business',
+  tagline: 'AI tools for every job in a business, reviewed by people',
   // Replace with your real domain once bought. Used for canonical URLs, sitemap and RSS.
   url: 'https://lantle.ai',
   description:
-    'Independent reviews, comparisons and a curated directory of AI tools for finance, accounting, bookkeeping and business operations. Plus done-for-you SEO, link building and LinkedIn growth services for B2B SaaS.',
+    'A directory of AI and software tools for every part of a business, with independent reviews, side by side comparisons and free listings for any product. Plus done-for-you SEO, link building and LinkedIn growth services for software companies.',
   email: 'hello@lantle.ai',
   // Create a free form at https://formspree.io (or Tally / Basin) and paste the endpoint here.
   formEndpoint: 'https://formspree.io/f/REPLACE_ME',
   social: {
     linkedin: 'https://www.linkedin.com/company/REPLACE_ME',
   },
-  // How advertisers pay. Shown on the Advertise page. Change when you add Stripe or another processor.
+  // How advertisers pay. Shown on the submit page. Change when you add Stripe or another processor.
   paymentMethods: 'PayPal invoice or bank transfer',
-  // Current domain rating. Update as the site grows; it is shown on the Advertise page.
-  domainRating: 'New site (building authority)',
 };
 
 export type Price = { name: string; price: string; unit?: string; points: string[]; badge?: string };
+
+/** Extra fee when we write a sponsored article for the advertiser. */
+export const SPONSORED_WRITING_FEE = '$19';
+/** Length of a sponsored article. Keep in one place so every page says the same thing. */
+export const SPONSORED_ARTICLE_LENGTH = '1,500 to 1,800 words';
 
 /** What advertisers can buy on THIS site. Founding rates: raise them as domain rating and traffic grow. */
 export const ADVERTISE_PRICES: Price[] = [
@@ -31,7 +34,7 @@ export const ADVERTISE_PRICES: Price[] = [
     unit: 'per article',
     points: [
       'Up to 2 dofollow links (rel="sponsored")',
-      '800 to 1,500 words, written by you or by us (+$40)',
+      `${SPONSORED_ARTICLE_LENGTH}, written by you or by us (+${SPONSORED_WRITING_FEE})`,
       'Permanent, indexed, shared on LinkedIn',
       'Live within 3 business days',
     ],
@@ -50,9 +53,6 @@ export const ADVERTISE_PRICES: Price[] = [
   },
 ];
 
-/** Extra fee when we write a sponsored article for the advertiser. Shown in the Advertise FAQ. */
-export const SPONSORED_WRITING_FEE = '$19';
-
 /**
  * Done-for-you services, split into Content (we write) and Distribution (we place).
  * Founding client rates. Lock them for the first 10 clients, then raise.
@@ -65,7 +65,7 @@ export const CONTENT_SERVICES: Price[] = [
     badge: 'Start here',
     points: [
       'Keyword research + AI citation research (what ChatGPT, Perplexity and Google actually cite)',
-      '1,200–2,000 words, fact-checked, with schema markup and meta tags',
+      '1,200 to 2,000 words, fact-checked, with schema markup and meta tags',
       'Optimised for both search rankings and AI Overviews',
       '4-article bundle available at 15% off',
     ],
@@ -93,7 +93,7 @@ export const DISTRIBUTION_SERVICES: Price[] = [
       'Article written and placed on vetted SaaS sites (DR 30+, no PBNs)',
       'Permanent dofollow link to the page of your choice',
       'Pay per live link with full domain metric reporting',
-      '6 months link monitoring (typical turnaround: 2–4 weeks)',
+      '6 months link monitoring (typical turnaround: 2 to 4 weeks)',
     ],
   },
   {
@@ -104,7 +104,7 @@ export const DISTRIBUTION_SERVICES: Price[] = [
       'Manual submission to 100+ active SaaS and product directories',
       'Works for any vertical: dev tools, fintech, ecommerce, B2B SaaS',
       'Spreadsheet of every live listing with URL and status',
-      'One time fee, all listings are permanent (5–7 days turnaround)',
+      'One time fee, all listings are permanent (5 to 7 days turnaround)',
     ],
   },
 ];

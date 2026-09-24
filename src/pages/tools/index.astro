@@ -2,16 +2,23 @@
 import Base from '../../layouts/Base.astro';
 import ToolCard from '../../components/ToolCard.astro';
 import { getCollection } from 'astro:content';
+import { VERTICALS } from '../../data/taxonomy';
 
 const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick) || a.data.name.localeCompare(b.data.name));
-const categories = [...new Set(tools.map((t) => t.data.category))].sort();
-const categoryCounts = new Map<string, number>();
-tools.forEach((t) => categoryCounts.set(t.data.category, (categoryCounts.get(t.data.category) ?? 0) + 1));
+
+const byVertical = VERTICALS.map((v) => {
+  const vt = tools.filter((t) => t.data.vertical === v.slug);
+  const cats = v.categories.filter((c) => vt.some((t) => t.data.category === c));
+  return { ...v, tools: vt, cats };
+});
+const live = byVertical.filter((v) => v.tools.length > 0);
+const open = byVertical.filter((v) => v.tools.length === 0);
+const catCount = (c: string) => tools.filter((t) => t.data.category === c).length;
 ---
-<Base title="AI tools for finance and accounting: the directory" description="Every AI bookkeeping, accounts payable, expense, forecasting and tax tool we have reviewed, by category and pricing.">
+<Base title="AI tools directory: software for every part of a business" description="Browse AI and software tools by category, from finance and marketing to support and engineering. Every listing is checked by a person. Free to list.">
   <section class="hero">
     <h1>AI tools directory</h1>
-    <p class="lead">Hand curated. Every listing is checked by a human before it goes live. Featured listings are paid and marked. Editor's picks are our own recommendations and are never paid.</p>
+    <p class="lead">Software for finance, marketing, sales, support, engineering and the rest of the company. Every listing is checked by a person before it goes live. Featured listings are paid and marked. Editor's picks are our own recommendations and are never paid.</p>
 
     <div class="search-bar" style="margin-top:1rem;">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -19,72 +26,99 @@ tools.forEach((t) => categoryCounts.set(t.data.category, (categoryCounts.get(t.d
     </div>
 
     <div class="filter-pills" id="filter-pills">
-      <button class="pill active" data-category="all">All ({tools.length})</button>
-      {categories.map((c) => (
-        <button class="pill" data-category={c}>{c} ({categoryCounts.get(c)})</button>
+      <button class="pill active" data-filter="all">All ({tools.length})</button>
+      {live.length > 1 && live.map((v) => (
+        <button class="pill" data-filter={`v:${v.slug}`}>{v.short} ({v.tools.length})</button>
+      ))}
+      {live.flatMap((v) => v.cats).map((c) => (
+        <button class="pill" data-filter={`c:${c}`}>{c} ({catCount(c)})</button>
       ))}
     </div>
   </section>
 
-  {categories.map((c) => (
-    <section class="section tool-section fade-in" id={c.toLowerCase().replace(/[^a-z0-9]+/g, '-')} data-cat={c}>
-      <h2 style="margin-top:0">{c}</h2>
-      <div class="grid">{tools.filter((t) => t.data.category === c).map((t) => <ToolCard tool={t} />)}</div>
+  {live.map((v) => (
+    <section class="section tool-section fade-in" id={v.slug} data-vertical={v.slug}>
+      <div class="row" style="justify-content:space-between; align-items:baseline; margin-bottom:.25rem;">
+        <h2 style="margin:0">{v.name}</h2>
+        <a href={`/categories/${v.slug}/`} style="font-size:.9rem; font-weight:500;">Category page</a>
+      </div>
+      <p class="muted" style="margin:0 0 1.5rem;">{v.blurb}</p>
+      {v.cats.map((c) => (
+        <div class="tool-group" data-cat={c} id={c.toLowerCase().replace(/[^a-z0-9]+/g, '-')}>
+          <h3>{c}</h3>
+          <div class="grid">{v.tools.filter((t) => t.data.category === c).map((t) => <ToolCard tool={t} />)}</div>
+        </div>
+      ))}
     </section>
   ))}
 
+  {open.length > 0 && (
+    <section class="section fade-in" id="open-categories">
+      <h2 style="margin-top:0">Open categories</h2>
+      <p class="muted" style="margin-bottom:1.25rem;">No listings yet in these areas. Any product can be submitted for free. The first tools in a category are reviewed within 5 business days and sit at the top of the page until others arrive.</p>
+      <div class="grid">
+        {open.map((v) => (
+          <div class="card">
+            <span class="pill">Open for listings</span>
+            <h3><a href={`/categories/${v.slug}/`}>{v.name}</a></h3>
+            <p class="muted" style="flex:1; font-size:.93rem;">{v.blurb}</p>
+            <a href="/submit-tool/" style="font-size:.9rem; font-weight:500;">List the first tool</a>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
   <script>
-    // Category filter
     const pills = document.querySelectorAll<HTMLButtonElement>('#filter-pills .pill');
     const sections = document.querySelectorAll<HTMLElement>('.tool-section');
+    const groups = document.querySelectorAll<HTMLElement>('.tool-group');
+    const cards = document.querySelectorAll<HTMLElement>('.tool-section .card');
+    const search = document.getElementById('tool-search') as HTMLInputElement | null;
+
+    const setActive = (pill: HTMLButtonElement) => {
+      pills.forEach((p) => p.classList.remove('active'));
+      pill.classList.add('active');
+    };
+
+    const hideEmptySections = () => {
+      sections.forEach((s) => s.classList.toggle('hidden', !s.querySelector('.tool-group:not(.hidden)')));
+    };
+
+    const applyFilter = (filter: string) => {
+      groups.forEach((g) => {
+        const vertical = g.closest<HTMLElement>('.tool-section')?.dataset.vertical;
+        const show =
+          filter === 'all' ||
+          (filter.startsWith('v:') && vertical === filter.slice(2)) ||
+          (filter.startsWith('c:') && g.dataset.cat === filter.slice(2));
+        g.classList.toggle('hidden', !show);
+      });
+      hideEmptySections();
+    };
 
     pills.forEach((pill) => {
       pill.addEventListener('click', () => {
-        const cat = pill.dataset.category;
-        pills.forEach((p) => p.classList.remove('active'));
-        pill.classList.add('active');
-
-        sections.forEach((section) => {
-          if (cat === 'all' || section.dataset.cat === cat) {
-            section.classList.remove('hidden');
-          } else {
-            section.classList.add('hidden');
-          }
-        });
+        if (search) search.value = '';
+        cards.forEach((c) => (c.style.display = ''));
+        setActive(pill);
+        applyFilter(pill.dataset.filter || 'all');
       });
     });
 
-    // Search filter
-    const searchInput = document.getElementById('tool-search') as HTMLInputElement;
-    searchInput?.addEventListener('input', () => {
-      const q = searchInput.value.toLowerCase().trim();
-      const cards = document.querySelectorAll<HTMLElement>('.tool-section .card');
-
-      if (!q) {
-        cards.forEach((c) => c.style.display = '');
-        sections.forEach((s) => s.classList.remove('hidden'));
-        // Reset pill to "All"
-        pills.forEach((p) => p.classList.remove('active'));
-        pills[0]?.classList.add('active');
-        return;
-      }
-
-      // Reset filter to all when searching
-      pills.forEach((p) => p.classList.remove('active'));
-      pills[0]?.classList.add('active');
-      sections.forEach((s) => s.classList.remove('hidden'));
-
+    search?.addEventListener('input', () => {
+      const q = search.value.toLowerCase().trim();
+      if (pills[0]) setActive(pills[0]);
+      applyFilter('all');
       cards.forEach((c) => {
-        const name = c.dataset.name || '';
-        const text = c.textContent?.toLowerCase() || '';
-        c.style.display = (name.includes(q) || text.includes(q)) ? '' : 'none';
+        const hay = `${c.dataset.name || ''} ${c.textContent || ''}`.toLowerCase();
+        c.style.display = !q || hay.includes(q) ? '' : 'none';
       });
-
-      // Hide sections where all cards are hidden
-      sections.forEach((s) => {
-        const visibleCards = s.querySelectorAll('.card:not([style*="display: none"])');
-        s.classList.toggle('hidden', visibleCards.length === 0);
+      groups.forEach((g) => {
+        const visible = [...g.querySelectorAll<HTMLElement>('.card')].some((c) => c.style.display !== 'none');
+        g.classList.toggle('hidden', !visible);
       });
+      hideEmptySections();
     });
   </script>
 </Base>

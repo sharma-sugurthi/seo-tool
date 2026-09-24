@@ -2,6 +2,7 @@
 name: Brex
 website: https://www.brex.com/
 tagline: Global corporate cards, travel and spend management with an AI assistant that reviews expenses so people do not have to.
+vertical: finance
 category: Expense management
 pricing: Freemium
 bestFor: Companies with international teams and travel heavy spend

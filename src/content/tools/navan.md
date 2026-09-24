@@ -2,6 +2,7 @@
 name: Navan
 website: https://navan.com/
 tagline: Travel booking and expense management in one app, with AI that reconciles trips, receipts and policy automatically.
+vertical: finance
 category: Expense management
 pricing: Freemium
 bestFor: Companies where travel is the biggest expense category

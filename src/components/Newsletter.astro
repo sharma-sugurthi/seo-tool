@@ -4,8 +4,8 @@ import { SITE } from '../site.config';
 <div class="newsletter">
   <div class="newsletter-inner">
     <div class="newsletter-text">
-      <h3 style="margin:0;">Get the Lantle newsletter</h3>
-      <p class="muted" style="margin:.25rem 0 0; font-size:.93rem;">New tool reviews, comparison guides and finance AI news. One email a week, no spam.</p>
+      <h3 style="margin:0;">Get the {SITE.name} newsletter</h3>
+      <p class="muted" style="margin:.25rem 0 0; font-size:.93rem;">New tool reviews, comparison guides and short notes on AI at work. One email a week, no spam.</p>
     </div>
     <form class="newsletter-form" action={SITE.formEndpoint} method="POST">
       <input type="hidden" name="_subject" value="Newsletter signup" />

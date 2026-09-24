@@ -2,6 +2,7 @@
 name: QuickBooks with Intuit Assist
 website: https://quickbooks.intuit.com/
 tagline: The default small business ledger, now with an AI assistant for categorisation, invoices and cash flow questions.
+vertical: finance
 category: Bookkeeping
 pricing: Paid
 bestFor: Small businesses and the accountants who serve them

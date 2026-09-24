@@ -2,6 +2,7 @@
 name: Puzzle
 website: https://puzzle.io/
 tagline: Real time accounting software for startups, with automated categorisation and investor ready metrics.
+vertical: finance
 category: Bookkeeping
 pricing: Freemium
 bestFor: Early stage startups and the bookkeepers who support them

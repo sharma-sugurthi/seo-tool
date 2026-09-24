@@ -2,6 +2,7 @@
 name: Botkeeper
 website: https://www.botkeeper.com/
 tagline: Automated bookkeeping platform sold to accounting firms, combining machine learning categorisation with human review.
+vertical: finance
 category: Bookkeeping
 pricing: Paid
 bestFor: Accounting firms that want to scale bookkeeping without hiring proportionally

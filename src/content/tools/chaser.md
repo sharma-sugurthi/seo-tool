@@ -2,6 +2,7 @@
 name: Chaser
 website: https://www.chaserhq.com/
 tagline: Accounts receivable automation that chases overdue invoices with personalised reminders and predicts when customers will pay.
+vertical: finance
 category: Invoicing and AR
 pricing: Paid
 bestFor: Businesses with many invoices outstanding and a small finance team

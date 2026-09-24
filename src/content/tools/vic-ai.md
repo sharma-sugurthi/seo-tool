@@ -2,6 +2,7 @@
 name: Vic.ai
 website: https://www.vic.ai/
 tagline: Autonomous invoice processing and approvals for mid market and enterprise finance teams.
+vertical: finance
 category: Accounts payable
 pricing: Enterprise
 bestFor: Enterprise accounts payable teams processing high volume invoices

@@ -2,6 +2,7 @@
 name: Expensify
 website: https://www.expensify.com/
 tagline: Receipt scanning and expense reports that most employees already know how to use, with cards and bill pay added on.
+vertical: finance
 category: Expense management
 pricing: Freemium
 bestFor: Small teams that need expense reports done with minimal training

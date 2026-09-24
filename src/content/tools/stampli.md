@@ -2,6 +2,7 @@
 name: Stampli
 website: https://www.stampli.com/
 tagline: AP automation built around collaboration on each invoice, with an AI assistant that learns your coding and approval patterns.
+vertical: finance
 category: Accounts payable
 pricing: Paid
 bestFor: Mid market finance teams that want AP automation without changing their ERP

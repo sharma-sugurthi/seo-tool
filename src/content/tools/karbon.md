@@ -2,6 +2,7 @@
 name: Karbon
 website: https://karbonhq.com/
 tagline: Practice management for accounting firms, with AI that drafts client emails, summarises threads and keeps every job on schedule.
+vertical: finance
 category: Business operations
 pricing: Paid
 bestFor: Accounting and bookkeeping firms with 5 to 200 staff

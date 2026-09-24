@@ -2,6 +2,7 @@
 name: Cube
 website: https://www.cubesoftware.com/
 tagline: Spreadsheet native FP&A that syncs Excel and Google Sheets with your source systems for budgeting, forecasting and reporting.
+vertical: finance
 category: FP&A and forecasting
 pricing: Paid
 bestFor: Growing companies moving from ad hoc spreadsheets to a repeatable planning process

@@ -2,6 +2,7 @@
 name: Datarails
 website: https://www.datarails.com/
 tagline: FP&A platform that keeps finance teams in Excel while automating consolidation, reporting and AI powered analysis underneath.
+vertical: finance
 category: FP&A and forecasting
 pricing: Enterprise
 bestFor: Mid sized finance teams that live in Excel and do not want to leave

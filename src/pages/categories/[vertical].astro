@@ -1,0 +1,84 @@
+---
+import Base from '../../layouts/Base.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import { getCollection } from 'astro:content';
+import { VERTICALS, type Vertical } from '../../data/taxonomy';
+
+export async function getStaticPaths() {
+  const all = await getCollection('tools');
+  const counts = Object.fromEntries(VERTICALS.map((v) => [v.slug, all.filter((t) => t.data.vertical === v.slug).length]));
+  return VERTICALS.map((v) => ({
+    params: { vertical: v.slug },
+    props: { v, tools: all.filter((t) => t.data.vertical === v.slug), counts },
+  }));
+}
+
+interface Props { v: Vertical; tools: any[]; counts: Record<string, number> }
+const { v, tools, counts } = Astro.props;
+
+const sorted = [...tools].sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick) || a.data.name.localeCompare(b.data.name));
+const cats = v.categories.filter((c) => sorted.some((t) => t.data.category === c));
+const empty = sorted.length === 0;
+const others = VERTICALS.filter((x) => x.slug !== v.slug);
+const lower = v.name.charAt(0).toLowerCase() + v.name.slice(1);
+
+const title = empty ? `AI ${lower} tools: open for listings` : `AI ${lower} tools: ${sorted.length} reviewed and compared`;
+const description = empty
+  ? `The ${lower} category is open. List any tool for free and be the first product people see here. Categories: ${v.categories.join(', ')}.`
+  : `${sorted.length} AI tools for ${lower}, checked by a person and compared on pricing and fit. ${v.categories.slice(0, 4).join(', ')} and more.`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `AI tools for ${lower}`,
+  description,
+  url: new URL(Astro.url.pathname, Astro.site).toString(),
+};
+---
+<Base title={title} description={description} noindex={empty} jsonLd={jsonLd}>
+  <section class="hero">
+    <p class="meta"><a href="/tools/">Tools</a> / <a href="/categories/">Categories</a> / {v.name}</p>
+    <h1>AI tools for {lower}</h1>
+    <p class="lead">{v.blurb}</p>
+    <div class="row" style="margin-top:.75rem;">
+      {v.categories.map((c) => <span class="pill">{c}</span>)}
+    </div>
+  </section>
+
+  {empty ? (
+    <section class="section fade-in">
+      <div class="card" style="max-width:40rem;">
+        <h2 style="margin-top:0">Nothing listed here yet</h2>
+        <p class="muted">Which means the first tool submitted sits at the top of this page, gets its own review page, and shows up in the directory search from day one. Basic listings are free and take about five minutes to submit.</p>
+        <div class="row" style="margin-top:.5rem;">
+          <a class="btn" href="/submit-tool/">List your tool, free</a>
+          <a class="btn ghost" href="/submit-tool/#listing-form">See featured options</a>
+        </div>
+      </div>
+    </section>
+  ) : (
+    cats.map((c) => (
+      <section class="section fade-in" id={c.toLowerCase().replace(/[^a-z0-9]+/g, '-')}>
+        <h2 style="margin-top:0">{c}</h2>
+        <div class="grid">{sorted.filter((t) => t.data.category === c).map((t) => <ToolCard tool={t} />)}</div>
+      </section>
+    ))
+  )}
+
+  {!empty && (
+    <section class="section fade-in">
+      <div class="notice">
+        <strong>Have a {lower} tool that is not here?</strong> Basic listings are free and reviewed within five business days. <a href="/submit-tool/">Submit it</a>.
+      </div>
+    </section>
+  )}
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Other categories</h2>
+    <div class="row" style="gap:.4rem;">
+      {others.map((o) => (
+        <a class="pill" href={`/categories/${o.slug}/`}>{o.short}{counts[o.slug] ? ` (${counts[o.slug]})` : ''}</a>
+      ))}
+    </div>
+  </section>
+</Base>

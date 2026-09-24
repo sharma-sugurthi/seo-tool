@@ -2,6 +2,7 @@
 name: Anrok
 website: https://www.anrok.com/
 tagline: Sales tax and VAT compliance for software companies, with automated nexus tracking, calculation, filing and remittance.
+vertical: finance
 category: Tax
 pricing: Paid
 bestFor: SaaS and digital product companies selling across US states and countries

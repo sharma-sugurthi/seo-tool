@@ -5,19 +5,21 @@ import PostCard from '../components/PostCard.astro';
 import Newsletter from '../components/Newsletter.astro';
 import { getCollection } from 'astro:content';
 import { SITE } from '../site.config';
+import { VERTICALS } from '../data/taxonomy';
 
 const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick) || b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const categories = [...new Set(tools.map((t) => t.data.category))];
+const counts = new Map(VERTICALS.map((v) => [v.slug, tools.filter((t) => t.data.vertical === v.slug).length]));
+const verticals = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0));
 ---
-<Base title={SITE.name} description={SITE.description}>
+<Base title="AI tools directory: reviews, comparisons and free listings" description={SITE.description}>
   <section class="hero">
-    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Finance, accounting and bookkeeping</p>
+    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Software directory, open to every category</p>
     <h1>{SITE.tagline}</h1>
-    <p class="lead">Independent reviews of AI tools for finance teams, accountants and founders. Plus growth services for the companies that build them.</p>
+    <p class="lead">Independent reviews and side by side comparisons of AI tools for finance, marketing, sales, support, engineering and the rest of the company. Any product can be listed for free. Growth services for the companies that build them.</p>
     <div class="row" style="margin-top:1.25rem;">
       <a class="btn" href="/tools/">Browse the tools</a>
-      <a class="btn ghost" href="/services/">Grow your SaaS with us</a>
+      <a class="btn ghost" href="/submit-tool/">List your tool, free</a>
     </div>
     <div class="stats-bar">
       <div class="stat">
@@ -25,13 +27,32 @@ const categories = [...new Set(tools.map((t) => t.data.category))];
         <span class="stat-label">Tools reviewed</span>
       </div>
       <div class="stat">
+        <span class="stat-number">{VERTICALS.length}</span>
+        <span class="stat-label">Categories</span>
+      </div>
+      <div class="stat">
         <span class="stat-number">{posts.length}</span>
         <span class="stat-label">Articles</span>
       </div>
-      <div class="stat">
-        <span class="stat-number">{categories.length}</span>
-        <span class="stat-label">Categories</span>
-      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <div class="row" style="justify-content:space-between; margin-bottom:1.25rem;">
+      <h2 style="margin:0;">Browse by category</h2>
+      <a href="/categories/" style="font-size:.9rem; font-weight:500;">All categories</a>
+    </div>
+    <div class="grid">
+      {verticals.slice(0, 6).map((v) => {
+        const n = counts.get(v.slug) ?? 0;
+        return (
+          <div class="card">
+            <span class="pill">{n > 0 ? `${n} ${n === 1 ? 'tool' : 'tools'}` : 'Open for listings'}</span>
+            <h3><a href={`/categories/${v.slug}/`}>{v.name}</a></h3>
+            <p class="muted" style="flex:1; font-size:.93rem;">{v.blurb}</p>
+          </div>
+        );
+      })}
     </div>
   </section>
 
@@ -59,16 +80,16 @@ const categories = [...new Set(tools.map((t) => t.data.category))];
     </div>
     <div class="grid">
       <div class="card">
-        <h3><a href="/learn/bookkeeping-automation-roi-calculator/">Automation savings calculator</a></h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Enter your transaction volume and hourly cost. See what AI categorisation and reconciliation would save each month.</p>
+        <h3><a href="/learn/tool-evaluation-scorecard/">Tool evaluation scorecard</a></h3>
+        <p class="muted" style="flex:1; font-size:.93rem;">Eight weighted criteria, up to three tools side by side. Set the weights before the demo and print the result for the purchase request.</p>
       </div>
       <div class="card">
-        <h3><a href="/learn/month-end-close-checklist/">Month end close checklist</a></h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">A working checklist for a three day close. Tick items off in your browser, print it, or copy it into your own tool.</p>
+        <h3><a href="/learn/software-cost-calculator/">Software cost calculator</a></h3>
+        <p class="muted" style="flex:1; font-size:.93rem;">Seat growth, add-ons, implementation and the annual billing question, rolled into a three year total and a real cost per seat.</p>
       </div>
       <div class="card">
-        <h3><a href="/learn/glossary/">Finance and AI glossary</a></h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Plain English definitions of the terms in tool reviews, vendor pitches and SEO reports, from accruals to domain rating.</p>
+        <h3><a href="/learn/ai-vendor-security-checklist/">AI vendor security checklist</a></h3>
+        <p class="muted" style="flex:1; font-size:.93rem;">The questions on training data, retention, SSO and exit that vendors go quiet on. Tick them off, copy them into your review.</p>
       </div>
     </div>
   </section>
@@ -77,8 +98,8 @@ const categories = [...new Set(tools.map((t) => t.data.category))];
     <h2 style="margin-top:0; margin-bottom:1.25rem;">Work with us</h2>
     <div class="grid">
       <div class="card">
-        <h3>Get in front of finance buyers</h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Sponsored articles and featured listings, read by accountants, controllers and founders.</p>
+        <h3>Get in front of buyers</h3>
+        <p class="muted" style="flex:1; font-size:.93rem;">Sponsored articles and featured listings, read by the people comparing tools before they buy.</p>
         <a href="/submit-tool/" style="font-size:.9rem; font-weight:500;">See advertising options</a>
       </div>
       <div class="card">

@@ -5,20 +5,24 @@ import { SITE } from '../site.config';
 <Base title="About and editorial policy" description="Who runs the site, how tools get listed, how sponsored content is labelled and how we make money.">
   <section class="hero">
     <h1>About {SITE.name}</h1>
-    <p class="lead">A small, independent publication about the AI tools finance teams actually use, plus a growth studio for the companies that build them.</p>
+    <p class="lead">A directory of software and AI tools that anyone can list in, with reviews written by people who checked the product. Plus a growth studio for the companies that build those tools.</p>
   </section>
   <section class="section prose fade-in">
-    <h2 style="margin-top:0">How we make money</h2>
+    <h2 style="margin-top:0">What this site is</h2>
+    <p>Most tool directories are scraped lists with a logo and a one line description. This one is smaller and slower on purpose. Every listing is read by a person before it goes live, every review says who the tool is not for, and paid placements are labelled so you can tell them apart from our own picks.</p>
+    <p>The directory started with finance and accounting tools, which is why that section is the deepest. Every other category is open to any product and is reviewed to the same standard. If a category is empty, the first tool listed there sits at the top until others arrive.</p>
+    <h2>How we make money</h2>
     <p>Three ways, all listed on this site: sponsored articles and link insertions, featured directory listings, and growth services for software companies. We do not run display ads and we do not sell reader data.</p>
     <h2>Editorial policy</h2>
     <ul>
       <li>Every tool listing is checked by a person. Paid listings are labelled "Featured".</li>
       <li>Sponsored articles carry a visible label at the top and paid links use rel="sponsored".</li>
       <li>Reviews are based on hands on use or documented customer experience. Sponsors cannot buy a rating.</li>
+      <li>We decline listings for products that do not exist yet, that misrepresent what they do, or that fall outside the categories on the site.</li>
       <li>Corrections are published within 48 hours of being verified. Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</li>
     </ul>
     <h2>Who is behind it</h2>
-    <p>{SITE.name} is run by an independent founder with a background in software and B2B marketing, working with finance and accounting teams on how they evaluate tools. Editorial decisions, tool reviews and client work are handled personally, not outsourced.</p>
+    <p>{SITE.name} is run by an independent founder with a background in software and B2B marketing. Editorial decisions, tool reviews and client work are handled personally, not outsourced.</p>
     <p>Questions, corrections or partnership ideas: <a href={`mailto:${SITE.email}`}>{SITE.email}</a> or <a href={SITE.social.linkedin} rel="me noopener" target="_blank">LinkedIn</a>.</p>
   </section>
 </Base>

@@ -2,6 +2,7 @@
 name: Digits
 website: https://digits.com/
 tagline: An AI native general ledger that categorises, reconciles and reports in near real time for startups and their accountants.
+vertical: finance
 category: Bookkeeping
 pricing: Paid
 bestFor: Startups that want a live view of the books, and firms serving them

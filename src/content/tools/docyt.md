@@ -2,6 +2,7 @@
 name: Docyt
 website: https://docyt.com/
 tagline: AI bookkeeping automation for multi location businesses and the accounting firms that manage them.
+vertical: finance
 category: Bookkeeping
 pricing: Paid
 bestFor: Franchises, hospitality groups and firms with many entities

@@ -1,15 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE, ADVERTISE_PRICES } from '../site.config';
+import { SITE, ADVERTISE_PRICES, SPONSORED_WRITING_FEE } from '../site.config';
+import { VERTICALS } from '../data/taxonomy';
 const featured = ADVERTISE_PRICES.find((p) => p.name === 'Featured tool listing')!;
 const sponsored = ADVERTISE_PRICES.find((p) => p.name === 'Sponsored article')!;
 const featuredPrice = `${featured.price} ${featured.unit}`;
 const sponsoredPrice = `${sponsored.price} ${sponsored.unit}`;
+const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories]));
 ---
-<Base title="Submit a tool or advertise" description="Add your AI tool to our finance and accounting directory. Free basic listing, featured placements, and sponsored articles available.">
+<Base title="Submit a tool or advertise" description="List any software or AI tool in the directory for free. Featured placements and sponsored articles are available in every category.">
   <section class="hero">
     <h1>Submit a tool or advertise</h1>
-    <p class="lead">Get your product in front of accountants, controllers, bookkeepers and founders comparing AI tools before they buy.</p>
+    <p class="lead">Any product, any category. Get in front of the people comparing tools before they buy. Basic listings are free and every submission is checked by a person.</p>
   </section>
 
   <section class="section grid fade-in">
@@ -29,7 +31,7 @@ const sponsoredPrice = `${sponsored.price} ${sponsored.unit}`;
     <div class="card">
       <h3>Sponsored article</h3>
       <div class="price">{sponsored.price} <small>{sponsored.unit}</small></div>
-      <ul><li>Up to 2 dofollow links</li><li>1,500 to 1,800 words, written by you, or by us (+$19)</li><li>Permanent, indexed</li><li>Live within 3 business days</li></ul>
+      <ul>{sponsored.points.map((pt) => <li>{pt}</li>)}</ul>
       <a class="btn ghost" href="#listing-form" id="order-sponsored" style="align-self:flex-start; margin-top:auto;">Order article</a>
     </div>
   </section>
@@ -37,41 +39,47 @@ const sponsoredPrice = `${sponsored.price} ${sponsored.unit}`;
   <section class="section fade-in" id="listing-form">
     <h2 style="margin-top:0">Details</h2>
     <p class="muted" style="margin-bottom:1rem;">Fill in the form below. For paid options, we send a PayPal invoice within 4 hours.</p>
-    <form class="stack" action={SITE.formEndpoint} method="POST" enctype="multipart/form-data">
+    <form class="stack" action={SITE.formEndpoint} method="POST">
       <input type="hidden" name="_subject" value="Tool submission" />
       <label>What would you like? <select name="listing_type" id="listing-type"><option value="basic">Basic listing (free)</option><option value="featured">Featured listing ({featuredPrice})</option><option value="sponsored">Sponsored article ({sponsoredPrice})</option></select></label>
-      <label>Company or Tool name <input name="tool_name" required /></label>
+      <label>Company or tool name <input name="tool_name" required /></label>
       <label>Website URL <input type="url" name="website" required placeholder="https://" /></label>
       <label>Your email <input type="email" name="email" required /></label>
 
       <div id="tool-fields" style="display:contents;">
         <label>One line tagline (max 140 characters) <input name="tagline" maxlength="140" required /></label>
         <label>Category
-          <select name="category">
-            <option>Bookkeeping</option><option>Accounts payable</option><option>Expense management</option><option>FP&amp;A and forecasting</option><option>Tax</option><option>Invoicing and AR</option><option>Spend cards</option><option>Business operations</option><option>Others</option>
+          <select name="vertical" id="vertical-select">
+            {VERTICALS.map((v) => <option value={v.slug}>{v.name}</option>)}
+          </select>
+        </label>
+        <label>Subcategory
+          <select name="category" id="category-select">
+            {VERTICALS[0].categories.map((c) => <option>{c}</option>)}
+            <option>Other (tell us in the notes)</option>
           </select>
         </label>
         <label>Pricing model <select name="pricing"><option>Free</option><option>Freemium</option><option>Paid</option><option>Enterprise</option></select></label>
-        <label>Who is it best for? <input name="best_for" placeholder="e.g. bookkeeping firms with 20 to 200 clients" /></label>
-        <label>Screenshot or product image <input type="file" name="thumbnail" accept="image/png, image/jpeg, image/webp" required /></label>
-        <p class="muted" style="margin:-.5rem 0 0; font-size:.84rem;">Upload a screenshot of your dashboard or your logo. PNG, JPG or WebP, at least 600px wide.</p>
+        <label>Who is it best for? <input name="best_for" placeholder="e.g. teams of 5 to 50 without a dedicated admin" /></label>
+        <label>Screenshot or logo URL <input type="url" name="thumbnail" placeholder="https://" /></label>
+        <p class="muted" style="margin:-.5rem 0 0; font-size:.84rem;">A link to a dashboard screenshot or your logo, at least 600px wide. We resize and compress it. Leave blank and we will take one from your site.</p>
         <hr style="margin:1rem 0; border:0; border-top:1px solid var(--border);" />
-        
+
         <label>What does your tool do? <textarea name="what_it_does" required placeholder="Explain the core workflow and what problem it solves."></textarea></label>
-        <label>What is your competitive advantage? <textarea name="where_it_shines" required placeholder="What do you do better than anyone else? e.g. 'Our AI handles complex multi-currency invoices.'"></textarea></label>
-        <label>Who is this NOT a good fit for? <textarea name="where_it_falls_short" required placeholder="Be honest. e.g. 'Not for solo founders' or 'Requires a minimum of 50 employees to see ROI.'"></textarea></label>
-        <label>Conclusion <textarea name="conclusion" placeholder="Your final thoughts or summary"></textarea></label>
+        <label>What do you do better than the alternatives? <textarea name="where_it_shines" required placeholder="Be specific. e.g. 'Answers tickets in the customer's language before an agent sees them.'"></textarea></label>
+        <label>Who is this NOT a good fit for? <textarea name="where_it_falls_short" required placeholder="Be honest. e.g. 'Not for solo founders' or 'Needs a team of 50+ to pay off.'"></textarea></label>
+        <label>Anything else? <textarea name="conclusion" placeholder="Notes for the reviewer, a category we are missing, a launch date."></textarea></label>
       </div>
 
       <div id="article-fields" style="display:none;">
         <hr style="margin:1rem 0; border:0; border-top:1px solid var(--border);" />
         <label style="display:flex; align-items:center; gap:.5rem; font-weight:normal; margin-bottom:.5rem;">
           <input type="checkbox" name="written_by_us" style="width:auto; margin:0;" />
-          Write the article for me (+ $19)
+          Write the article for me (+{SPONSORED_WRITING_FEE})
         </label>
-        <label>Author Name <input name="author_name" required placeholder="Who should we attribute this to?" /></label>
-        <label>Proposed Article Title <input name="article_title" required placeholder="e.g. 5 Ways AI is Changing Accounts Payable" /></label>
-        <label>Article Draft or Pitch <textarea name="article_draft" required placeholder="Paste a link to a Google Doc, or paste your draft/concept here."></textarea></label>
+        <label>Author name <input name="author_name" required placeholder="Who should we attribute this to?" /></label>
+        <label>Proposed article title <input name="article_title" required placeholder="e.g. What changed when we moved onboarding to an AI agent" /></label>
+        <label>Article draft or pitch <textarea name="article_draft" required placeholder="Paste a link to a Google Doc, or paste your draft or concept here."></textarea></label>
       </div>
 
       <hr style="margin:1rem 0 0; border:0; border-top:1px solid var(--border);" />
@@ -81,6 +89,7 @@ const sponsoredPrice = `${sponsored.price} ${sponsored.unit}`;
     </form>
   </section>
 
+  <script type="application/json" id="taxonomy-data" set:html={JSON.stringify(taxonomy)} />
   <script>
     const sel = document.getElementById('listing-type') as HTMLSelectElement | null;
     const toolFields = document.getElementById('tool-fields');
@@ -91,14 +100,14 @@ const sponsoredPrice = `${sponsored.price} ${sponsored.unit}`;
       const isArticle = sel.value === 'sponsored';
       toolFields.style.display = isArticle ? 'none' : 'contents';
       articleFields.style.display = isArticle ? 'contents' : 'none';
-      
+
       // Toggle required attributes so hidden fields don't block submission
-      toolFields.querySelectorAll('input, textarea, select').forEach(el => {
+      toolFields.querySelectorAll('input, textarea, select').forEach((el) => {
         if (el.hasAttribute('data-required')) {
           isArticle ? el.removeAttribute('required') : el.setAttribute('required', 'true');
         }
       });
-      articleFields.querySelectorAll('input, textarea, select').forEach(el => {
+      articleFields.querySelectorAll('input, textarea, select').forEach((el) => {
         if (el.hasAttribute('data-required')) {
           !isArticle ? el.removeAttribute('required') : el.setAttribute('required', 'true');
         }
@@ -106,9 +115,9 @@ const sponsoredPrice = `${sponsored.price} ${sponsored.unit}`;
     }
 
     if (sel) {
-      // Store original required state
-      document.querySelectorAll('#listing-form [required]').forEach(el => el.setAttribute('data-required', 'true'));
+      document.querySelectorAll('#listing-form [required]').forEach((el) => el.setAttribute('data-required', 'true'));
       sel.addEventListener('change', updateForm);
+      updateForm();
     }
 
     document.getElementById('order-featured')?.addEventListener('click', () => {
@@ -116,6 +125,21 @@ const sponsoredPrice = `${sponsored.price} ${sponsored.unit}`;
     });
     document.getElementById('order-sponsored')?.addEventListener('click', () => {
       if (sel) { sel.value = 'sponsored'; updateForm(); }
+    });
+
+    // Subcategory options follow the chosen category
+    const taxonomy: Record<string, string[]> = JSON.parse(document.getElementById('taxonomy-data')?.textContent || '{}');
+    const verticalSel = document.getElementById('vertical-select') as HTMLSelectElement | null;
+    const categorySel = document.getElementById('category-select') as HTMLSelectElement | null;
+    verticalSel?.addEventListener('change', () => {
+      if (!categorySel) return;
+      const cats = taxonomy[verticalSel.value] || [];
+      categorySel.innerHTML = '';
+      [...cats, 'Other (tell us in the notes)'].forEach((c) => {
+        const o = document.createElement('option');
+        o.textContent = c;
+        categorySel.appendChild(o);
+      });
     });
   </script>
 </Base>

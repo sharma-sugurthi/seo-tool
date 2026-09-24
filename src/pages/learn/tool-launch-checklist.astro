@@ -1,0 +1,105 @@
+---
+import Base from '../../layouts/Base.astro';
+const sections = [
+  { title: 'Before you list anywhere', items: [
+    'One sentence that says who the tool is for and what it replaces, tested on three strangers',
+    'A public pricing page, even if it only says "from" and "contact us" for the top tier',
+    'Three screenshots at 1200 by 675 or wider showing the product doing the job, not the empty dashboard',
+    'A logo in SVG and PNG on transparent, plus a square icon version',
+    'A two minute demo video or GIF with no audio required',
+    'A changelog or "what is new" page, so listings can link to proof the product is alive',
+    'One tracked link per channel (UTM or a redirect), so you can see which listings send anyone',
+  ]},
+  { title: 'Directories and listings', items: [
+    'Pick the ten directories your buyers actually search, not the hundred that accept anything',
+    'Use the same name, tagline and category wording on every listing, so search engines connect them',
+    'Claim the free listing here and on the other category directories in your niche',
+    'Submit to the two or three general software review sites with real traffic and ask five customers to review',
+    'Post on the launch platforms on a Tuesday to Thursday, with a founder comment ready in the first ten minutes',
+    'Add the tool to the marketplaces of the platforms it integrates with (app stores, plugin galleries, partner directories)',
+    'Record every live listing URL, login and renewal date in one spreadsheet',
+  ]},
+  { title: 'Social proof', items: [
+    'Five named customer quotes with role and company, permission in writing',
+    'One case study with a before and after number, even a small one',
+    'A "reviewed on" or "listed on" badge on your site pointing back to the listing',
+    'Founder LinkedIn profile updated with the product and a pinned post about it',
+  ]},
+  { title: 'Search and AI visibility', items: [
+    'A comparison page for each of your two or three main alternatives (your name vs theirs)',
+    'A "best tools for" article in your category that includes competitors honestly, hosted on your own domain',
+    'Schema markup for SoftwareApplication on the product page, with pricing and rating fields',
+    'Product name and category stated plainly in the first paragraph of the homepage, so AI answers can quote it',
+    'Documentation public and indexable, not behind a login',
+  ]},
+  { title: 'After launch', items: [
+    'Reply to every comment and review within 24 hours for the first month',
+    'Check which listings sent visitors after 30 days and drop or upgrade based on that, not on the directory\'s pitch',
+    'Refresh screenshots and the tagline on every listing after each major release',
+    'Set a quarterly reminder to re-run this list',
+  ]},
+];
+const total = sections.reduce((n, s) => n + s.items.length, 0);
+---
+<Base title="Tool launch checklist: getting a software product listed, reviewed and found" description="A checklist for founders launching a software or AI tool: assets to prepare, directories and marketplaces to list on, social proof to collect, and what to do after launch.">
+  <section class="hero">
+    <p class="meta"><a href="/learn/">Learn</a> / checklist</p>
+    <h1>Tool launch checklist</h1>
+    <p class="lead">{total} items for getting a product listed, reviewed and found, in the order that saves rework. Progress is saved in this browser only. Copy it into your project tool or print it.</p>
+    <div class="row">
+      <span class="pill" id="progress">0 of {total} done</span>
+      <button class="btn ghost" type="button" id="reset">Reset</button>
+      <button class="btn ghost" type="button" id="copy">Copy as text</button>
+      <button class="btn ghost" type="button" onclick="window.print()">Print</button>
+    </div>
+  </section>
+
+  <section class="section prose" id="checklist">
+    {sections.map((s, si) => (
+      <div class="check-group">
+        <h2 style={si === 0 ? 'margin-top:0' : ''}>{s.title}</h2>
+        <ul class="checklist">
+          {s.items.map((item, ii) => {
+            const id = `l-${si}-${ii}`;
+            return (
+              <li>
+                <label class="check-item" for={id}>
+                  <input type="checkbox" id={id} data-key={id} />
+                  <span>{item}</span>
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </section>
+
+  <section class="section prose">
+    <h2 style="margin-top:0">Where this connects</h2>
+    <p>The free listing on this site takes five minutes on the <a href="/submit-tool/">submit page</a>, and <a href="/blog/where-to-list-an-ai-finance-tool-for-free/">this article</a> lists other free directories worth the time, most of which accept any category despite the title. If you would rather have the directory and listicle work done for you, that is the <a href="/services/">distribution package</a>.</p>
+  </section>
+
+  <script>
+    const KEY = 'lantle-launch-checklist';
+    const boxes = Array.from(document.querySelectorAll<HTMLInputElement>('input[type=checkbox][data-key]'));
+    const progress = document.getElementById('progress');
+    const load = (): Record<string, boolean> => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+    const save = (state: Record<string, boolean>) => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+    const render = () => {
+      const done = boxes.filter((b) => b.checked).length;
+      if (progress) progress.textContent = `${done} of ${boxes.length} done`;
+    };
+    const state = load();
+    boxes.forEach((b) => { b.checked = !!state[b.dataset.key!]; b.addEventListener('change', () => { state[b.dataset.key!] = b.checked; save(state); render(); }); });
+    render();
+    document.getElementById('reset')?.addEventListener('click', () => { boxes.forEach((b) => (b.checked = false)); save({}); render(); });
+    document.getElementById('copy')?.addEventListener('click', async () => {
+      const lines: string[] = [];
+      document.querySelectorAll('.check-group').forEach((g) => {
+        lines.push(g.querySelector('h2')?.textContent ?? '', ...Array.from(g.querySelectorAll('.check-item')).map((l) => `- [${(l.querySelector('input') as HTMLInputElement).checked ? 'x' : ' '}] ${l.querySelector('span')?.textContent}`), '');
+      });
+      try { await navigator.clipboard.writeText(lines.join('\n')); const btn = document.getElementById('copy'); if (btn) btn.textContent = 'Copied'; } catch {}
+    });
+  </script>
+</Base>

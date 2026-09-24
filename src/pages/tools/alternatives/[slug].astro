@@ -24,10 +24,12 @@ const sameCategory = allTools
     || (b.data.rating ?? 0) - (a.data.rating ?? 0)
   );
 
+// Prefer tools from the same vertical, then the rest of the directory
 const otherCategory = allTools
   .filter((t) => t.data.category !== d.category && t.id !== tool.id)
   .sort((a, b) =>
-    Number(b.data.featured) - Number(a.data.featured)
+    Number(b.data.vertical === d.vertical) - Number(a.data.vertical === d.vertical)
+    || Number(b.data.featured) - Number(a.data.featured)
     || Number(b.data.editorsPick) - Number(a.data.editorsPick)
     || (b.data.rating ?? 0) - (a.data.rating ?? 0)
   )

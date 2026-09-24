@@ -2,6 +2,7 @@
 name: BILL
 website: https://www.bill.com/
 tagline: Accounts payable, receivable and spend management for small and mid sized businesses, with AI that reads and codes invoices.
+vertical: finance
 category: Accounts payable
 pricing: Paid
 bestFor: Small businesses and accounting firms that pay a lot of vendor bills

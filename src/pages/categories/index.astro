@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { VERTICALS } from '../../data/taxonomy';
+
+const tools = await getCollection('tools');
+const counts = new Map(VERTICALS.map((v) => [v.slug, tools.filter((t) => t.data.vertical === v.slug).length]));
+const ordered = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0));
+---
+<Base title="Software categories: browse AI tools by what they do" description="Every category in the directory, from finance and marketing to developer tools and HR. See what is listed and where your product would sit.">
+  <section class="hero">
+    <h1>Categories</h1>
+    <p class="lead">The directory is organised by the job a tool does in a business. Pick a category to see what is listed, or submit a product to any category that fits. Empty categories are open and the first listing is free.</p>
+  </section>
+
+  <section class="section fade-in">
+    <div class="grid">
+      {ordered.map((v) => {
+        const n = counts.get(v.slug) ?? 0;
+        return (
+          <div class="card">
+            <span class="pill">{n > 0 ? `${n} ${n === 1 ? 'tool' : 'tools'}` : 'Open for listings'}</span>
+            <h3><a href={`/categories/${v.slug}/`}>{v.name}</a></h3>
+            <p class="muted" style="flex:1; font-size:.93rem;">{v.blurb}</p>
+            <p class="meta" style="margin:0;">{v.categories.slice(0, 4).join(', ')}{v.categories.length > 4 ? ` and ${v.categories.length - 4} more` : ''}</p>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Does your product not fit?</h2>
+    <p class="muted">Pick the closest category when you submit and say so in the notes. If enough tools arrive that need a new home, we add the category.</p>
+    <div style="margin-top:.75rem;"><a class="btn" href="/submit-tool/">Submit a tool</a></div>
+  </section>
+</Base>
