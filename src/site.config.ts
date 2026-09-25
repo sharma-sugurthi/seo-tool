@@ -50,7 +50,7 @@ export const ADVERTISE_PRICES: Price[] = [
       'Dedicated tool page with dofollow link and custom thumbnail',
       'Pinned to the top of your category for 12 months',
       'Eligible for our "best tools" roundup articles',
-      'Free basic listing (nofollow) is always available',
+      'Rate locked in — increases once we hit 10K monthly visitors',
     ],
   },
 ];
@@ -62,7 +62,7 @@ export const ADVERTISE_PRICES: Price[] = [
 export const CONTENT_SERVICES: Price[] = [
   {
     name: 'SEO and GEO blog content',
-    price: 'from $60',
+    price: 'from $99',
     unit: 'per article',
     badge: 'Start here',
     points: [
@@ -74,7 +74,7 @@ export const CONTENT_SERVICES: Price[] = [
   },
   {
     name: 'LinkedIn ghostwriting',
-    price: 'from $150',
+    price: 'from $299',
     unit: 'per month',
     points: [
       '8 posts per month (2 per week): hooks, text posts and document carousels',
@@ -88,13 +88,13 @@ export const CONTENT_SERVICES: Price[] = [
 export const DISTRIBUTION_SERVICES: Price[] = [
   {
     name: 'Guest post outreach and placement',
-    price: 'from $99',
+    price: 'from $149',
     unit: 'per placement',
     badge: 'Most popular',
     points: [
       'Article written and placed on vetted SaaS sites (DR 30+, no PBNs)',
-      'Permanent dofollow link to the page of your choice',
-      'Pay per live link with full domain metric reporting',
+      'We share the target site list before writing a word — you approve each one',
+      'You pay per live link, not per attempt',
       '6 months link monitoring (typical turnaround: 2 to 4 weeks)',
     ],
   },
@@ -105,7 +105,7 @@ export const DISTRIBUTION_SERVICES: Price[] = [
     points: [
       'Manual submission to 100+ active SaaS and product directories',
       'Works for any vertical: dev tools, fintech, ecommerce, B2B SaaS',
-      'Spreadsheet of every live listing with URL and status',
+      'Spreadsheet report: every directory, URL, status and date live',
       'One time fee, all listings are permanent (5 to 7 days turnaround)',
     ],
     buyHref: `${SITE.apiBase}/checkout/directory-package`,
