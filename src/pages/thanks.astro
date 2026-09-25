@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+---
+<Base title="Thanks" noindex>
+  <section class="hero" style="max-width:40rem;">
+    <h1 id="t-title">Thanks, we have it</h1>
+    <p class="lead" id="t-body">We reply within one business day.</p>
+    <p class="meta" id="t-meta">Or email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+    <div class="row" style="margin-top:1rem;"><a class="btn ghost" href="/">Back home</a><a class="btn ghost" href="/tools/">Browse the tools</a></div>
+  </section>
+  <script>
+    const p = new URLSearchParams(location.search);
+    const type = p.get('type') || '';
+    const msg = p.get('msg') || '';
+    const set = (title: string, body: string) => {
+      const t = document.getElementById('t-title'); const b = document.getElementById('t-body');
+      if (t) t.textContent = title; if (b) b.textContent = body;
+    };
+    const copy: Record<string, [string, string]> = {
+      contact: ['Thanks, we have your message', 'We reply within one business day.'],
+      'service-order': ['Order received', 'We reply within one business day with next steps, and work starts the same day the invoice is paid.'],
+      'guest-pitch': ['Pitch received', 'We reply to every pitch within three business days.'],
+      newsletter: ['You are subscribed', 'One email a week, no spam. Unsubscribe with one click any time.'],
+      'directory-package': ['Payment received', 'We email you within one business day to collect the product details and start submissions. The full spreadsheet of live listings follows within five to seven days.'],
+      error: ['Something went wrong', msg || 'Please go back and try again, or email us.'],
+    };
+    if (copy[type]) set(...copy[type]);
+  </script>
+</Base>

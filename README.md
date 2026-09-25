@@ -15,7 +15,7 @@ npm run build    # type check + static build into dist/
 ## Make it yours (15 minutes)
 
 1. **Brand and domain.** Edit `src/site.config.ts`: name, tagline, URL, email, social links. Update `public/robots.txt` with the same domain.
-2. **Forms.** Create a free form at Formspree (or Tally, Basin) and paste the endpoint into `formEndpoint` in `src/site.config.ts`. Every form on the site posts there.
+2. **Backend.** Forms, submissions, payments and the tool listings themselves come from the `lantle-backend` service. Set `apiBase` in `src/site.config.ts` to its URL, and `TOOLS_API_URL` in Cloudflare Pages environment variables to the same value (the build fetches published tools from `/api/tools`). Locally, put `TOOLS_API_URL=http://localhost:3000` in `.env`.
 3. **Prices.** `ADVERTISE_PRICES` (what people buy on this site) and `SERVICE_PRICES` (what you sell to other companies) live in the same file. Raise prices as domain rating grows and update `domainRating`.
 4. **About page.** Replace the placeholder paragraph in `src/pages/about.astro` with your name, background and LinkedIn. Real people earn trust and sales.
 5. **Favicon and logo.** `public/favicon.svg`.

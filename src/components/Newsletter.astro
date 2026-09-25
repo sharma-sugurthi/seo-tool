@@ -7,8 +7,7 @@ import { SITE } from '../site.config';
       <h3 style="margin:0;">Get the {SITE.name} newsletter</h3>
       <p class="muted" style="margin:.25rem 0 0; font-size:.93rem;">New tool reviews, comparison guides and short notes on AI at work. One email a week, no spam.</p>
     </div>
-    <form class="newsletter-form" action={SITE.formEndpoint} method="POST">
-      <input type="hidden" name="_subject" value="Newsletter signup" />
+    <form class="newsletter-form" action={`${SITE.apiBase}/forms/newsletter`} method="POST">
       <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
       <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address" />
       <button type="submit" class="btn">Subscribe</button>

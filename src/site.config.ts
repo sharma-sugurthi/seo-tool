@@ -1,5 +1,5 @@
 /**
- * Single place to change the brand, domain, prices and form endpoints.
+ * Single place to change the brand, domain, prices and backend address.
  * Everything on the site reads from here.
  */
 export const SITE = {
@@ -10,23 +10,25 @@ export const SITE = {
   description:
     'A directory of AI and software tools for every part of a business, with independent reviews, side by side comparisons and free listings for any product. Plus done-for-you SEO, link building and LinkedIn growth services for software companies.',
   email: 'hello@lantle.ai',
-  // Create a free form at https://formspree.io (or Tally / Basin) and paste the endpoint here.
-  formEndpoint: 'https://formspree.io/f/REPLACE_ME',
+  // The backend (lantle-backend on Heroku). Forms post here, checkouts start here, and the build reads tools from here.
+  // For a local build against a local backend, set TOOLS_API_URL in .env instead of changing this.
+  apiBase: import.meta.env.TOOLS_API_URL ?? 'https://lantle-backend-ed132a1d726a.herokuapp.com',
+  // Cloudflare Turnstile site key (public). Leave empty to disable the bot check widget.
+  turnstileSiteKey: '',
   social: {
     linkedin: 'https://www.linkedin.com/company/REPLACE_ME',
   },
-  // How advertisers pay. Shown on the submit page. Change when you add Stripe or another processor.
-  paymentMethods: 'PayPal invoice or bank transfer',
+  paymentMethods: 'Card, Apple Pay or Google Pay through Dodo Payments',
 };
 
-export type Price = { name: string; price: string; unit?: string; points: string[]; badge?: string };
+export type Price = { name: string; price: string; unit?: string; points: string[]; badge?: string; buyHref?: string; buyLabel?: string };
 
 /** Extra fee when we write a sponsored article for the advertiser. */
 export const SPONSORED_WRITING_FEE = '$19';
 /** Length of a sponsored article. Keep in one place so every page says the same thing. */
 export const SPONSORED_ARTICLE_LENGTH = '1,500 to 1,800 words';
 
-/** What advertisers can buy on THIS site. Founding rates: raise them as domain rating and traffic grow. */
+/** What advertisers can buy on THIS site. Charged amounts are set on the matching products in Dodo Payments. */
 export const ADVERTISE_PRICES: Price[] = [
   {
     name: 'Sponsored article',
@@ -106,5 +108,7 @@ export const DISTRIBUTION_SERVICES: Price[] = [
       'Spreadsheet of every live listing with URL and status',
       'One time fee, all listings are permanent (5 to 7 days turnaround)',
     ],
+    buyHref: `${SITE.apiBase}/checkout/directory-package`,
+    buyLabel: 'Buy now',
   },
 ];

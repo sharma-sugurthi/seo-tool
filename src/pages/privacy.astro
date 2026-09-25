@@ -11,11 +11,11 @@ import { SITE } from '../site.config';
     <h2 style="margin-top:0">What we collect</h2>
     <p>We collect only what you give us voluntarily through our forms:</p>
     <ul>
-      <li><strong>Contact and order forms</strong> -- your name, email address, company name and message. These are sent to Formspree, our form processor, and forwarded to us by email.</li>
+      <li><strong>Contact and order forms</strong> -- your name, email address, company name and message. These are stored on our servers and sent to us by email.</li>
       <li><strong>Newsletter signups</strong> -- your email address only.</li>
       <li><strong>Tool submissions</strong> -- the tool name, URL, description and your contact email.</li>
     </ul>
-    <p>We do not collect payment card details on this site. Payments are handled through PayPal or bank transfer after we send you an invoice by email.</p>
+    <p>We never see your card details. Payments are taken by Dodo Payments, the merchant of record, on their checkout page. We keep a record of what was bought, by which email address, and its payment status.</p>
 
     <h2>How we use your data</h2>
     <ul>
@@ -28,7 +28,8 @@ import { SITE } from '../site.config';
     <h2>Third-party services</h2>
     <p>The site uses a small number of external services:</p>
     <ul>
-      <li><strong>Formspree</strong> -- processes form submissions. <a href="https://formspree.io/legal/privacy-policy/" rel="noopener" target="_blank">Their privacy policy</a>.</li>
+      <li><strong>Dodo Payments</strong> -- processes payments as merchant of record. We never see your card number. <a href="https://dodopayments.com/privacy-policy" rel="noopener" target="_blank">Their privacy policy</a>.</li>
+      <li><strong>Our own servers</strong> (hosted on Heroku, database on Supabase) -- store form submissions, tool listings and order records.</li>
       <li><strong>Google Fonts</strong> -- loads typefaces. Google may log your IP address. <a href="https://policies.google.com/privacy" rel="noopener" target="_blank">Their privacy policy</a>.</li>
       <li><strong>Netlify / Vercel</strong> (or whichever host you deploy to) -- serves the site and may log IP addresses and request data in server logs.</li>
     </ul>

@@ -10,7 +10,10 @@ const { items, ctaHref, ctaLabel = 'Get started' } = Astro.props;
       <h3>{p.name}</h3>
       <div class="price">{p.price} {p.unit && <small>{p.unit}</small>}</div>
       <ul>{p.points.map((pt) => <li>{pt}</li>)}</ul>
-      <a class={`btn ${p.badge ? '' : 'ghost'}`} href={ctaHref} style="align-self:flex-start; margin-top:auto;">{ctaLabel}</a>
+      <div class="row" style="margin-top:auto;">
+        <a class={`btn ${p.badge || p.buyHref ? '' : 'ghost'}`} href={p.buyHref ?? ctaHref}>{p.buyHref ? (p.buyLabel ?? 'Buy now') : ctaLabel}</a>
+        {p.buyHref && <a class="btn ghost" href={ctaHref}>Ask first</a>}
+      </div>
     </div>
   ))}
 </div>

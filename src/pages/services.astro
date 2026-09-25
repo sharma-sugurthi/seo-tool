@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: 'How do I pay?',
-    a: 'We send a PayPal invoice within 4 hours of your order. Work starts the same day the invoice is paid. No upfront retainers, no long contracts.',
+    a: 'The directory package is paid by card, Apple Pay or Google Pay at checkout and the receipt comes from Dodo Payments, our payment provider. Quoted work (content, placements, LinkedIn) is confirmed by email with a payment link the same day. No retainers, no long contracts.',
   },
   {
     q: 'What industries do you specialise in?',
@@ -36,7 +36,7 @@ const faqs = [
 ];
 
 const steps = [
-  { title: 'Place your order', body: 'Pick the services you need below. We send a PayPal invoice within 4 hours.' },
+  { title: 'Place your order', body: 'Buy the directory package directly, or send the order form for quoted work and get a payment link the same day.' },
   { title: 'Kickoff call', body: '30 minutes on your buyers, competitors and the questions they ask. We check where you already show up in AI answers.' },
   { title: 'Execution', body: 'We do the work. Anything published in your name or about your brand is shared for approval first.' },
   { title: 'Delivery report', body: 'Links live, content published, rankings and AI citations found, in a spreadsheet you own.' },
@@ -113,7 +113,7 @@ const steps = [
 
   <section class="section fade-in" id="order">
     <h2 style="margin-top:0">Place your order</h2>
-    <p class="muted" style="margin-bottom:1rem;">Tell us what you need. We send a PayPal invoice within 4 hours and work starts the same day.</p>
-    <ContactForm subject="Service order" options={['SEO and GEO content', 'LinkedIn ghostwriting', 'Guest post placement', 'Directory and listicle package', 'Bundle (content + distribution)']} optionsLabel="Which service?" placeholder="Which service, the product or pages to promote, anchor text if you have it, budget and timeline." />
+    <p class="muted" style="margin-bottom:1rem;">Tell us what you need and we will follow up within one business day to confirm scope and next steps.</p>
+    <ContactForm kind="service-order" options={['SEO and GEO content', 'LinkedIn ghostwriting', 'Guest post placement', 'Directory and listicle package', 'Bundle (content + distribution)']} optionsLabel="Which service?" placeholder="Which service, the product or pages to promote, anchor text if you have it, budget and timeline." />
   </section>
 </Base>

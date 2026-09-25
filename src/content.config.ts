@@ -1,6 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { getVertical, verticalSlugs } from './data/taxonomy';
+import { apiToolsLoader } from './loaders/tools';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
@@ -20,23 +21,23 @@ const blog = defineCollection({
   }),
 });
 
+// Tools live in the backend database and are fetched at build time. Editing happens in the admin.
 const tools = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/tools' }),
+  loader: apiToolsLoader(),
   schema: z
     .object({
       name: z.string(),
       website: z.string().url(),
       tagline: z.string().max(140),
-      // Top level area (finance, marketing, ...). Slugs live in src/data/taxonomy.ts.
       vertical: z.enum(verticalSlugs),
-      // Must be one of the categories listed under that vertical in taxonomy.ts.
       category: z.string(),
       pricing: z.enum(['Free', 'Freemium', 'Paid', 'Enterprise']),
       bestFor: z.string(),
       rating: z.number().min(1).max(5).optional(),
-      // featured: paid listing, dofollow link, pinned to top of category. Basic listings are nofollow.
+      // featured: paid listing, dofollow link, pinned to top of category. Computed by the API from the paid term.
       featured: z.boolean().default(false),
-      // editorsPick: our own recommendation. Shown with a pill and sorted after featured. Link stays nofollow. Never paid.
+      featuredUntil: z.coerce.date().optional(),
+      // editorsPick: our own recommendation. Shown with a pill and sorted after featured. Never paid.
       editorsPick: z.boolean().default(false),
       thumbnail: z.string().optional(),
       addedDate: z.coerce.date(),

@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+---
+<Base title="Submission received" noindex>
+  <section class="hero" style="max-width:40rem;">
+    <h1 id="s-title">Submission received</h1>
+    <p class="lead" id="s-body">A person reads every submission, usually within five business days. You will get an email when it is live.</p>
+    <p class="notice" id="s-note" hidden></p>
+    <p class="meta">Questions: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+    <div class="row" style="margin-top:1rem;"><a class="btn ghost" href="/tools/">Browse the directory</a><a class="btn ghost" href="/learn/tool-launch-checklist/">Launch checklist</a></div>
+  </section>
+  <script>
+    const p = new URLSearchParams(location.search);
+    const status = p.get('status') || 'received';
+    const kind = p.get('kind') || '';
+    const pay = p.get('pay') || '';
+    const msg = p.get('msg') || '';
+    const title = document.getElementById('s-title');
+    const body = document.getElementById('s-body');
+    const note = document.getElementById('s-note') as HTMLElement | null;
+    const say = (t: string, b: string, n = '') => {
+      if (title) title.textContent = t;
+      if (body) body.textContent = b;
+      if (note) { note.textContent = n; note.hidden = !n; }
+    };
+    if (status === 'error') {
+      say('That did not go through', msg || 'Please go back and check the form.', '');
+    } else if (status === 'paid') {
+      say(
+        kind === 'sponsored' ? 'Payment received, article in the queue' : 'Payment received, listing in the queue',
+        kind === 'sponsored'
+          ? 'Your receipt comes from Dodo Payments. We review the draft and reply within one business day with a publication date.'
+          : 'Your receipt comes from Dodo Payments. Featured placement switches on the moment the listing is approved, usually within five business days.',
+      );
+    } else if (pay === 'later' || pay === 'failed') {
+      say(
+        'Submission received',
+        'A person reads every submission, usually within five business days.',
+        pay === 'failed'
+          ? 'The payment page could not be opened. Your submission is saved; we will email you a payment link within one business day.'
+          : 'Online payment is not switched on yet. Your submission is saved; we will email you a payment link within one business day, and featured placement starts once it is paid.',
+      );
+    }
+  </script>
+</Base>

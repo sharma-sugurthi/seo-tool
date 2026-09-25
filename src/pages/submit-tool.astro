@@ -38,13 +38,13 @@ const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories])
 
   <section class="section fade-in" id="listing-form">
     <h2 style="margin-top:0">Details</h2>
-    <p class="muted" style="margin-bottom:1rem;">Fill in the form below. For paid options, we send a PayPal invoice within 4 hours.</p>
-    <form class="stack" action={SITE.formEndpoint} method="POST">
-      <input type="hidden" name="_subject" value="Tool submission" />
+    <p class="muted" style="margin-bottom:1rem;">Fill in the form below. Paid options go straight to a secure checkout (card, Apple Pay, Google Pay) and the receipt comes from Dodo Payments.</p>
+    <form class="stack" action={`${SITE.apiBase}/submissions`} method="POST" enctype="multipart/form-data">
       <label>What would you like? <select name="listing_type" id="listing-type"><option value="basic">Basic listing (free)</option><option value="featured">Featured listing ({featuredPrice})</option><option value="sponsored">Sponsored article ({sponsoredPrice})</option></select></label>
       <label>Company or tool name <input name="tool_name" required /></label>
       <label>Website URL <input type="url" name="website" required placeholder="https://" /></label>
       <label>Your email <input type="email" name="email" required /></label>
+      <label>Your name <input name="submitter_name" autocomplete="name" /></label>
 
       <div id="tool-fields" style="display:contents;">
         <label>One line tagline (max 140 characters) <input name="tagline" maxlength="140" required /></label>
@@ -84,6 +84,7 @@ const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories])
 
       <hr style="margin:1rem 0 0; border:0; border-top:1px solid var(--border);" />
       <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+      {SITE.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={SITE.turnstileSiteKey}></div>}
       <button class="btn" type="submit">Submit</button>
       <p class="meta">We reply within one business day. Or email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
     </form>
