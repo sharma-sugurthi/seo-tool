@@ -1,10 +1,11 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
 import { getVertical, verticalSlugs } from './data/taxonomy';
 import { apiToolsLoader } from './loaders/tools';
+import { apiPostsLoader } from './loaders/posts';
 
+// Articles live in the backend database too (editorial and sponsored). Written and approved in the admin.
 const blog = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
+  loader: apiPostsLoader(),
   schema: z.object({
     title: z.string(),
     description: z.string().max(200),

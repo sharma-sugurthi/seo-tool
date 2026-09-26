@@ -12,7 +12,8 @@ export const SITE = {
   email: 'hello@lantle.ai',
   // The backend (lantle-backend on Heroku). Forms post here, checkouts start here, and the build reads tools from here.
   // For a local build against a local backend, set TOOLS_API_URL in .env instead of changing this.
-  apiBase: import.meta.env.TOOLS_API_URL ?? 'https://lantle-backend-ed132a1d726a.herokuapp.com',
+  // Set TOOLS_API_URL in Cloudflare Pages (and in a local .env) to point a build at a different backend.
+  apiBase: (typeof process !== 'undefined' && process.env.TOOLS_API_URL) || 'https://lantle-backend-ed132a1d726a.herokuapp.com',
   // Cloudflare Turnstile site key (public). Leave empty to disable the bot check widget.
   turnstileSiteKey: '',
   social: {
@@ -50,7 +51,7 @@ export const ADVERTISE_PRICES: Price[] = [
       'Dedicated tool page with dofollow link and custom thumbnail',
       'Pinned to the top of your category for 12 months',
       'Eligible for our "best tools" roundup articles',
-      'Rate locked in — increases once we hit 10K monthly visitors',
+      'Rate locked in -- increases once we hit 10K monthly visitors',
     ],
   },
 ];
@@ -93,7 +94,7 @@ export const DISTRIBUTION_SERVICES: Price[] = [
     badge: 'Most popular',
     points: [
       'Article written and placed on vetted SaaS sites (DR 30+, no PBNs)',
-      'We share the target site list before writing a word — you approve each one',
+      'We share the target site list before writing a word -- you approve each one',
       'You pay per live link, not per attempt',
       '6 months link monitoring (typical turnaround: 2 to 4 weeks)',
     ],

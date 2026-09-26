@@ -61,14 +61,16 @@ const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories])
         </label>
         <label>Pricing model <select name="pricing"><option>Free</option><option>Freemium</option><option>Paid</option><option>Enterprise</option></select></label>
         <label>Who is it best for? <input name="best_for" placeholder="e.g. teams of 5 to 50 without a dedicated admin" /></label>
-        <label>Screenshot or logo URL <input type="url" name="thumbnail" placeholder="https://" /></label>
-        <p class="muted" style="margin:-.5rem 0 0; font-size:.84rem;">A link to a dashboard screenshot or your logo, at least 600px wide. We resize and compress it. Leave blank and we will take one from your site.</p>
+        <label>Screenshot or product image <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/webp" /></label>
+        <label>Or a link to the image <input type="url" name="thumbnail_url" placeholder="https://" /></label>
+        <p class="muted" style="margin:-.5rem 0 0; font-size:.84rem;">PNG, JPG or WebP up to 5 MB, at least 600px wide. We crop it to the card shape and compress it. Leave both empty and we will take one from your site.</p>
         <hr style="margin:1rem 0; border:0; border-top:1px solid var(--border);" />
 
         <label>What does your tool do? <textarea name="what_it_does" required placeholder="Explain the core workflow and what problem it solves."></textarea></label>
         <label>What do you do better than the alternatives? <textarea name="where_it_shines" required placeholder="Be specific. e.g. 'Answers tickets in the customer's language before an agent sees them.'"></textarea></label>
         <label>Who is this NOT a good fit for? <textarea name="where_it_falls_short" required placeholder="Be honest. e.g. 'Not for solo founders' or 'Needs a team of 50+ to pay off.'"></textarea></label>
-        <label>Anything else? <textarea name="conclusion" placeholder="Notes for the reviewer, a category we are missing, a launch date."></textarea></label>
+        <label>Conclusion (optional) <textarea name="conclusion" placeholder="One paragraph: who should pick it and why."></textarea></label>
+        <label>Notes for the reviewer (not published) <textarea name="notes" placeholder="A category we are missing, a launch date, anything we should know."></textarea></label>
       </div>
 
       <div id="article-fields" style="display:none;">
@@ -80,6 +82,7 @@ const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories])
         <label>Author name <input name="author_name" required placeholder="Who should we attribute this to?" /></label>
         <label>Proposed article title <input name="article_title" required placeholder="e.g. What changed when we moved onboarding to an AI agent" /></label>
         <label>Article draft or pitch <textarea name="article_draft" required placeholder="Paste a link to a Google Doc, or paste your draft or concept here."></textarea></label>
+        <label>Cover image (optional, 16:9) <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/webp" /></label>
       </div>
 
       <hr style="margin:1rem 0 0; border:0; border-top:1px solid var(--border);" />
