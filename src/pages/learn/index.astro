@@ -37,9 +37,9 @@ const groups = [
   </section>
 
   {groups.map((g) => (
-    <section class="section">
+    <section class="section reveal">
       <h2 style="margin-top:0">{g.title}</h2>
-      <div class="grid">
+      <div class="grid reveal-stagger">
         {g.items.map((it) => (
           <div class="card">
             <span class="pill">{it.pill}</span>
@@ -51,15 +51,15 @@ const groups = [
     </section>
   ))}
 
-  <section class="section">
+  <section class="section reveal">
     <h2 style="margin-top:0">Guides</h2>
-    <div class="grid">
-      {guides.map((g) => <PostCard post={g} />)}
+    <div class="grid reveal-stagger">
+      {guides.map((g) => <PostCard post={g} hideTags />)}
     </div>
     <p style="margin-top:1rem"><a href="/blog/">All articles</a></p>
   </section>
 
-  <section class="section">
+  <section class="section reveal">
     <h2 style="margin-top:0">Something missing?</h2>
     <p class="muted">Tell us what would help: a template, a comparison, a definition. <a href="/contact/">Contact us</a> and we will build it if enough people ask.</p>
   </section>

@@ -21,6 +21,7 @@ const cats = v.categories.filter((c) => sorted.some((t) => t.data.category === c
 const empty = sorted.length === 0;
 const others = VERTICALS.filter((x) => x.slug !== v.slug);
 const lower = v.name.charAt(0).toLowerCase() + v.name.slice(1);
+const anchor = (c: string) => c.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
 const title = empty ? `AI ${lower} tools: open for listings` : `AI ${lower} tools: ${sorted.length} reviewed and compared`;
 const description = empty
@@ -45,6 +46,12 @@ const jsonLd = {
     </div>
   </section>
 
+  {cats.length > 1 && (
+    <nav class="subnav" id="subnav" aria-label="Categories on this page">
+      {cats.map((c) => <a class="pill" href={`#${anchor(c)}`}>{c}<span class="n">{sorted.filter((t) => t.data.category === c).length}</span></a>)}
+    </nav>
+  )}
+
   {empty ? (
     <section class="section fade-in">
       <div class="card" style="max-width:40rem;">
@@ -58,9 +65,9 @@ const jsonLd = {
     </section>
   ) : (
     cats.map((c) => (
-      <section class="section fade-in" id={c.toLowerCase().replace(/[^a-z0-9]+/g, '-')}>
+      <section class="section fade-in" id={anchor(c)}>
         <h2 style="margin-top:0">{c}</h2>
-        <div class="grid">{sorted.filter((t) => t.data.category === c).map((t) => <ToolCard tool={t} />)}</div>
+        <div class="grid reveal-stagger">{sorted.filter((t) => t.data.category === c).map((t) => <ToolCard tool={t} />)}</div>
       </section>
     ))
   )}
@@ -81,4 +88,19 @@ const jsonLd = {
       ))}
     </div>
   </section>
+
+  <script>
+    // Highlight the category currently on screen in the sticky sub navigation
+    const nav = document.getElementById('subnav');
+    if (nav && 'IntersectionObserver' in window) {
+      const links = [...nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+      const sections = links.map((l) => document.getElementById(l.hash.slice(1))).filter(Boolean) as HTMLElement[];
+      const io = new IntersectionObserver((es) => {
+        const visible = es.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (!visible) return;
+        links.forEach((l) => l.classList.toggle('on', l.hash === `#${visible.target.id}`));
+      }, { rootMargin: '-30% 0px -55% 0px' });
+      sections.forEach((s) => io.observe(s));
+    }
+  </script>
 </Base>

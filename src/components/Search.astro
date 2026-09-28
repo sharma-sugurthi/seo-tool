@@ -1,0 +1,137 @@
+---
+/**
+ * Command palette: instant search across tools, categories, articles and pages.
+ * Opens from the header button, any [data-search-open] element, Ctrl/Cmd+K or "/".
+ * The index (/search.json) is generated at build time and fetched on first open.
+ */
+---
+<div class="cmdk" id="cmdk" hidden role="dialog" aria-modal="true" aria-label="Search the site">
+  <div class="cmdk-panel">
+    <div class="cmdk-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="cmdk-input" type="search" placeholder="Search tools, categories, guides" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list" />
+      <button class="cmdk-close" id="cmdk-close" type="button" aria-label="Close search">✕</button>
+    </div>
+    <ul class="cmdk-list" id="cmdk-list" role="listbox"></ul>
+    <div class="cmdk-foot"><span><kbd class="key">↑</kbd><kbd class="key">↓</kbd> navigate</span><span><kbd class="key">↵</kbd> open</span><span><kbd class="key">esc</kbd> close</span></div>
+  </div>
+</div>
+
+<script>
+  type Item = { k: string; n: string; d: string; c: string; u: string; i?: string };
+  const root = document.getElementById('cmdk')!;
+  const input = document.getElementById('cmdk-input') as HTMLInputElement;
+  const list = document.getElementById('cmdk-list')!;
+  let items: Item[] | null = null;
+  let loading: Promise<Item[]> | null = null;
+  let rows: HTMLAnchorElement[] = [];
+  let sel = 0;
+  let lastFocus: Element | null = null;
+
+  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+  const load = () => (loading ??= fetch('/search.json').then((r) => r.json()).then((d) => (items = d)));
+
+  function score(it: Item, tokens: string[]): number {
+    const n = it.n.toLowerCase(); const d = (it.d || '').toLowerCase(); const c = (it.c || '').toLowerCase();
+    let total = 0;
+    for (const t of tokens) {
+      let s = 0;
+      if (n.startsWith(t)) s = 10; else if (n.split(/\s+/).some((w) => w.startsWith(t))) s = 7; else if (n.includes(t)) s = 5;
+      else if (c.includes(t)) s = 3; else if (d.includes(t)) s = 2;
+      if (!s) return 0;
+      total += s;
+    }
+    return total + (it.k === 'tool' ? 0.5 : 0);
+  }
+  function highlight(text: string, tokens: string[]): string {
+    let out = esc(text);
+    for (const t of tokens) {
+      if (!t) continue;
+      const re = new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'i');
+      if (re.test(out)) { out = out.replace(re, '<mark>$1</mark>'); break; }
+    }
+    return out;
+  }
+  const GROUPS: Record<string, string> = { tool: 'Tools', cat: 'Categories', post: 'Articles', page: 'Pages' };
+  const LIMIT: Record<string, number> = { tool: 8, cat: 4, post: 4, page: 3 };
+
+  function render(q: string) {
+    const all = items ?? [];
+    const tokens = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    let picked: Item[];
+    if (!tokens.length) {
+      picked = [...all.filter((i) => i.k === 'cat').slice(0, 4), ...all.filter((i) => i.k === 'tool').slice(0, 6), ...all.filter((i) => i.k === 'post').slice(0, 2)];
+    } else {
+      picked = all.map((i) => ({ i, s: score(i, tokens) })).filter((x) => x.s > 0).sort((a, b) => b.s - a.s).map((x) => x.i);
+    }
+    const byKind = new Map<string, Item[]>();
+    for (const it of picked) { const arr = byKind.get(it.k) ?? []; if (arr.length < LIMIT[it.k]) arr.push(it); byKind.set(it.k, arr); }
+    let html = '';
+    let idx = 0;
+    for (const k of ['tool', 'cat', 'post', 'page']) {
+      const arr = byKind.get(k); if (!arr?.length) continue;
+      html += `<li class="cmdk-group" role="presentation">${tokens.length ? GROUPS[k] : k === 'tool' ? 'Top rated tools' : k === 'cat' ? 'Browse' : GROUPS[k]}</li>`;
+      for (const it of arr) {
+        const ico = it.k === 'tool' ? (it.i ? `<img src="${esc(it.i)}" alt="" loading="lazy">` : esc(it.n.charAt(0))) : it.k === 'cat' ? '#' : it.k === 'post' ? '¶' : '→';
+        html += `<li role="presentation"><a class="cmdk-item" role="option" id="cmdk-opt-${idx}" aria-selected="${idx === 0}" href="${esc(it.u)}" data-i="${idx}"><span class="ico">${ico}</span><span class="txt"><strong>${highlight(it.n, tokens)}</strong><span>${highlight(it.d || '', tokens)}</span></span>${it.c ? `<span class="tag">${esc(it.c)}</span>` : ''}</a></li>`;
+        idx++;
+      }
+    }
+    list.innerHTML = html || `<li class="cmdk-empty">Nothing matches "${esc(q)}". Try a category name, or <a href="/submit-tool/">submit the tool</a> if it is missing.</li>`;
+    rows = [...list.querySelectorAll<HTMLAnchorElement>('.cmdk-item')];
+    sel = 0;
+    input.setAttribute('aria-activedescendant', rows[0]?.id ?? '');
+  }
+  function move(delta: number) {
+    if (!rows.length) return;
+    rows[sel].setAttribute('aria-selected', 'false');
+    sel = (sel + delta + rows.length) % rows.length;
+    rows[sel].setAttribute('aria-selected', 'true');
+    rows[sel].scrollIntoView({ block: 'nearest' });
+    input.setAttribute('aria-activedescendant', rows[sel].id);
+  }
+  function open(prefill = '') {
+    if (!root.hidden) return;
+    lastFocus = document.activeElement;
+    root.hidden = false;
+    document.body.classList.add('cmdk-open');
+    input.value = prefill;
+    list.innerHTML = '<li class="cmdk-empty">Loading…</li>';
+    load().then(() => render(input.value)).catch(() => { list.innerHTML = '<li class="cmdk-empty">Search is unavailable right now. <a href="/tools/">Browse the directory</a> instead.</li>'; });
+    requestAnimationFrame(() => input.focus());
+  }
+  function close() {
+    if (root.hidden) return;
+    root.hidden = true;
+    document.body.classList.remove('cmdk-open');
+    (lastFocus as HTMLElement | null)?.focus?.();
+  }
+
+  input.addEventListener('input', () => items && render(input.value));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+    else if (e.key === 'Enter') { const r = rows[sel]; if (r) { e.preventDefault(); window.location.href = r.href; } }
+    else if (e.key === 'Escape') { e.preventDefault(); close(); }
+  });
+  list.addEventListener('mousemove', (e) => {
+    const a = (e.target as Element).closest<HTMLAnchorElement>('.cmdk-item');
+    if (a && rows[sel] !== a) { rows[sel]?.setAttribute('aria-selected', 'false'); sel = Number(a.dataset.i); a.setAttribute('aria-selected', 'true'); }
+  });
+  root.addEventListener('click', (e) => { if (e.target === root) close(); });
+  document.getElementById('cmdk-close')?.addEventListener('click', close);
+  document.addEventListener('click', (e) => {
+    const t = (e.target as Element).closest<HTMLElement>('[data-search-open]');
+    if (t) { e.preventDefault(); open(t.dataset.searchOpen || ''); }
+  });
+  document.addEventListener('keydown', (e) => {
+    const tag = (document.activeElement?.tagName || '').toLowerCase();
+    const typing = tag === 'input' || tag === 'textarea' || tag === 'select' || (document.activeElement as HTMLElement | null)?.isContentEditable;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); root.hidden ? open() : close(); }
+    else if (e.key === '/' && !typing && root.hidden) { e.preventDefault(); open(); }
+    else if (e.key === 'Escape' && !root.hidden) close();
+  });
+  // Warm the index once the page is idle so the first open feels instant
+  const idle = (window as any).requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1500));
+  idle(() => load().catch(() => {}));
+</script>

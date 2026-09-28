@@ -14,7 +14,7 @@ const ordered = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (count
   </section>
 
   <section class="section fade-in">
-    <div class="grid">
+    <div class="grid reveal-stagger">
       {ordered.map((v) => {
         const n = counts.get(v.slug) ?? 0;
         return (
@@ -30,8 +30,8 @@ const ordered = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (count
   </section>
 
   <section class="section fade-in">
-    <h2 style="margin-top:0">Does your product not fit?</h2>
-    <p class="muted">Pick the closest category when you submit and say so in the notes. If enough tools arrive that need a new home, we add the category.</p>
+    <h2 style="margin-top:0">Suggest a new category</h2>
+    <p class="muted">Can't find the perfect fit? Select the closest match for now and suggest a new category in the notes. Our editorial team reviews category requests with every submission.</p>
     <div style="margin-top:.75rem;"><a class="btn" href="/submit-tool/">Submit a tool</a></div>
   </section>
 </Base>

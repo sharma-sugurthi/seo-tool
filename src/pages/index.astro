@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import ToolCard from '../components/ToolCard.astro';
 import PostCard from '../components/PostCard.astro';
 import Newsletter from '../components/Newsletter.astro';
+import HeroGlobe from '../components/HeroGlobe.astro';
 import { getCollection } from 'astro:content';
 import { SITE } from '../site.config';
 import { VERTICALS } from '../data/taxonomy';
@@ -11,112 +12,180 @@ const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featur
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const counts = new Map(VERTICALS.map((v) => [v.slug, tools.filter((t) => t.data.vertical === v.slug).length]));
 const verticals = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0));
+
+// Bento data. Every list here is editorial: rating, editor's pick or date. Paid placement never changes the order.
+const byName = new Map(tools.map((t) => [t.id, t]));
+const latest = [...tools].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf() || a.data.name.localeCompare(b.data.name));
+const picks = tools.filter((t) => t.data.editorsPick).sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0)).slice(0, 3);
+const pairs = (await getCollection('comparisons'))
+  .map((c) => ({ a: byName.get(c.data.toolA), b: byName.get(c.data.toolB), winner: c.data.winner ? byName.get(c.data.winner) : undefined, reason: c.data.winnerReason, id: c.id }))
+  .filter((p) => p.a && p.b);
+const tickerItems = latest.slice(0, 14);
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 ---
 <Base title="AI tools directory: reviews, comparisons and free listings" description={SITE.description}>
-  <section class="hero">
-    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Software directory, open to every category</p>
-    <h1>{SITE.tagline}</h1>
-    <p class="lead">Independent reviews and side by side comparisons of AI tools for finance, marketing, sales, support, engineering and the rest of the company. Any product can be listed for free. Growth services for the companies that build them.</p>
-    <div class="row" style="margin-top:1.25rem;">
-      <a class="btn" href="/tools/">Browse the tools</a>
-      <a class="btn ghost" href="/submit-tool/">List your tool, free</a>
+  <section class="hero hero-globe">
+    <div>
+      <p class="meta eyebrow">Discover better software</p>
+      <h1>{SITE.tagline}</h1>
+      <p class="lead">Compare the best AI software for finance, marketing, engineering, and more. Read independent reviews, compare pricing side-by-side, and find the right tool for your team today.</p>
+      <div class="row" style="margin-top:1.25rem;">
+        <a class="btn" href="/tools/">Browse the tools</a>
+        <a class="btn ghost" href="/submit-tool/">List your tool, free</a>
+      </div>
+      <div class="stats-bar">
+        <div class="stat"><span class="stat-number" data-count={tools.length}>{tools.length}</span><span class="stat-label">Tools reviewed</span></div>
+        <div class="stat"><span class="stat-number" data-count={VERTICALS.length}>{VERTICALS.length}</span><span class="stat-label">Categories</span></div>
+        <div class="stat"><span class="stat-number" data-count={pairs.length}>{pairs.length}</span><span class="stat-label">Editorial verdicts</span></div>
+        <div class="stat"><span class="stat-number" data-count={posts.length}>{posts.length}</span><span class="stat-label">Articles</span></div>
+      </div>
     </div>
-    <div class="stats-bar">
-      <div class="stat">
-        <span class="stat-number">{tools.length}</span>
-        <span class="stat-label">Tools reviewed</span>
+    {/* scene="deep" gives the dark green globe panel on the light page */}
+    <HeroGlobe tools={tools} scene="light" />
+  </section>
+
+  <div class="ticker" aria-label="Recently listed tools">
+    <div class="ticker-track">
+      {tickerItems.map((t) => <a href={`/tools/${t.id}/`}>{t.data.name} <span class="meta">{t.data.category}</span></a>)}
+      {tickerItems.map((t) => <a class="dup" href={`/tools/${t.id}/`} aria-hidden="true" tabindex="-1">{t.data.name} <span class="meta">{t.data.category}</span></a>)}
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="bento reveal-stagger">
+      <div class="tile t-search">
+        <p class="meta eyebrow">Find a tool</p>
+        <h2>What job do you need done?</h2>
+        <button type="button" class="search-fake" data-search-open aria-label="Search the directory">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span>Search {tools.length} tools, {VERTICALS.length} categories and every guide</span>
+          <kbd class="key">/</kbd>
+        </button>
+        <p class="lead-sm">Every listing is checked by a person. Ratings and rankings are never for sale.</p>
+        <p class="try">Try:
+          {['invoice automation', 'coding assistant', 'e-signature', 'help desk', 'SEO', 'meeting notes'].map((q) => <button type="button" class="try-chip" data-search-open={q}>{q}</button>)}
+        </p>
+        <div class="chips">
+          {verticals.slice(0, 6).map((v) => <a class="pill" href={`/categories/${v.slug}/`}>{v.short} <span class="n">{counts.get(v.slug) ?? 0}</span></a>)}
+          <a class="pill" href="/categories/">All categories</a>
+        </div>
       </div>
-      <div class="stat">
-        <span class="stat-number">{VERTICALS.length}</span>
-        <span class="stat-label">Categories</span>
+
+      {verticals.slice(0, 4).map((v, i) => (
+        <div class={`tile t-cat c${i + 1}`}>
+          <span class="tile-arrow" aria-hidden="true">↗</span>
+          <span class="tile-num" data-count={counts.get(v.slug) ?? 0}>{counts.get(v.slug) ?? 0}</span>
+          <span class="tile-name">{v.name}</span>
+          <p class="muted">{v.categories.slice(0, 3).join(', ')}</p>
+          <a class="tile-link" href={`/categories/${v.slug}/`} aria-label={`${v.name}: ${counts.get(v.slug) ?? 0} tools`}></a>
+        </div>
+      ))}
+
+      <div class="tile t-new">
+        <p class="meta eyebrow">Just added</p>
+        <ul class="plain">
+          {latest.slice(0, 5).map((t) => <li><a href={`/tools/${t.id}/`}>{t.data.name}</a><span class="meta">{t.data.category} · {fmt(t.data.addedDate)}</span></li>)}
+        </ul>
+        <a class="link-more" href="/tools/" style="margin-top:auto;">All {tools.length} tools</a>
       </div>
-      <div class="stat">
-        <span class="stat-number">{posts.length}</span>
-        <span class="stat-label">Articles</span>
+
+      <div class="tile t-vs">
+        <p class="meta eyebrow">Head to head</p>
+        <ul class="vs-list" id="vs-list">
+          {pairs.map((p, i) => (
+            <li class={i === 0 ? 'on' : ''}>
+              <a class="vs-pair" href={`/tools/compare/${p.id}/`}>{p.a!.data.name} vs {p.b!.data.name}</a>
+              <p class="vs-call muted">{p.winner ? `Our call: ${p.winner.data.name}. ${p.reason ?? ''}` : 'No clear winner: it depends on your team. See who each one fits.'}</p>
+            </li>
+          ))}
+        </ul>
+        {pairs.length > 1 && <div class="vs-dots" id="vs-dots" aria-hidden="true">{pairs.map((_, i) => <button type="button" class={i === 0 ? 'on' : ''} data-i={i}></button>)}</div>}
+      </div>
+
+      <div class="tile t-picks">
+        <p class="meta eyebrow">Editor's picks</p>
+        <ul class="plain">
+          {picks.map((t) => <li><a href={`/tools/${t.id}/`}>{t.data.name}</a><span class="stars" aria-label={`Rated ${t.data.rating} out of 5`}>{[1, 2, 3, 4, 5].map((i) => <span class={`star ${i <= (t.data.rating ?? 0) ? 'filled' : ''}`}>★</span>)}</span></li>)}
+        </ul>
+        <p class="meta" style="margin-top:auto;">Picked by us, never paid.</p>
+      </div>
+
+      <div class="tile t-learn">
+        <p class="meta eyebrow">Free tools for buyers</p>
+        <div class="learn-row">
+          <a href="/learn/tool-evaluation-scorecard/">Evaluation scorecard <small>Eight weighted criteria, three tools side by side</small></a>
+          <a href="/learn/software-cost-calculator/">Cost calculator <small>Seats, add-ons and setup over three years</small></a>
+          <a href="/learn/ai-vendor-security-checklist/">Security checklist <small>The questions vendors go quiet on</small></a>
+        </div>
+      </div>
+
+      <div class="tile t-cta">
+        <div>
+          <h2>Build software? Get in front of the people comparing it.</h2>
+          <p>A basic listing is free and reviewed within five business days. Featured placement, sponsored articles and done-for-you growth services are there when you want more.</p>
+        </div>
+        <div class="row">
+          <a class="btn" href="/submit-tool/">List your tool</a>
+          <a class="btn ghost" href="/services/">Growth services</a>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section fade-in">
-    <div class="row" style="justify-content:space-between; margin-bottom:1.25rem;">
-      <h2 style="margin:0;">Browse by category</h2>
-      <a href="/categories/" style="font-size:.9rem; font-weight:500;">All categories</a>
-    </div>
-    <div class="grid">
-      {verticals.slice(0, 6).map((v) => {
-        const n = counts.get(v.slug) ?? 0;
-        return (
-          <div class="card">
-            <span class="pill">{n > 0 ? `${n} ${n === 1 ? 'tool' : 'tools'}` : 'Open for listings'}</span>
-            <h3><a href={`/categories/${v.slug}/`}>{v.name}</a></h3>
-            <p class="muted" style="flex:1; font-size:.93rem;">{v.blurb}</p>
-          </div>
-        );
-      })}
-    </div>
+  <section class="section reveal">
+    <div class="section-head"><h2>Latest tools</h2><a class="link-more" href="/submit-tool/">Submit yours, free</a></div>
+    <div class="grid reveal-stagger">{tools.slice(0, 6).map((t) => <ToolCard tool={t} />)}</div>
+    {tools.length > 6 && <p style="margin-top:1rem;"><a class="link-more" href="/tools/">View all {tools.length} tools</a></p>}
   </section>
 
-  <section class="section fade-in">
-    <div class="row" style="justify-content:space-between; margin-bottom:1.25rem;">
-      <h2 style="margin:0;">Latest tools</h2>
-      <a href="/submit-tool/" style="font-size:.9rem; font-weight:500;">Submit yours, free</a>
-    </div>
-    <div class="grid">{tools.slice(0, 6).map((t) => <ToolCard tool={t} />)}</div>
-    {tools.length > 6 && <p style="margin-top:1rem;"><a href="/tools/">View all {tools.length} tools</a></p>}
+  <section class="section reveal">
+    <div class="section-head"><h2>From the blog</h2><a class="link-more" href="/blog/">All articles</a></div>
+    <div class="grid reveal-stagger">{posts.slice(0, 3).map((p) => <PostCard post={p} />)}</div>
   </section>
 
-  <section class="section fade-in">
-    <div class="row" style="justify-content:space-between; margin-bottom:1.25rem;">
-      <h2 style="margin:0;">From the blog</h2>
-      <a href="/blog/" style="font-size:.9rem; font-weight:500;">All articles</a>
-    </div>
-    <div class="grid">{posts.slice(0, 3).map((p) => <PostCard post={p} />)}</div>
-  </section>
-
-  <section class="section fade-in">
-    <div class="row" style="justify-content:space-between; margin-bottom:1.25rem;">
-      <h2 style="margin:0;">Free resources</h2>
-      <a href="/learn/" style="font-size:.9rem; font-weight:500;">Everything in Learn</a>
-    </div>
-    <div class="grid">
-      <div class="card">
-        <h3><a href="/learn/tool-evaluation-scorecard/">Tool evaluation scorecard</a></h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Eight weighted criteria, up to three tools side by side. Set the weights before the demo and print the result for the purchase request.</p>
-      </div>
-      <div class="card">
-        <h3><a href="/learn/software-cost-calculator/">Software cost calculator</a></h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Seat growth, add-ons, implementation and the annual billing question, rolled into a three year total and a real cost per seat.</p>
-      </div>
-      <div class="card">
-        <h3><a href="/learn/ai-vendor-security-checklist/">AI vendor security checklist</a></h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">The questions on training data, retention, SSO and exit that vendors go quiet on. Tick them off, copy them into your review.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section fade-in">
-    <h2 style="margin-top:0; margin-bottom:1.25rem;">Work with us</h2>
-    <div class="grid">
+  <section class="section reveal">
+    <div class="section-head"><h2>Work with us</h2><a class="link-more" href="/services/">Everything we offer</a></div>
+    <div class="grid reveal-stagger">
       <div class="card">
         <h3>Get in front of buyers</h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Sponsored articles and featured listings, read by the people comparing tools before they buy.</p>
-        <a href="/submit-tool/" style="font-size:.9rem; font-weight:500;">See advertising options</a>
+        <p class="muted desc">Sponsored articles and featured listings, read by the people comparing tools before they buy.</p>
+        <a class="link-more" href="/submit-tool/">See advertising options</a>
       </div>
       <div class="card">
         <h3>Get cited by AI and ranked on Google</h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Guest post placement, directory submissions, SEO content and LinkedIn ghostwriting, done for you.</p>
-        <a href="/services/" style="font-size:.9rem; font-weight:500;">See growth services</a>
+        <p class="muted desc">Guest post placement, directory submissions, SEO content and LinkedIn ghostwriting, done for you.</p>
+        <a class="link-more" href="/services/">See growth services</a>
       </div>
       <div class="card">
         <h3>Share your expertise</h3>
-        <p class="muted" style="flex:1; font-size:.93rem;">Practitioners and founders can publish free guest posts if they teach something real.</p>
-        <a href="/write-for-us/" style="font-size:.9rem; font-weight:500;">Read the guidelines</a>
+        <p class="muted desc">Practitioners and founders can publish free guest posts if they teach something real.</p>
+        <a class="link-more" href="/write-for-us/">Read the guidelines</a>
       </div>
     </div>
   </section>
 
-  <section class="section fade-in">
+  <section class="section reveal">
     <Newsletter />
   </section>
 
+  <script>
+    // Head to head tile: cycle through the editorial pairs, pause on hover, dots jump
+    const list = document.getElementById('vs-list');
+    const dots = document.getElementById('vs-dots');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (list && !reduced) {
+      const items = [...list.children] as HTMLElement[];
+      const dotEls = dots ? ([...dots.children] as HTMLElement[]) : [];
+      let i = 0; let timer: number | undefined;
+      const show = (n: number) => { items[i].classList.remove('on'); dotEls[i]?.classList.remove('on'); i = (n + items.length) % items.length; items[i].classList.add('on'); dotEls[i]?.classList.add('on'); };
+      const start = () => { stop(); if (items.length > 1) timer = window.setInterval(() => show(i + 1), 4500); };
+      const stop = () => { if (timer) window.clearInterval(timer); };
+      dotEls.forEach((d, n) => d.addEventListener('click', () => { show(n); start(); }));
+      const tile = list.closest('.tile');
+      tile?.addEventListener('mouseenter', stop);
+      tile?.addEventListener('mouseleave', start);
+      document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+      start();
+    }
+  </script>
 </Base>
