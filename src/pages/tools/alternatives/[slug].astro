@@ -2,133 +2,154 @@
 import Base from '../../../layouts/Base.astro';
 import ToolCard from '../../../components/ToolCard.astro';
 import { getCollection } from 'astro:content';
+import { getVertical } from '../../../data/taxonomy';
+import { deployCell, editorialRank, fmtDate, freeCell, labelAlternatives, midSentence, pairPath, priceCell, ratingCell, situations, sizeCell, platformsCell, hasFreePlan } from '../../../lib/compare';
 
 export async function getStaticPaths() {
   const tools = await getCollection('tools');
-  return tools.map((tool) => ({
-    params: { slug: tool.id },
-    props: { tool },
-  }));
+  return tools.map((tool) => ({ params: { slug: tool.id }, props: { tool } }));
 }
 
 const { tool } = Astro.props;
 const d = tool.data;
-
+const v = getVertical(d.vertical);
 const allTools = await getCollection('tools');
 
-const sameCategory = allTools
-  .filter((t) => t.data.category === d.category && t.id !== tool.id)
-  .sort((a, b) =>
-    Number(b.data.featured) - Number(a.data.featured)
-    || Number(b.data.editorsPick) - Number(a.data.editorsPick)
-    || (b.data.rating ?? 0) - (a.data.rating ?? 0)
-  );
+// Direct alternatives: same category, ranked by rating and editorial pick only. Paid placement does not move a tool up this list.
+const alternatives = allTools.filter((t) => t.data.category === d.category && t.id !== tool.id).sort(editorialRank);
+const labelled = labelAlternatives(alternatives);
+const count = alternatives.length;
+// Same vertical, different category: adjacent tools, clearly marked as not direct replacements.
+const adjacent = allTools.filter((t) => t.data.vertical === d.vertical && t.data.category !== d.category && t.id !== tool.id).sort(editorialRank).slice(0, 3);
+const noindex = count < 3;
 
-// Prefer tools from the same vertical, then the rest of the directory
-const otherCategory = allTools
-  .filter((t) => t.data.category !== d.category && t.id !== tool.id)
-  .sort((a, b) =>
-    Number(b.data.vertical === d.vertical) - Number(a.data.vertical === d.vertical)
-    || Number(b.data.featured) - Number(a.data.featured)
-    || Number(b.data.editorsPick) - Number(a.data.editorsPick)
-    || (b.data.rating ?? 0) - (a.data.rating ?? 0)
-  )
-  .slice(0, 3);
+const cases = situations(d, alternatives);
+const checked = [d, ...alternatives.map((t) => t.data)].map((x) => x.dataCheckedAt).filter(Boolean) as Date[];
+const lastChecked = checked.length ? new Date(Math.min(...checked.map((x) => x.getTime()))) : undefined;
+const withData = alternatives.filter((t) => t.data.startingPrice || t.data.freeTier != null || t.data.platforms.length).length;
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'WebPage',
-  name: `Alternatives to ${d.name}`,
-  description: `The best alternatives to ${d.name} for ${d.category.toLowerCase()} in 2026.`,
-  url: new URL(Astro.url.pathname, Astro.site).toString(),
-};
+const year = new Date().getFullYear();
+const title = count >= 3 ? `${count} best ${d.name} alternatives (${year})` : `${d.name} alternatives (${year})`;
+const description = count >= 3
+  ? `The ${count} best ${d.name} alternatives for ${d.category.toLowerCase()}, compared on starting price, free plans, platforms and who each one fits.${d.cons[0] ? ` Common reason to switch: ${midSentence(d.cons[0])}.` : ''}`
+  : `Tools that compete with ${d.name} in ${d.category.toLowerCase()}, with pricing and fit. More alternatives are added as the category grows.`;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const jsonLd = [
+  { '@context': 'https://schema.org', '@type': 'WebPage', name: `${d.name} alternatives`, description, url: pageUrl },
+  {
+    '@context': 'https://schema.org', '@type': 'ItemList', name: `${d.name} alternatives`, url: pageUrl,
+    itemListElement: alternatives.map((t, i) => ({ '@type': 'ListItem', position: i + 1, url: new URL(`/tools/${t.id}/`, Astro.site).toString(), name: t.data.name })),
+  },
+];
 ---
-<Base title={`Best alternatives to ${d.name} (2026)`} description={`Looking for an alternative to ${d.name}? Compare the top ${d.category.toLowerCase()} tools side by side with pricing, ratings and use cases.`} jsonLd={jsonLd}>
+<Base title={title} description={description} jsonLd={jsonLd} noindex={noindex}>
   <section class="hero">
-    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">{d.category}</p>
-    <h1>Best alternatives to {d.name}</h1>
-    <p class="lead">{d.name} is {d.pricing.toLowerCase() === 'free' ? 'free' : `a ${d.pricing.toLowerCase()} tool`} for {d.bestFor.toLowerCase()}. Here are the top alternatives if you are evaluating your options.</p>
+    <p class="meta eyebrow"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {d.category}</p>
+    <h1>{count >= 3 ? `${count} ${d.name} alternatives` : `${d.name} alternatives`}</h1>
+    <p class="lead">
+      {d.cons.length
+        ? `The usual reasons to look past ${d.name}: ${midSentence(d.cons[0])}${d.cons[1] ? `; ${midSentence(d.cons[1])}` : ''}. ${count ? `Below: ${count} ${d.category.toLowerCase()} tools that fix at least one of those, ranked by our rating, with the price and the fit of each.` : ''}`
+        : `${d.name} is ${d.pricing === 'Free' ? 'free' : `a ${d.pricing.toLowerCase()} tool`} for ${midSentence(d.bestFor)}. ${count ? `Below: ${count} ${d.category.toLowerCase()} tools that compete with it, ranked by our rating.` : ''}`}
+    </p>
+    <p class="meta">Ranking uses our ratings and the published data only. Paid placement never moves a tool up this page.{lastChecked ? ` Pricing last checked ${fmtDate(lastChecked)}.` : ''}</p>
   </section>
 
   <section class="section fade-in">
-    <div class="alt-reference card" style="margin-bottom:2rem;">
+    <div class="alt-reference card">
       <div class="row" style="justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
-        <div style="flex:1; min-width:200px;">
-          <span class="pill" style="margin-bottom:.35rem;">{d.category}</span>
-          <h3 style="margin:.25rem 0;">{d.name}</h3>
-          <p class="muted" style="margin:0; font-size:.93rem;">{d.tagline}</p>
-          <p class="meta" style="margin:.5rem 0 0;">Pricing: {d.pricing}{d.rating ? ` | Rating: ${d.rating}/5` : ''} | Best for: {d.bestFor}</p>
+        <div style="flex:1; min-width:240px;">
+          <span class="pill">{d.category}</span>
+          <h2 style="margin:.4rem 0 .2rem; font-size:1.25rem;">What you get with {d.name}</h2>
+          <p class="muted" style="margin:0 0 .6rem; font-size:.93rem;">{d.tagline}</p>
+          <dl class="facts">
+            <div><dt>Starting price</dt><dd>{priceCell(d)}</dd></div>
+            <div><dt>Free plan</dt><dd>{freeCell(d)}</dd></div>
+            {d.deployment && <div><dt>Deployment</dt><dd>{deployCell(d)}</dd></div>}
+            <div><dt>Best for</dt><dd>{d.bestFor}</dd></div>
+          </dl>
+          {d.cons.length > 0 && <><p class="pc-head con" style="margin-top:.8rem;">Why people switch</p><ul class="pc-list con">{d.cons.map((x) => <li>{x}</li>)}</ul></>}
         </div>
-        <a class="btn ghost" href={`/tools/${tool.id}/`} style="font-size:.85rem; padding:.4rem .9rem; flex-shrink:0;">Read full review</a>
+        <a class="btn ghost sm" href={`/tools/${tool.id}/`} style="flex-shrink:0;">Read the {d.name} review</a>
       </div>
     </div>
   </section>
 
-  {sameCategory.length > 0 && (
+  {count > 0 ? (
     <section class="section fade-in">
-      <h2 style="margin-top:0;">{d.category} alternatives</h2>
-      <p class="muted" style="margin-bottom:1.25rem;">These tools compete directly with {d.name} in the {d.category.toLowerCase()} category.</p>
-      <div class="grid">{sameCategory.map((t) => <ToolCard tool={t} />)}</div>
+      <h2 style="margin-top:0;">The best {d.name} alternatives</h2>
+      <ol class="alt-list">
+        {labelled.map(({ tool: t, label }, i) => (
+          <li class="alt-item card">
+            <div class="alt-rank">{i + 1}</div>
+            <div class="alt-body">
+              <div class="row" style="justify-content:space-between; gap:.5rem; align-items:flex-start;">
+                <div>
+                  {label && <span class="pill alt-label">{label}</span>}
+                  <h3><a href={`/tools/${t.id}/`}>{t.data.name}</a></h3>
+                  <p class="muted" style="margin:0;">{t.data.tagline}</p>
+                </div>
+                {t.data.rating && <span class="alt-rating" aria-label={`Rated ${t.data.rating} out of 5`}>{t.data.rating}<small> / 5</small></span>}
+              </div>
+              <dl class="facts compact">
+                <div><dt>Price</dt><dd>{priceCell(t.data)}</dd></div>
+                <div><dt>Free plan</dt><dd>{freeCell(t.data)}</dd></div>
+                {t.data.deployment && <div><dt>Deployment</dt><dd>{deployCell(t.data)}</dd></div>}
+                <div><dt>Best for</dt><dd>{t.data.bestFor}</dd></div>
+              </dl>
+              {t.data.pros.length > 0 && <ul class="pc-list pro">{t.data.pros.slice(0, 2).map((x) => <li>{x}</li>)}</ul>}
+              {t.data.cons.length > 0 && <ul class="pc-list con">{t.data.cons.slice(0, 1).map((x) => <li>{x}</li>)}</ul>}
+              {t.data.verdictLine && <p class="verdict-line" style="text-align:left;">{t.data.verdictLine}</p>}
+              <div class="row" style="gap:.5rem; margin-top:.6rem;">
+                <a class="btn ghost sm" href={`/tools/${t.id}/`}>Review</a>
+                <a class="btn ghost sm" href={pairPath(tool.id, t.id)}>{d.name} vs {t.data.name}</a>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  ) : (
+    <section class="section fade-in">
+      <p class="muted">{d.name} is the only {d.category.toLowerCase()} tool listed so far. <a href="/submit-tool/">Submit a tool</a> in this category and it appears here once a person has reviewed it.</p>
     </section>
   )}
 
-  {sameCategory.length > 0 && (
+  {count > 0 && (
     <section class="section fade-in">
-      <h2 style="margin-top:0;">Quick comparison</h2>
+      <h2 style="margin-top:0;">{d.name} and its alternatives side by side</h2>
       <div class="compare-table-wrap">
-        <table class="compare-table">
-          <thead>
-            <tr>
-              <th>Tool</th>
-              <th>Pricing</th>
-              <th>Rating</th>
-              <th>Best for</th>
-            </tr>
-          </thead>
+        <table class="compare-table wide">
+          <thead><tr><th>Tool</th><th>Starting price</th><th>Free plan</th><th>Platforms</th><th>Deployment</th><th>Company size</th><th>Rating</th><th>Best for</th></tr></thead>
           <tbody>
-            <tr>
-              <td><strong>{d.name}</strong></td>
-              <td>{d.pricing}</td>
-              <td>{d.rating ? `${d.rating}/5` : 'N/A'}</td>
-              <td>{d.bestFor}</td>
-            </tr>
-            {sameCategory.map((t) => (
-              <tr>
-                <td><a href={`/tools/${t.id}/`}>{t.data.name}</a></td>
-                <td>{t.data.pricing}</td>
-                <td>{t.data.rating ? `${t.data.rating}/5` : 'N/A'}</td>
-                <td>{t.data.bestFor}</td>
+            {[tool, ...alternatives].map((t, i) => (
+              <tr class={i === 0 ? 'base-row' : ''}>
+                <td class="compare-label">{i === 0 ? <span>{t.data.name} <span class="meta">(this tool)</span></span> : <a href={`/tools/${t.id}/`}>{t.data.name}</a>}</td>
+                <td>{priceCell(t.data)}</td><td>{freeCell(t.data)}</td><td>{platformsCell(t.data)}</td><td>{deployCell(t.data)}</td><td>{sizeCell(t.data)}</td><td>{ratingCell(t.data)}</td><td>{t.data.bestFor}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <p class="meta" style="margin-top:.6rem;">Entry paid plan on monthly billing where the vendor publishes one. "Not listed" means the data has not been captured yet, not that the tool lacks it.{withData < count ? ' Some rows are still being filled in.' : ''}</p>
     </section>
   )}
 
-  {sameCategory.length >= 2 && (
+  {cases.length > 0 && (
     <section class="section fade-in">
-      <h2 style="margin-top:0;">Head to head comparisons</h2>
-      <p class="muted" style="margin-bottom:1rem;">Dive deeper into how {d.name} stacks up against each alternative.</p>
-      <div class="grid">
-        {sameCategory.map((t) => {
-          const [first, second] = [tool.id, t.id].sort();
-          return (
-            <a href={`/tools/compare/${first}-vs-${second}/`} class="card" style="text-decoration:none; color:var(--text);">
-              <h3 style="font-size:.95rem;">{d.name} vs {t.data.name}</h3>
-              <p class="muted" style="margin:0; font-size:.85rem;">Compare pricing, features and ratings side by side</p>
-            </a>
-          );
-        })}
+      <h2 style="margin-top:0;">Which alternative for which situation</h2>
+      <div class="prose">
+        {cases.map((c) => <><h3>{c.title}</h3><p>{c.text}</p></>)}
+        {hasFreePlan(d) && !cases.some((c) => c.title === 'You want a free plan') && <p>{d.name} already has a free plan, so price is rarely the reason to leave. The gaps in the feature matrix on each compare page are the better guide.</p>}
       </div>
     </section>
   )}
 
-  {otherCategory.length > 0 && (
+  {adjacent.length > 0 && (
     <section class="section fade-in">
       <div class="related-section">
-        <h3>Other tools you might consider</h3>
-        <div class="grid">{otherCategory.map((t) => <ToolCard tool={t} />)}</div>
+        <h3>Nearby in {v.name}, not direct replacements</h3>
+        <p class="muted" style="margin:-.5rem 0 1rem; font-size:.9rem;">These solve a neighbouring problem in {v.name.toLowerCase()}. Worth a look if the job you hired {d.name} for has changed.</p>
+        <div class="grid">{adjacent.map((t) => <ToolCard tool={t} />)}</div>
       </div>
     </section>
   )}

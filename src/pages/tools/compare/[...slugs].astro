@@ -2,126 +2,217 @@
 import Base from '../../../layouts/Base.astro';
 import ToolCard from '../../../components/ToolCard.astro';
 import { getCollection } from 'astro:content';
+import { getVertical } from '../../../data/taxonomy';
+import { derivedPicks, editorialRank, featureMatrix, fmtDate, hasFreePlan, midSentence, pairPath, specRows, type Tool } from '../../../lib/compare';
 
 export async function getStaticPaths() {
   const tools = await getCollection('tools');
-  const paths: { params: { slugs: string }; props: { toolA: any; toolB: any } }[] = [];
-
-  for (let i = 0; i < tools.length; i++) {
-    for (let j = i + 1; j < tools.length; j++) {
-      if (tools[i].data.category === tools[j].data.category) {
-        const a = tools[i];
-        const b = tools[j];
-        const [first, second] = [a, b].sort((x, y) => x.id.localeCompare(y.id));
-        paths.push({
-          params: { slugs: `${first.id}-vs-${second.id}` },
-          props: { toolA: first, toolB: second },
-        });
-      }
-    }
+  const verdicts = await getCollection('comparisons');
+  const bySlug = new Map(tools.map((t) => [t.id, t]));
+  const seen = new Set<string>();
+  const paths: { params: { slugs: string }; props: { toolA: Tool; toolB: Tool; verdict?: (typeof verdicts)[number] } }[] = [];
+  const add = (a: Tool, b: Tool) => {
+    const [first, second] = [a, b].sort((x, y) => x.id.localeCompare(y.id));
+    const key = `${first.id}-vs-${second.id}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    paths.push({ params: { slugs: key }, props: { toolA: first, toolB: second, verdict: verdicts.find((v) => v.id === key) } });
+  };
+  // Every pair in the same category gets a page.
+  for (let i = 0; i < tools.length; i++) for (let j = i + 1; j < tools.length; j++) if (tools[i].data.category === tools[j].data.category) add(tools[i], tools[j]);
+  // Editorial verdicts can pair tools across categories in the same vertical (Intercom vs Zendesk, Ramp vs Brex).
+  for (const v of verdicts) {
+    const a = bySlug.get(v.data.toolA);
+    const b = bySlug.get(v.data.toolB);
+    if (a && b && a.data.vertical === b.data.vertical) add(a, b);
   }
-
   return paths;
 }
 
-const { toolA, toolB } = Astro.props;
+const { toolA, toolB, verdict } = Astro.props;
 const a = toolA.data;
 const b = toolB.data;
-
-const fields = [
-  { label: 'Category', valA: a.category, valB: b.category },
-  { label: 'Pricing', valA: a.pricing, valB: b.pricing },
-  { label: 'Best for', valA: a.bestFor, valB: b.bestFor },
-  { label: 'Rating', valA: a.rating ? `${a.rating} / 5` : 'Not rated', valB: b.rating ? `${b.rating} / 5` : 'Not rated' },
-];
-
+const v = getVertical(a.vertical);
+const sameCategory = a.category === b.category;
+const scope = sameCategory ? a.category : v.name;
 const relA = a.featured ? 'noopener' : 'nofollow noopener';
 const relB = b.featured ? 'noopener' : 'nofollow noopener';
 
-const allTools = await getCollection('tools');
-const related = allTools
-  .filter((t) => t.data.category === a.category && t.id !== toolA.id && t.id !== toolB.id)
-  .sort((x, y) => Number(y.data.featured) - Number(x.data.featured) || Number(y.data.editorsPick) - Number(x.data.editorsPick))
-  .slice(0, 3);
+const rows = specRows([a, b]);
+const matrix = featureMatrix(a.vertical, [a, b]);
+const hasData = (d: typeof a) => d.pros.length > 0 || d.keyFeatures.length > 0 || !!d.startingPrice;
+const checked = [a.dataCheckedAt, b.dataCheckedAt].filter(Boolean) as Date[];
+const lastChecked = checked.length === 2 ? new Date(Math.min(...checked.map((d) => d.getTime()))) : undefined;
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'WebPage',
-  name: `${a.name} vs ${b.name}`,
-  description: `Side by side comparison of ${a.name} and ${b.name} for ${a.category.toLowerCase()}.`,
-  url: new URL(Astro.url.pathname, Astro.site).toString(),
-};
+const pickA = verdict?.data.pickAIf.length ? verdict.data.pickAIf : derivedPicks(a, b);
+const pickB = verdict?.data.pickBIf.length ? verdict.data.pickBIf : derivedPicks(b, a);
+const winnerName = verdict?.data.winner === toolA.id ? a.name : verdict?.data.winner === toolB.id ? b.name : undefined;
+
+// Short answer at the top: the editorial call when there is one, otherwise the two verdict lines, otherwise best-for.
+const shortAnswer = winnerName
+  ? `${winnerName} is the better default for most buyers. ${verdict!.data.winnerReason ?? ''}`.trim()
+  : a.verdictLine && b.verdictLine
+    ? `${a.verdictLine} ${b.verdictLine}`
+    : `${a.name} is built for ${midSentence(a.bestFor)}; ${b.name} is built for ${midSentence(b.bestFor)}.`;
+
+// Integrations: shared, only A, only B
+const setB = new Set(b.integrations);
+const setA = new Set(a.integrations);
+const shared = a.integrations.filter((x) => setB.has(x));
+const onlyA = a.integrations.filter((x) => !setB.has(x));
+const onlyB = b.integrations.filter((x) => !setA.has(x));
+
+// Templated verdict when no editorial one exists: honest, built only from the data we have.
+const templated: string[] = [];
+if (!verdict) {
+  const priceA = a.startingPrice ? `starts at ${a.startingPrice}` : a.pricing === 'Free' ? 'is free' : 'quotes on request';
+  const priceB = b.startingPrice ? `starts at ${b.startingPrice}` : b.pricing === 'Free' ? 'is free' : 'quotes on request';
+  templated.push(`${a.name} ${priceA}${hasFreePlan(a) ? ' with a permanent free plan' : ''}. ${b.name} ${priceB}${hasFreePlan(b) ? ' with a permanent free plan' : ''}. On paper ${a.name} suits ${midSentence(a.bestFor)} and ${b.name} suits ${midSentence(b.bestFor)}.`);
+  const onlyFa = a.keyFeatures.filter((f) => b.keyFeatures.length && !b.keyFeatures.includes(f));
+  const onlyFb = b.keyFeatures.filter((f) => a.keyFeatures.length && !a.keyFeatures.includes(f));
+  if (onlyFa.length || onlyFb.length) {
+    templated.push([
+      onlyFa.length ? `${a.name} lists ${onlyFa.slice(0, 3).join(', ')} where ${b.name} does not.` : '',
+      onlyFb.length ? `${b.name} lists ${onlyFb.slice(0, 3).join(', ')} where ${a.name} does not.` : '',
+      'If one of those is the reason you are switching, the choice is made; if not, the pricing model and the deployment options decide it.',
+    ].filter(Boolean).join(' '));
+  }
+  templated.push(`We have not written a hand-picked verdict for this pair yet. The tables above come from each vendor's own pricing and documentation pages${lastChecked ? `, last checked on ${fmtDate(lastChecked)}` : ''}, and the full reviews of ${a.name} and ${b.name} say where each one falls short.`);
+}
+
+const allTools = await getCollection('tools');
+const related = allTools.filter((t) => t.data.category === a.category && t.id !== toolA.id && t.id !== toolB.id).sort(editorialRank).slice(0, 3);
+const otherPairs = allTools
+  .filter((t) => t.data.category === a.category && t.id !== toolA.id && t.id !== toolB.id)
+  .sort(editorialRank)
+  .slice(0, 4)
+  .flatMap((t) => [{ label: `${a.name} vs ${t.data.name}`, href: pairPath(toolA.id, t.id) }, { label: `${b.name} vs ${t.data.name}`, href: pairPath(toolB.id, t.id) }])
+  .slice(0, 6);
+
+const year = new Date().getFullYear();
+// Keep the title tag near 60 characters: long product names drop the descriptive tail.
+const base = `${a.name} vs ${b.name} (${year})`;
+const title = base.length <= 30 ? `${base}: pricing, features and which to pick` : base.length <= 45 ? `${base}: which to pick` : base;
+const description = `${a.name} or ${b.name} for ${scope.toLowerCase()}? Starting price, free plans, platforms, a feature by feature matrix, pros and cons, and who each one is for.`;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const jsonLd = [
+  { '@context': 'https://schema.org', '@type': 'WebPage', name: `${a.name} vs ${b.name}`, description, url: pageUrl, ...(verdict?.data.reviewedAt ? { dateModified: verdict.data.reviewedAt.toISOString().slice(0, 10) } : {}) },
+  {
+    '@context': 'https://schema.org', '@type': 'ItemList', name: `${a.name} vs ${b.name}`, url: pageUrl,
+    itemListElement: [toolA, toolB].map((t, i) => ({ '@type': 'ListItem', position: i + 1, url: new URL(`/tools/${t.id}/`, Astro.site).toString(), name: t.data.name })),
+  },
+];
+const mark = (m: 'yes' | 'no' | 'unknown') => (m === 'yes' ? '<span class="mark yes" title="Listed by the vendor">✓</span>' : m === 'no' ? '<span class="mark no" title="Not in the vendor\'s feature list">✕</span>' : '<span class="mark unknown">not listed</span>');
 ---
-<Base title={`${a.name} vs ${b.name}: which is better for ${a.category.toLowerCase()}?`} description={`Compare ${a.name} and ${b.name} side by side. Pricing, ratings, best use cases and key differences for ${a.category.toLowerCase()} teams.`} jsonLd={jsonLd}>
+<Base title={title} description={description} jsonLd={jsonLd}>
   <section class="hero">
-    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">{a.category}</p>
+    <p class="meta eyebrow"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {scope}</p>
     <h1>{a.name} vs {b.name}</h1>
-    <p class="lead">A side by side look at two {a.category.toLowerCase()} tools to help you pick the right one for your team.</p>
+    <p class="lead"><strong>Short answer:</strong> {shortAnswer}</p>
+    <p class="meta">
+      {verdict?.data.reviewedAt ? `Editorial verdict reviewed ${fmtDate(verdict.data.reviewedAt)}. ` : ''}
+      {lastChecked ? `Pricing and features checked against both vendors' sites on ${fmtDate(lastChecked)}.` : 'Pricing and features come from each vendor\'s published pages and are re-checked by our editors; the date appears here once that check is logged.'}
+      {!sameCategory && ` ${a.name} is listed under ${a.category} and ${b.name} under ${b.category}; people compare them because they overlap in practice.`}
+    </p>
   </section>
 
   <section class="section fade-in">
     <div class="compare-grid">
-      <div class="compare-col">
-        {a.thumbnail ? (
-          <img class="compare-thumb" src={a.thumbnail} alt={a.name} width="600" height="400" loading="lazy" />
-        ) : (
-          <div class="compare-thumb-placeholder"><span>{a.name.charAt(0)}</span></div>
-        )}
-        <h2 style="margin-top:.75rem;">{a.name}</h2>
-        <p class="muted" style="font-size:.93rem;">{a.tagline}</p>
-        <div class="row" style="margin-top:.5rem;">
-          <a class="btn ghost" href={`/tools/${toolA.id}/`} style="font-size:.85rem; padding:.4rem .9rem;">Read review</a>
-          <a class="btn ghost" href={a.website} target="_blank" rel={relA} style="font-size:.85rem; padding:.4rem .9rem;">Visit site</a>
-        </div>
-      </div>
-      <div class="compare-vs">vs</div>
-      <div class="compare-col">
-        {b.thumbnail ? (
-          <img class="compare-thumb" src={b.thumbnail} alt={b.name} width="600" height="400" loading="lazy" />
-        ) : (
-          <div class="compare-thumb-placeholder"><span>{b.name.charAt(0)}</span></div>
-        )}
-        <h2 style="margin-top:.75rem;">{b.name}</h2>
-        <p class="muted" style="font-size:.93rem;">{b.tagline}</p>
-        <div class="row" style="margin-top:.5rem;">
-          <a class="btn ghost" href={`/tools/${toolB.id}/`} style="font-size:.85rem; padding:.4rem .9rem;">Read review</a>
-          <a class="btn ghost" href={b.website} target="_blank" rel={relB} style="font-size:.85rem; padding:.4rem .9rem;">Visit site</a>
-        </div>
-      </div>
+      {[[toolA, a, relA], [toolB, b, relB]].map(([t, d, rel]: any, i) => (
+        <>
+          {i === 1 && <div class="compare-vs">vs</div>}
+          <div class="compare-col">
+            {d.thumbnail ? <img class="compare-thumb" src={d.thumbnail} alt={d.name} width="600" height="400" loading="lazy" /> : <div class="compare-thumb-placeholder"><span>{d.name.charAt(0)}</span></div>}
+            <h2 style="margin-top:.75rem;">{d.name}</h2>
+            <p class="muted" style="font-size:.93rem;">{d.tagline}</p>
+            {d.verdictLine && <p class="verdict-line">{d.verdictLine}</p>}
+            <div class="row" style="margin-top:.5rem; justify-content:center;">
+              <a class="btn ghost sm" href={`/tools/${t.id}/`}>Read review</a>
+              <a class="btn ghost sm" href={d.website} target="_blank" rel={rel}>Visit site</a>
+            </div>
+          </div>
+        </>
+      ))}
     </div>
   </section>
 
   <section class="section fade-in">
-    <h2 style="margin-top:0;">Quick comparison</h2>
+    <h2 style="margin-top:0;">{a.name} vs {b.name} at a glance</h2>
     <div class="compare-table-wrap">
       <table class="compare-table">
-        <thead>
-          <tr>
-            <th>Feature</th>
-            <th>{a.name}</th>
-            <th>{b.name}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {fields.map(({ label, valA, valB }) => (
-            <tr>
-              <td class="compare-label">{label}</td>
-              <td>{valA}</td>
-              <td>{valB}</td>
-            </tr>
-          ))}
-        </tbody>
+        <thead><tr><th></th><th>{a.name}</th><th>{b.name}</th></tr></thead>
+        <tbody>{rows.map((r) => <tr><td class="compare-label">{r.label}</td>{r.cells.map((c) => <td>{c}</td>)}</tr>)}</tbody>
       </table>
+    </div>
+    <p class="meta" style="margin-top:.6rem;">Prices are the vendor's entry paid plan on monthly billing where published; annual billing is usually cheaper. Ratings are ours and are never affected by paid placement.</p>
+  </section>
+
+  {matrix.length > 0 && (
+    <section class="section fade-in">
+      <h2 style="margin-top:0;">Feature by feature</h2>
+      <p class="muted" style="margin-bottom:1rem;">A tick means the vendor documents the capability. A cross means it is not in that vendor's feature list. "Not listed" means we have not captured feature data for that tool yet.</p>
+      <div class="compare-table-wrap">
+        <table class="compare-table matrix">
+          <thead><tr><th>Capability</th><th>{a.name}</th><th>{b.name}</th></tr></thead>
+          <tbody>{matrix.map((r) => <tr><td class="compare-label">{r.feature}</td>{r.marks.map((m) => <td set:html={mark(m)} />)}</tr>)}</tbody>
+        </table>
+      </div>
+      {lastChecked && <p class="meta" style="margin-top:.6rem;">Checked against vendor documentation on {fmtDate(lastChecked)}.</p>}
+    </section>
+  )}
+
+  {(a.pros.length || b.pros.length) > 0 && (
+    <section class="section fade-in">
+      <h2 style="margin-top:0;">Pros and cons</h2>
+      <div class="two-col">
+        {[a, b].map((d) => (
+          <div class="card pc-card">
+            <h3>{d.name}</h3>
+            {d.pros.length > 0 && <><p class="pc-head pro">Where it is strong</p><ul class="pc-list pro">{d.pros.map((x) => <li>{x}</li>)}</ul></>}
+            {d.cons.length > 0 && <><p class="pc-head con">Where it falls short</p><ul class="pc-list con">{d.cons.map((x) => <li>{x}</li>)}</ul></>}
+            {!hasData(d) && <p class="muted">We have not captured structured data for {d.name} yet. The full review covers its strengths and limits.</p>}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0;">Which one should you pick?</h2>
+    <div class="two-col" style="margin-bottom:2rem;">
+      <div class="card pick-card">
+        <h3>Pick {a.name} if</h3>
+        {pickA.length ? <ul class="pick-list">{pickA.map((x) => <li>{x}</li>)}</ul> : <p class="muted">Best for {midSentence(a.bestFor)}.</p>}
+      </div>
+      <div class="card pick-card">
+        <h3>Pick {b.name} if</h3>
+        {pickB.length ? <ul class="pick-list">{pickB.map((x) => <li>{x}</li>)}</ul> : <p class="muted">Best for {midSentence(b.bestFor)}.</p>}
+      </div>
+    </div>
+    <div class="prose">
+      {verdict ? (
+        <>
+          {winnerName && <p class="our-call"><strong>Our call: {winnerName}.</strong> {verdict.data.winnerReason}</p>}
+          <div set:html={verdict.data.verdictHtml} />
+        </>
+      ) : (
+        templated.map((p) => <p>{p}</p>)
+      )}
+      <p><a href={`/tools/${toolA.id}/`}>Read the {a.name} review</a> and <a href={`/tools/${toolB.id}/`}>the {b.name} review</a> for the detail behind this page.</p>
     </div>
   </section>
 
-  <section class="section fade-in prose">
-    <h2>When to pick {a.name}</h2>
-    <p>{a.name} is best for {a.bestFor.toLowerCase()}. It uses a {a.pricing.toLowerCase()} pricing model{a.rating ? ` and we rated it ${a.rating} out of 5` : ''}. <a href={`/tools/${toolA.id}/`}>Read the full review</a> to see where it shines and where it falls short.</p>
-
-    <h2>When to pick {b.name}</h2>
-    <p>{b.name} is best for {b.bestFor.toLowerCase()}. It uses a {b.pricing.toLowerCase()} pricing model{b.rating ? ` and we rated it ${b.rating} out of 5` : ''}. <a href={`/tools/${toolB.id}/`}>Read the full review</a> to see where it shines and where it falls short.</p>
-  </section>
+  {(shared.length || onlyA.length || onlyB.length) > 0 && (
+    <section class="section fade-in">
+      <h2 style="margin-top:0;">Integrations</h2>
+      <div class="prose">
+        {shared.length > 0 && <p><strong>Both connect to</strong> {shared.join(', ')}.</p>}
+        {onlyA.length > 0 && <p><strong>Only {a.name}</strong> lists {onlyA.join(', ')}.</p>}
+        {onlyB.length > 0 && <p><strong>Only {b.name}</strong> lists {onlyB.join(', ')}.</p>}
+        <p class="meta">Native integrations as documented by each vendor, up to ten each. Most tools also connect through Zapier or Make.</p>
+      </div>
+    </section>
+  )}
 
   {related.length > 0 && (
     <section class="section fade-in">
@@ -132,7 +223,11 @@ const jsonLd = {
     </section>
   )}
 
-  <section class="section fade-in" style="text-align:center;">
-    <p class="muted">Looking for more? <a href="/tools/">Browse all tools</a> or see <a href={`/tools/alternatives/${toolA.id}/`}>alternatives to {a.name}</a>.</p>
+  <section class="section fade-in">
+    <div class="row" style="justify-content:center; gap:.6rem;">
+      <a class="btn ghost sm" href={`/tools/alternatives/${toolA.id}/`}>{a.name} alternatives</a>
+      <a class="btn ghost sm" href={`/tools/alternatives/${toolB.id}/`}>{b.name} alternatives</a>
+      {otherPairs.map((p) => <a class="btn ghost sm" href={p.href}>{p.label}</a>)}
+    </div>
   </section>
 </Base>

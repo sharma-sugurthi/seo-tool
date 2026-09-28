@@ -2,6 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { getVertical, verticalSlugs } from './data/taxonomy';
 import { apiToolsLoader } from './loaders/tools';
 import { apiPostsLoader } from './loaders/posts';
+import { apiComparisonsLoader } from './loaders/comparisons';
 
 // Articles live in the backend database too (editorial and sponsored). Written and approved in the admin.
 const blog = defineCollection({
@@ -42,6 +43,23 @@ const tools = defineCollection({
       editorsPick: z.boolean().default(false),
       thumbnail: z.string().optional(),
       addedDate: z.coerce.date(),
+      // Comparison data, filled in the admin (or by the submitter) and shown on the vs, alternatives and tool pages. All optional.
+      pros: z.array(z.string()).default([]),
+      cons: z.array(z.string()).default([]),
+      // Labels from FEATURES[vertical] in src/data/taxonomy.ts. Drives the tick and cross matrix.
+      keyFeatures: z.array(z.string()).default([]),
+      platforms: z.array(z.string()).default([]),
+      integrations: z.array(z.string()).default([]),
+      // Cheapest paid plan as a phrase, e.g. "$20 per user per month". Missing means quote only or unknown.
+      startingPrice: z.string().optional(),
+      freeTier: z.boolean().optional(),
+      trialDays: z.number().int().optional(),
+      deployment: z.enum(['cloud', 'self-hosted', 'both']).optional(),
+      companySize: z.array(z.enum(['solo', 'small', 'mid', 'enterprise'])).default([]),
+      // One sentence, "Pick X if ...". Shown as the short answer on compare and alternatives pages.
+      verdictLine: z.string().optional(),
+      // When a person last checked pricing and features against the vendor's site. Shown under the tables.
+      dataCheckedAt: z.coerce.date().optional(),
     })
     .superRefine((d, ctx) => {
       const v = getVertical(d.vertical);
@@ -55,4 +73,19 @@ const tools = defineCollection({
     }),
 });
 
-export const collections = { blog, tools };
+// Hand-written verdicts for the pairs with real search demand. Every other pair renders the data-driven page.
+const comparisons = defineCollection({
+  loader: apiComparisonsLoader(),
+  schema: z.object({
+    toolA: z.string(),
+    toolB: z.string(),
+    verdictHtml: z.string(),
+    pickAIf: z.array(z.string()).default([]),
+    pickBIf: z.array(z.string()).default([]),
+    winner: z.string().optional(),
+    winnerReason: z.string().optional(),
+    reviewedAt: z.coerce.date().optional(),
+  }),
+});
+
+export const collections = { blog, tools, comparisons };

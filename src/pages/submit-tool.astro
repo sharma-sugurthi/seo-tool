@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { SITE, ADVERTISE_PRICES, SPONSORED_WRITING_FEE } from '../site.config';
-import { VERTICALS } from '../data/taxonomy';
+import { VERTICALS, FEATURES, PLATFORMS, DEPLOYMENTS, COMPANY_SIZES } from '../data/taxonomy';
 const featured = ADVERTISE_PRICES.find((p) => p.name === 'Featured tool listing')!;
 const sponsored = ADVERTISE_PRICES.find((p) => p.name === 'Sponsored article')!;
 const featuredPrice = `${featured.price} ${featured.unit}`;
@@ -70,6 +70,33 @@ const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories])
         <label>What do you do better than the alternatives? <textarea name="where_it_shines" required placeholder="Be specific. e.g. 'Answers tickets in the customer's language before an agent sees them.'"></textarea></label>
         <label>Who is this NOT a good fit for? <textarea name="where_it_falls_short" required placeholder="Be honest. e.g. 'Not for solo founders' or 'Needs a team of 50+ to pay off.'"></textarea></label>
         <label>Conclusion (optional) <textarea name="conclusion" placeholder="One paragraph: who should pick it and why."></textarea></label>
+
+        <details class="optional">
+          <summary>Comparison data (optional, but it gets you into the "vs" and "alternatives" pages)</summary>
+          <div class="stack">
+            <p class="muted" style="margin:0; font-size:.88rem;">Everything here is checked by a person before it shows. Tick only what exists today.</p>
+            <label>Pros (one per line, 3 to 5) <textarea name="pros" rows="4" placeholder="Receipts match themselves from a phone photo&#10;Policy checks run at the point of purchase"></textarea></label>
+            <label>Cons (one per line, 2 to 4) <textarea name="cons" rows="3" placeholder="Cards are US only&#10;No JetBrains plugin"></textarea></label>
+            <div>
+              <span style="font-weight:600; font-size:.92rem;">Features it has</span>
+              <div class="chks" id="feature-box">{FEATURES[VERTICALS[0].slug].map((f) => <label class="chk"><input type="checkbox" name="key_features" value={f} /> {f}</label>)}</div>
+            </div>
+            <div>
+              <span style="font-weight:600; font-size:.92rem;">Platforms</span>
+              <div class="chks">{PLATFORMS.map((p) => <label class="chk"><input type="checkbox" name="platforms" value={p} /> {p}</label>)}</div>
+            </div>
+            <label>Native integrations (comma separated, up to 10) <input name="integrations" placeholder="Slack, HubSpot, QuickBooks" /></label>
+            <label>Starting price of the cheapest paid plan <input name="starting_price" maxlength="60" placeholder="$20 per user per month (leave empty if quote only)" /></label>
+            <label>Permanent free plan? <select name="free_tier"><option value="">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select></label>
+            <label>Free trial length in days (0 for none) <input type="number" name="trial_days" min="0" max="365" /></label>
+            <label>Deployment <select name="deployment"><option value="">Not sure</option>{DEPLOYMENTS.map((x) => <option value={x}>{x}</option>)}</select></label>
+            <div>
+              <span style="font-weight:600; font-size:.92rem;">Company size it fits</span>
+              <div class="chks">{COMPANY_SIZES.map((x) => <label class="chk"><input type="checkbox" name="company_size" value={x} /> {x}</label>)}</div>
+            </div>
+            <label>One line verdict (max 160 characters) <input name="verdict_line" maxlength="160" placeholder="Pick <name> if ..." /></label>
+          </div>
+        </details>
         <label>Notes for the reviewer (not published) <textarea name="notes" placeholder="A category we are missing, a launch date, anything we should know."></textarea></label>
       </div>
 
@@ -94,6 +121,7 @@ const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories])
   </section>
 
   <script type="application/json" id="taxonomy-data" set:html={JSON.stringify(taxonomy)} />
+  <script type="application/json" id="features-data" set:html={JSON.stringify(FEATURES)} />
   <script>
     const sel = document.getElementById('listing-type') as HTMLSelectElement | null;
     const toolFields = document.getElementById('tool-fields');
@@ -133,8 +161,10 @@ const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories])
 
     // Subcategory options follow the chosen category
     const taxonomy: Record<string, string[]> = JSON.parse(document.getElementById('taxonomy-data')?.textContent || '{}');
+    const features: Record<string, string[]> = JSON.parse(document.getElementById('features-data')?.textContent || '{}');
     const verticalSel = document.getElementById('vertical-select') as HTMLSelectElement | null;
     const categorySel = document.getElementById('category-select') as HTMLSelectElement | null;
+    const featureBox = document.getElementById('feature-box');
     verticalSel?.addEventListener('change', () => {
       if (!categorySel) return;
       const cats = taxonomy[verticalSel.value] || [];
@@ -144,6 +174,15 @@ const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories])
         o.textContent = c;
         categorySel.appendChild(o);
       });
+      // Feature checkboxes follow the vertical too
+      if (featureBox) {
+        featureBox.innerHTML = '';
+        (features[verticalSel.value] || []).forEach((f) => {
+          const l = document.createElement('label'); l.className = 'chk';
+          const i = document.createElement('input'); i.type = 'checkbox'; i.name = 'key_features'; i.value = f;
+          l.append(i, ' ' + f); featureBox.appendChild(l);
+        });
+      }
     });
   </script>
 </Base>

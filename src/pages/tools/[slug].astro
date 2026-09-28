@@ -5,6 +5,7 @@ import Newsletter from '../../components/Newsletter.astro';
 import { getCollection, render } from 'astro:content';
 import { SITE } from '../../site.config';
 import { getVertical } from '../../data/taxonomy';
+import { deployCell, fmtDate, freeCell, pairPath, priceCell, trialCell, editorialRank } from '../../lib/compare';
 
 export async function getStaticPaths() {
   const tools = await getCollection('tools');
@@ -44,6 +45,15 @@ const rank = (a: any, b: any) => Number(b.data.featured) - Number(a.data.feature
 const sameCategory = allTools.filter((t) => t.data.category === d.category && t.id !== tool.id).sort(rank);
 const sameVertical = allTools.filter((t) => t.data.vertical === d.vertical && t.data.category !== d.category && t.id !== tool.id).sort(rank);
 const similar = [...sameCategory, ...sameVertical].slice(0, 3);
+// Compare links use the editorial ranking (rating, then editor's pick), never paid placement.
+const comparePeers = [...sameCategory].sort(editorialRank).slice(0, 3);
+const facts: [string, string][] = [
+  ...(d.startingPrice || d.pricing === 'Free' || d.pricing === 'Enterprise' ? [['Starting price', priceCell(d)] as [string, string]] : []),
+  ...(d.freeTier != null || d.pricing === 'Free' ? [['Free plan', freeCell(d)] as [string, string]] : []),
+  ...(d.trialDays != null ? [['Free trial', trialCell(d)] as [string, string]] : []),
+  ...(d.deployment ? [['Deployment', deployCell(d)] as [string, string]] : []),
+  ...(d.platforms.length ? [['Platforms', d.platforms.join(', ')] as [string, string]] : []),
+];
 ---
 <Base title={`${d.name} review: ${d.tagline}`} description={`${d.name} for ${d.category.toLowerCase()}. ${d.tagline} Pricing: ${d.pricing}. Best for ${d.bestFor}.`} jsonLd={jsonLd} image={d.thumbnail}>
   <div class="section tool-layout">
@@ -89,11 +99,23 @@ const similar = [...sameCategory, ...sameVertical].slice(0, 3);
             </div>
           )}
         </div>
+        {facts.length > 0 && (
+          <dl class="facts sidebar-facts">
+            {facts.map(([k, val]) => <div><dt>{k}</dt><dd>{val}</dd></div>)}
+          </dl>
+        )}
         <a class="btn" href={d.website} rel={rel} target="_blank" style="width:100%; justify-content:center; padding:1rem; font-size:1.05rem;">Visit {d.name} →</a>
         <div style="text-align: center; margin-top: 1rem;">
           <a href="/submit-tool/" style="font-size: 0.85rem; color: var(--muted); text-decoration: none;">Manage this listing</a>
         </div>
       </div>
+      {(d.pros.length || d.cons.length) > 0 && (
+        <div class="action-card pc-card" style="margin-top:1rem;">
+          {d.pros.length > 0 && <><p class="pc-head pro">Where it is strong</p><ul class="pc-list pro">{d.pros.map((x) => <li>{x}</li>)}</ul></>}
+          {d.cons.length > 0 && <><p class="pc-head con">Where it falls short</p><ul class="pc-list con">{d.cons.map((x) => <li>{x}</li>)}</ul></>}
+          {d.dataCheckedAt && <p class="meta" style="margin:.6rem 0 0;">Checked against the vendor's site on {fmtDate(d.dataCheckedAt)}.</p>}
+        </div>
+      )}
     </aside>
   </div>
 
@@ -109,10 +131,7 @@ const similar = [...sameCategory, ...sameVertical].slice(0, 3);
   <section class="section fade-in" style="text-align:center;">
     <div class="row" style="justify-content:center;">
       <a class="btn ghost" href={`/tools/alternatives/${tool.id}/`}>Alternatives to {d.name}</a>
-      {sameCategory.length > 0 && sameCategory.slice(0, 1).map((t) => {
-        const [first, second] = [tool.id, t.id].sort();
-        return <a class="btn ghost" href={`/tools/compare/${first}-vs-${second}/`}>{d.name} vs {t.data.name}</a>;
-      })}
+      {comparePeers.map((t) => <a class="btn ghost" href={pairPath(tool.id, t.id)}>{d.name} vs {t.data.name}</a>)}
     </div>
   </section>
 
