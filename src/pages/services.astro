@@ -2,121 +2,180 @@
 import Base from '../layouts/Base.astro';
 import PriceTable from '../components/PriceTable.astro';
 import ContactForm from '../components/ContactForm.astro';
-import { CONTENT_SERVICES, DISTRIBUTION_SERVICES } from '../site.config';
+import { SITE, CONTENT_SERVICES, DISTRIBUTION_SERVICES, FIXED_PRICE_ITEMS, BUNDLE_DISCOUNT } from '../site.config';
 
 const faqs = [
   {
     q: 'How quickly will I see results?',
-    a: 'Guest post links go live within 2 to 3 weeks. SEO content takes 2 to 4 months to move rankings meaningfully. AI citation improvements depend on model update cycles but typically surface within 6 to 8 weeks of new content being indexed.',
+    a: 'Guest post links go live within two to three weeks. SEO content takes two to four months to move rankings. AI citations follow the model update cycles and typically show up six to eight weeks after new content is indexed.',
   },
   {
-    q: 'Do I need to sign a long contract?',
-    a: 'No. Every service is pay per deliverable or month to month. We keep clients by delivering results, not by locking them in. Bundle content and distribution and save 15 percent.',
+    q: 'Is there a contract?',
+    a: 'No. Every service is priced per deliverable or per month. Stop whenever you like.',
   },
   {
     q: 'Where do the guest post links come from?',
-    a: 'Real publications in your niche with organic traffic, vetted by hand. We share the site list before we write a word, and you pay per live link, not per attempt.',
+    a: 'Publications in your niche with organic traffic, vetted by hand. You see the site list before a word is written, and you pay per live link, not per attempt.',
   },
   {
-    q: 'Can I see examples of your work?',
-    a: 'Yes. On a discovery call we share anonymised examples of placements, LinkedIn content and SEO articles we have produced for similar companies. We also run this site as a live portfolio.',
+    q: 'Can I see examples?',
+    a: 'On the kickoff call we walk through anonymised placements, LinkedIn content and SEO articles for companies like yours. This site is the live portfolio: the reviews, the compare pages and the rankings are the work.',
   },
   {
-    q: 'Do you offer an AI visibility audit?',
-    a: 'Yes, and it is free with any order. Before we start we check how often ChatGPT, Perplexity, Gemini and Google AI Overviews mention you versus competitors, and which sources they cite. That check sets the targets for the work.',
+    q: 'What is the AI visibility audit?',
+    a: 'Before any work starts we check how often ChatGPT, Perplexity, Gemini and Google AI Overviews mention you against your competitors, and which sources they cite. That sets the targets. It is included with every order.',
   },
   {
     q: 'How do I pay?',
-    a: 'The directory package is paid by card, Apple Pay or Google Pay at checkout and the receipt comes from Dodo Payments, our payment provider. Quoted work (content, placements, LinkedIn) is confirmed by email with a payment link the same day. No retainers, no long contracts.',
+    a: 'Fixed-price items check out below by card, Apple Pay or Google Pay; the receipt comes from Dodo Payments, our merchant of record. Quoted work is confirmed with a scope and a payment link the same business day.',
   },
   {
-    q: 'What industries do you specialise in?',
-    a: 'B2B software of any kind. Our deepest network is in finance, accounting and fintech, and we have placed and written for dev tools, HR, ecommerce and marketing products. On the kickoff call we show you the sites we already work with in your space.',
+    q: 'Which industries?',
+    a: 'B2B software of any kind. The deepest network is in finance, accounting and fintech; we have also placed and written for developer tools, HR, ecommerce and marketing products. On the kickoff call you see the sites we already work with in your space.',
   },
 ];
-
 const steps = [
-  { title: 'Place your order', body: 'Buy the directory package directly, or send the order form for quoted work and get a payment link the same day.' },
-  { title: 'Kickoff call', body: '30 minutes on your buyers, competitors and the questions they ask. We check where you already show up in AI answers.' },
-  { title: 'Execution', body: 'We do the work. Anything published in your name or about your brand is shared for approval first.' },
-  { title: 'Delivery report', body: 'Links live, content published, rankings and AI citations found, in a spreadsheet you own.' },
+  { title: 'Order', body: 'Fixed-price items check out below. Quoted work gets a scope and a payment link the same business day.' },
+  { title: 'Kickoff', body: 'Thirty minutes on your buyers, competitors and the questions they ask. We check where you already show up in AI answers.' },
+  { title: 'Execution', body: 'Anything published in your name or about your brand is shared for approval first.' },
+  { title: 'Report', body: 'Links live, content published, rankings and AI citations found, in a spreadsheet you own.' },
 ];
+const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US')}`;
 ---
-<Base title="Growth services for B2B SaaS: link building, directories, content and LinkedIn" description="Done-for-you guest post placement, directory and listicle submissions, SEO and GEO content, and LinkedIn ghostwriting for SaaS and AI software companies.">
+<Base title="Growth services for B2B software: links, directories, content and LinkedIn" description="Guest post placement, directory and listicle submissions, SEO and GEO content and LinkedIn ghostwriting for SaaS and AI software companies. Priced per deliverable, paid only when live.">
   <section class="hero">
-    <p class="meta" style="margin:0 0 .85rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">For SaaS and AI product teams</p>
+    <p class="meta eyebrow">For SaaS and AI product teams</p>
     <h1>Get found on Google, LinkedIn and inside AI answers</h1>
-    <p class="lead">Buyers now ask ChatGPT and Google's AI Overviews before they book a demo. Those answers are built from listicles, directories, review sites and expert content. We build that footprint for you.</p>
-    <div class="row" style="margin-top:1rem;"><a class="btn" href="#order">Order now</a><a class="btn ghost" href="#how">How it works</a></div>
+    <p class="lead">Buyers ask ChatGPT and Google's AI Overviews before they book a demo. Those answers are built from directories, listicles, review sites and expert content. We build that footprint for you: priced per deliverable, site lists shared before anything is written, links paid only once they are live.</p>
+    <div class="row" style="margin-top:1rem;"><a class="btn" href="#order">Build your order</a><a class="btn ghost" href="#how">How it works</a></div>
   </section>
 
-  <section class="section fade-in">
-    <div class="notice" style="margin-bottom: 2rem;">
-      <strong>Open to any B2B software company.</strong> The directory started in finance, but the outreach, directory submissions and content work cover every niche: dev tools, fintech, ecommerce, HR, martech and the rest. We get products listed on 100+ directories and ranking on Google.
-    </div>
-    <div class="service-category">
-      <p class="meta" style="margin:0 0 .25rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Distribution</p>
-      <h2 style="margin-top:0">We place, you get links</h2>
-      <p class="muted" style="margin-bottom:1rem;">Pay per live link, not per attempt. Prices shown while the directory is under 10K monthly visitors -- your rate is locked in permanently once you order.</p>
-      <PriceTable items={DISTRIBUTION_SERVICES} ctaHref="#order" ctaLabel="Order" />
-    </div>
+  <section class="section reveal">
+    <div class="section-head"><div><p class="meta eyebrow" style="margin-bottom:.35rem;">Distribution</p><h2>Placements on sites people actually read</h2></div></div>
+    <p class="muted" style="margin:0 0 1.25rem; max-width:44rem;">Real publications with organic traffic, vetted by hand. You approve the list first and pay per live link.</p>
+    <PriceTable items={DISTRIBUTION_SERVICES} ctaHref="#order" ctaLabel="Order" />
   </section>
 
-  <section class="section fade-in">
-    <div class="service-category">
-      <p class="meta" style="margin:0 0 .25rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:.76rem; color:var(--accent);">Content</p>
-      <h2 style="margin-top:0">We write, you publish</h2>
-      <p class="muted" style="margin-bottom:1rem;">Pay per deliverable, no retainers. One free revision on every piece. Prices shown while the directory is under 10K monthly visitors.</p>
-      <PriceTable items={CONTENT_SERVICES} ctaHref="#order" ctaLabel="Order" />
-    </div>
+  <section class="section reveal">
+    <div class="section-head"><div><p class="meta eyebrow" style="margin-bottom:.35rem;">Content</p><h2>Written for search engines and the models that read them</h2></div></div>
+    <p class="muted" style="margin:0 0 1.25rem; max-width:44rem;">Keyword and AI citation research first, then the piece, fact-checked, with schema and meta tags. One free revision on every deliverable.</p>
+    <PriceTable items={CONTENT_SERVICES} ctaHref="#order" ctaLabel="Order" />
   </section>
 
-  <section class="section fade-in">
-    <div class="notice">
-      <strong>Bundle and save.</strong> Order from both Content and Distribution and get 15% off the total. Just mention it in your order and we will apply the discount to your invoice.
-    </div>
-    <div class="notice" style="margin-top:1rem;">
-      <strong>Directory package deliverable.</strong> You receive a spreadsheet within 7 business days: every directory name, URL, submission date and live status. That is the exact report, every time.
-    </div>
+  <section class="section reveal" id="order">
+    <div class="section-head"><h2>Build your order</h2><span class="meta">Fixed-price items. Checkout in one step.</span></div>
+    <form class="builder" id="builder" action={`${SITE.apiBase}/checkout/order-builder`} method="POST">
+      <div class="builder-items">
+        {FIXED_PRICE_ITEMS.map((it) => (
+          <div class="b-item" data-key={it.key} data-cents={it.cents}>
+            <span class="b-check">{it.max > 1
+              ? <input type="number" name={`qty_${it.key}`} min="0" max={it.max} value="0" class="qty" aria-label={`Number of ${it.name.toLowerCase()}`} />
+              : <input type="checkbox" name={`item_${it.key}`} value="1" />}</span>
+            <span class="b-body">
+              <span class="b-name">{it.name} <b>{money(it.cents)} <small>{it.unit}</small></b></span>
+              <span class="b-desc">{it.description}</span>
+              {it.addon && (
+                <label class="chk-row b-addon"><input type="checkbox" name={it.addon.key} value="1" data-addon-cents={it.addon.cents} /> {it.addon.label} <b>+{money(it.addon.cents)} {it.addon.unit}</b></label>
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div class="card builder-summary">
+        <h3>Your order</h3>
+        <ul class="summary-lines" id="summary-lines"><li class="muted">Nothing selected yet.</li></ul>
+        <div class="summary-row"><span>Subtotal</span><b id="sum-sub">$0</b></div>
+        <div class="summary-row discount" id="sum-discount-row" hidden><span>Bundle discount, {BUNDLE_DISCOUNT.percent}%</span><b id="sum-discount">$0</b></div>
+        <div class="summary-row total"><span>Total</span><b id="sum-total">$0</b></div>
+        <p class="meta" id="bundle-hint">Add {BUNDLE_DISCOUNT.minItems} different items and {BUNDLE_DISCOUNT.percent}% comes off the whole order at checkout.</p>
+        <div class="stack" style="margin-top:1rem;">
+          <label>Company <input name="company" required maxlength="80" /></label>
+          <label>Website <input type="url" name="website" required placeholder="https://" /></label>
+          <label>Work email <input type="email" name="email" required autocomplete="email" /></label>
+          <label>Your name <input name="name" autocomplete="name" /></label>
+          <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+          {SITE.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={SITE.turnstileSiteKey}></div>}
+          <button class="btn" type="submit" id="checkout-btn" disabled>Checkout</button>
+          <p class="meta" style="margin:0;">Card, Apple Pay or Google Pay through Dodo Payments. Listings and articles are completed from private links after payment. Declined listings are refunded in full.</p>
+        </div>
+      </div>
+    </form>
   </section>
 
-  <section class="section fade-in" id="how">
+  <section class="section reveal" id="quote">
+    <div class="section-head"><h2>Quoted work</h2><span class="meta">Guest posts, SEO content, LinkedIn</span></div>
+    <p class="muted" style="margin:0 0 1.25rem; max-width:44rem;">These are scoped to your product and your target sites. Send the brief; a scope and a payment link follow the same business day. Orders that combine content and distribution get the {BUNDLE_DISCOUNT.percent}% bundle discount on the invoice.</p>
+    <ContactForm kind="service-order" options={['Guest post placement', 'SEO and GEO content', 'LinkedIn ghostwriting', 'Content and distribution together']} optionsLabel="Which service?" placeholder="The product or pages to promote, target sites or topics if you have them, anchor text, budget and timeline." submitLabel="Send the brief" />
+  </section>
+
+  <section class="section reveal" id="how">
     <h2 style="margin-top:0">How it works</h2>
     <div class="steps">
       {steps.map((s, i) => (
-        <div class="card">
-          <div class="step-num">{i + 1}</div>
-          <h3>{s.title}</h3>
-          <p class="muted" style="font-size:.93rem;">{s.body}</p>
-        </div>
+        <div class="card"><div class="step-num">{i + 1}</div><h3>{s.title}</h3><p class="muted" style="font-size:.93rem;">{s.body}</p></div>
       ))}
     </div>
   </section>
 
-  <section class="section fade-in">
+  <section class="section reveal">
     <h2 style="margin-top:0">What we will not do</h2>
     <ul style="padding-left:1.25rem; display:grid; gap:.5rem;">
       <li>Fake reviews, vote manipulation or astroturfing that breaks a community's rules. It gets accounts banned and brands named in threads.</li>
-      <li>Private blog networks or spun content. Links from sites with no real traffic do not move rankings in 2026.</li>
-      <li>Promise a ranking or a number of AI citations. We show you the work and the movement every month.</li>
+      <li>Private blog networks or spun content. Links from sites with no real traffic do not move rankings.</li>
+      <li>Promise a ranking or a number of AI citations. You see the work and the movement every month.</li>
     </ul>
   </section>
 
-  <section class="section fade-in">
-    <h2 style="margin-top:0">Frequently asked questions</h2>
+  <section class="section reveal">
+    <h2 style="margin-top:0">Questions</h2>
     <div class="faq-list">
       {faqs.map(({ q, a }) => (
-        <details class="faq">
-          <summary>{q}</summary>
-          <div class="faq-body"><p>{a}</p></div>
-        </details>
+        <details class="faq"><summary>{q}</summary><div class="faq-body"><p>{a}</p></div></details>
       ))}
     </div>
   </section>
 
-  <section class="section fade-in" id="order">
-    <h2 style="margin-top:0">Place your order</h2>
-    <p class="muted" style="margin-bottom:1rem;">Tell us what you need and we will follow up within one business day to confirm scope and next steps.</p>
-    <ContactForm kind="service-order" options={['SEO and GEO content', 'LinkedIn ghostwriting', 'Guest post placement', 'Directory and listicle package', 'Bundle (content + distribution)']} optionsLabel="Which service?" placeholder="Which service, the product or pages to promote, anchor text if you have it, budget and timeline." />
-  </section>
+  <script type="application/json" id="bundle-data" set:html={JSON.stringify(BUNDLE_DISCOUNT)} />
+  <script>
+    const bundle: { percent: number; minItems: number } = JSON.parse(document.getElementById('bundle-data')?.textContent || '{"percent":0,"minItems":99}');
+    const form = document.getElementById('builder') as HTMLFormElement;
+    const lines = document.getElementById('summary-lines')!;
+    const sub = document.getElementById('sum-sub')!, disc = document.getElementById('sum-discount')!, discRow = document.getElementById('sum-discount-row')!, total = document.getElementById('sum-total')!, hint = document.getElementById('bundle-hint')!;
+    const btn = document.getElementById('checkout-btn') as HTMLButtonElement;
+    const money = (c: number) => `$${(c / 100).toLocaleString('en-US', { minimumFractionDigits: c % 100 ? 2 : 0, maximumFractionDigits: 2 })}`;
+    function recalc() {
+      let subtotal = 0; const distinct = new Set<string>(); const out: string[] = [];
+      form.querySelectorAll<HTMLElement>('.b-item').forEach((item) => {
+        const cents = Number(item.dataset.cents); const key = item.dataset.key!;
+        const qtyEl = item.querySelector<HTMLInputElement>('.qty'); const chk = item.querySelector<HTMLInputElement>('input[type=checkbox][name^=item_]');
+        const qty = qtyEl ? Math.max(0, Math.min(Number(qtyEl.max), Number(qtyEl.value) || 0)) : chk?.checked ? 1 : 0;
+        const addon = item.querySelector<HTMLInputElement>('input[data-addon-cents]');
+        if (addon) addon.disabled = qty === 0;
+        if (!qty) return;
+        distinct.add(key); subtotal += cents * qty;
+        const name = item.querySelector('.b-name')!.childNodes[0].textContent!.trim();
+        out.push(`<li><span>${qty > 1 ? `${qty} x ` : ''}${name}</span><b>${money(cents * qty)}</b></li>`);
+        if (addon?.checked) { const ac = Number(addon.dataset.addonCents) * qty; subtotal += ac; out.push(`<li><span>${qty > 1 ? `${qty} x ` : ''}written by us</span><b>${money(ac)}</b></li>`); }
+      });
+      const discount = distinct.size >= bundle.minItems ? Math.round(subtotal * bundle.percent / 100) : 0;
+      lines.innerHTML = out.join('') || '<li class="muted">Nothing selected yet.</li>';
+      sub.textContent = money(subtotal); disc.textContent = `-${money(discount)}`; discRow.hidden = !discount; total.textContent = money(subtotal - discount);
+      hint.textContent = discount ? `${bundle.percent}% bundle discount applied at checkout.` : distinct.size === 1 ? `Add one more different item and ${bundle.percent}% comes off the whole order.` : `Add ${bundle.minItems} different items and ${bundle.percent}% comes off the whole order at checkout.`;
+      btn.disabled = subtotal === 0;
+      btn.textContent = subtotal ? `Checkout, ${money(subtotal - discount)}` : 'Checkout';
+    }
+    form.addEventListener('input', recalc); form.addEventListener('change', recalc); recalc();
+    // Clicking anywhere on an item row toggles it (inputs and the add-on keep their own behaviour)
+    form.querySelectorAll<HTMLElement>('.b-item').forEach((item) => item.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('input, .b-addon, a')) return;
+      const chk = item.querySelector<HTMLInputElement>('input[type=checkbox][name^=item_]'); const qty = item.querySelector<HTMLInputElement>('.qty');
+      if (chk) chk.checked = !chk.checked; else if (qty) qty.value = Number(qty.value) ? '0' : '1';
+      recalc();
+    }));
+    // "Order" buttons on the price cards jump here and pre-tick the matching item
+    document.querySelectorAll<HTMLAnchorElement>('a[href="#order"][data-item]').forEach((a) => a.addEventListener('click', () => {
+      const el = form.querySelector<HTMLInputElement>(`[name="item_${a.dataset.item}"], [name="qty_${a.dataset.item}"]`);
+      if (el) { if (el.type === 'checkbox') el.checked = true; else if (!Number(el.value)) el.value = '1'; recalc(); }
+    }));
+  </script>
 </Base>

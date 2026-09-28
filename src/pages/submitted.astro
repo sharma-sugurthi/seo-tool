@@ -3,44 +3,70 @@ import Base from '../layouts/Base.astro';
 import { SITE } from '../site.config';
 ---
 <Base title="Submission received" noindex>
-  <section class="hero" style="max-width:40rem;">
+  <section class="hero" style="max-width:44rem;">
     <h1 id="s-title">Submission received</h1>
-    <p class="lead" id="s-body">A person reads every submission, usually within five business days. You will get an email when it is live.</p>
+    <p class="lead" id="s-body">An editor reads every submission within five business days. You get an email when it is live.</p>
     <p class="notice" id="s-note" hidden></p>
-    <p class="meta">Questions: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
-    <div class="row" style="margin-top:1rem;"><a class="btn ghost" href="/tools/">Browse the directory</a><a class="btn ghost" href="/learn/tool-launch-checklist/">Launch checklist</a></div>
+    <div id="order-box" hidden>
+      <div class="card" style="margin-top:1rem;">
+        <div class="row" style="justify-content:space-between; align-items:center;">
+          <strong id="o-status">Checking the order</strong>
+          <span class="meta" id="o-amount"></span>
+        </div>
+        <p class="muted" id="o-text" style="margin:.5rem 0 0; font-size:.93rem;"></p>
+        <div class="stack" id="o-items" style="margin-top:.85rem;"></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:1.25rem;"><a class="btn ghost" href="/tools/">Browse the directory</a><a class="btn ghost" href="/learn/tool-launch-checklist/">Launch checklist</a></div>
+    <p class="meta" style="margin-top:1rem;">Questions: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
   </section>
+  <script type="application/json" id="api-base" set:html={JSON.stringify(SITE.apiBase)} />
   <script>
+    const apiBase = JSON.parse(document.getElementById('api-base')?.textContent || '""');
     const p = new URLSearchParams(location.search);
     const status = p.get('status') || 'received';
     const kind = p.get('kind') || '';
     const pay = p.get('pay') || '';
     const msg = p.get('msg') || '';
-    const title = document.getElementById('s-title');
-    const body = document.getElementById('s-body');
-    const note = document.getElementById('s-note') as HTMLElement | null;
-    const say = (t: string, b: string, n = '') => {
-      if (title) title.textContent = t;
-      if (body) body.textContent = b;
-      if (note) { note.textContent = n; note.hidden = !n; }
-    };
+    const orderId = p.get('o') || '';
+    const title = document.getElementById('s-title')!;
+    const body = document.getElementById('s-body')!;
+    const note = document.getElementById('s-note') as HTMLElement;
+    const say = (t: string, b: string, n = '') => { title.textContent = t; body.textContent = b; note.textContent = n; note.hidden = !n; };
+
     if (status === 'error') {
-      say('That did not go through', msg || 'Please go back and check the form.', '');
+      say('That did not go through', msg || 'Go back and check the form.');
     } else if (status === 'paid') {
-      say(
-        kind === 'sponsored' ? 'Payment received, article in the queue' : 'Payment received, listing in the queue',
-        kind === 'sponsored'
-          ? 'Your receipt comes from Dodo Payments. We review the draft and reply within one business day with a publication date.'
-          : 'Your receipt comes from Dodo Payments. Featured placement switches on the moment the listing is approved, usually within five business days.',
-      );
+      say(kind === 'sponsored' ? 'Paid. Now add the article' : kind === 'bundle' ? 'Paid. Now complete your order' : 'Paid. Now complete your listing',
+        'The receipt comes from Dodo Payments. Everything you bought is listed below with a private link; the same links are in your confirmation email.');
     } else if (pay === 'later' || pay === 'failed') {
-      say(
-        'Submission received',
-        'A person reads every submission, usually within five business days.',
-        pay === 'failed'
-          ? 'The payment page could not be opened. Your submission is saved; we will email you a payment link within one business day.'
-          : 'Online payment is not switched on yet. Your submission is saved; we will email you a payment link within one business day, and featured placement starts once it is paid.',
-      );
+      say('Order saved', 'A person reviews it and sends the payment link within one business day. Featured placement and publication start once it is paid.',
+        pay === 'failed' ? 'The payment page could not be opened, so nothing was charged.' : '');
     }
+
+    // Real order state comes from the backend (set by the payment webhook), not from the URL.
+    const box = document.getElementById('order-box')!;
+    const oStatus = document.getElementById('o-status')!, oAmount = document.getElementById('o-amount')!, oText = document.getElementById('o-text')!, oItems = document.getElementById('o-items')!;
+    const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+    let tries = 0;
+    async function load() {
+      try {
+        const r = await fetch(`${apiBase}/checkout/order/${orderId}/summary`);
+        if (!r.ok) return;
+        const d = await r.json();
+        box.hidden = false;
+        const money = (c: number) => `$${(c / 100).toFixed(2)}`;
+        oAmount.textContent = `${money(d.amountCents)}${d.discountCents ? ` after a ${money(d.discountCents)} bundle discount` : ''}`;
+        if (d.status === 'paid') { oStatus.textContent = 'Paid'; oText.textContent = d.items.length ? 'Each item has its own private link. Complete them in any order.' : 'A person contacts you within one business day.'; }
+        else if (d.status === 'pending') { oStatus.textContent = status === 'paid' ? 'Confirming payment' : 'Payment pending'; oText.textContent = status === 'paid' ? 'The payment provider is confirming; this updates by itself.' : 'Nothing is charged yet.'; }
+        else { oStatus.textContent = d.status.charAt(0).toUpperCase() + d.status.slice(1); oText.textContent = ''; }
+        oItems.innerHTML = [
+          ...d.items.map((it: { label: string; url: string }) => `<a class="btn ghost" href="${esc(it.url)}">${esc(it.label)}</a>`),
+          ...(d.status === 'pending' && d.payUrl && status !== 'paid' ? [`<a class="btn" href="${esc(d.payUrl)}">Pay now</a>`] : []),
+        ].join('');
+        if (d.status === 'pending' && status === 'paid' && tries++ < 10) setTimeout(load, 3000);
+      } catch {}
+    }
+    if (orderId) load();
   </script>
 </Base>

@@ -22,7 +22,7 @@ export const SITE = {
   paymentMethods: 'Card, Apple Pay or Google Pay through Dodo Payments',
 };
 
-export type Price = { name: string; price: string; unit?: string; points: string[]; badge?: string; buyHref?: string; buyLabel?: string };
+export type Price = { name: string; price: string; unit?: string; points: string[]; badge?: string; buyHref?: string; buyLabel?: string; /** key in FIXED_PRICE_ITEMS: the Order button pre-ticks it in the builder */ itemKey?: string };
 
 /** Extra fee when we write a sponsored article for the advertiser. */
 export const SPONSORED_WRITING_FEE = '$19';
@@ -39,7 +39,7 @@ export const ADVERTISE_PRICES: Price[] = [
       'Up to 2 dofollow links (rel="sponsored")',
       `${SPONSORED_ARTICLE_LENGTH}, written by you or by us (+${SPONSORED_WRITING_FEE})`,
       'Permanent, indexed, shared on LinkedIn',
-      'Live within 3 business days',
+      'Live within 3 business days of the final draft',
     ],
     badge: 'Most popular',
   },
@@ -50,11 +50,24 @@ export const ADVERTISE_PRICES: Price[] = [
     points: [
       'Dedicated tool page with dofollow link and custom thumbnail',
       'Pinned to the top of your category for 12 months',
-      'Eligible for our "best tools" roundup articles',
-      'Rate locked in -- increases once we hit 10K monthly visitors',
+      'Eligible for "best tools" roundup articles',
+      'Pay now, complete the listing from a private link',
     ],
   },
 ];
+
+/**
+ * Fixed-price items the order builder on the services page can check out in one go.
+ * Amounts must match `config.prices` in the backend (the charge itself is set on the Dodo products).
+ */
+export type FixedItem = { key: string; name: string; cents: number; unit: string; description: string; max: number; addon?: { key: string; label: string; cents: number; unit: string } };
+export const FIXED_PRICE_ITEMS: FixedItem[] = [
+  { key: 'featured', name: 'Featured listing', cents: 9900, unit: 'per year', max: 1, description: 'Dofollow link, pinned to the top of its category for 12 months, eligible for roundups. You complete the listing after payment.' },
+  { key: 'sponsored', name: 'Sponsored article', cents: 8900, unit: 'per article', max: 5, description: `${SPONSORED_ARTICLE_LENGTH}, up to 2 dofollow links, permanent, shared on LinkedIn. Add the draft after payment.`, addon: { key: 'writing_addon', label: 'Written by us from your brief', cents: 1900, unit: 'per article' } },
+  { key: 'directory', name: 'Directory and listicle package', cents: 19900, unit: 'one time', max: 1, description: 'Manual submission to 100+ directories. A spreadsheet of every directory, URL, date and live status within 7 business days.' },
+];
+/** Percent off when an order holds at least `minItems` different fixed-price items. Mirror of BUNDLE_DISCOUNT_PERCENT in the backend. */
+export const BUNDLE_DISCOUNT = { percent: 15, minItems: 2 };
 
 /**
  * Done-for-you services, split into Content (we write) and Distribution (we place).
@@ -109,7 +122,6 @@ export const DISTRIBUTION_SERVICES: Price[] = [
       'Spreadsheet report: every directory, URL, status and date live',
       'One time fee, all listings are permanent (5 to 7 days turnaround)',
     ],
-    buyHref: `${SITE.apiBase}/checkout/directory-package`,
-    buyLabel: 'Buy now',
+    itemKey: 'directory',
   },
 ];

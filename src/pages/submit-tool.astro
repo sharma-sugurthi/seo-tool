@@ -2,187 +2,235 @@
 import Base from '../layouts/Base.astro';
 import { SITE, ADVERTISE_PRICES, SPONSORED_WRITING_FEE } from '../site.config';
 import { VERTICALS, FEATURES, PLATFORMS, DEPLOYMENTS, COMPANY_SIZES } from '../data/taxonomy';
+import { getCollection } from 'astro:content';
+
 const featured = ADVERTISE_PRICES.find((p) => p.name === 'Featured tool listing')!;
 const sponsored = ADVERTISE_PRICES.find((p) => p.name === 'Sponsored article')!;
-const featuredPrice = `${featured.price} ${featured.unit}`;
-const sponsoredPrice = `${sponsored.price} ${sponsored.unit}`;
 const taxonomy = Object.fromEntries(VERTICALS.map((v) => [v.slug, v.categories]));
+const tools = await getCollection('tools');
+const comparePages = (() => { let n = 0; const byCat = new Map<string, number>(); tools.forEach((t) => byCat.set(t.data.category, (byCat.get(t.data.category) ?? 0) + 1)); byCat.forEach((c) => (n += (c * (c - 1)) / 2)); return n; })();
+
+const categoryOptions = VERTICALS.map((v) => ({ slug: v.slug, name: v.name }));
+const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the notes)'];
 ---
-<Base title="Submit a tool or advertise" description="List any software or AI tool in the directory for free. Featured placements and sponsored articles are available in every category.">
+<Base title="List your tool" description="List any software or AI tool. An editor reviews it within five business days; it gets a review page, a place in its category, and appears on the compare and alternatives pages automatically.">
   <section class="hero">
-    <h1>Submit a tool or advertise</h1>
-    <p class="lead">Any product, any category. Get in front of the people comparing tools before they buy. Basic listings are free and every submission is checked by a person.</p>
+    <p class="meta eyebrow">For the people who build software</p>
+    <h1>List your tool</h1>
+    <p class="lead">An editor reviews every listing within five business days. Approved tools get a review page, a place in their category, and appear on the compare and alternatives pages automatically. Ratings and rankings are never for sale.</p>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-number" data-count={tools.length}>{tools.length}</span><span class="stat-label">Tools listed</span></div>
+      <div class="stat"><span class="stat-number" data-count={comparePages}>{comparePages}</span><span class="stat-label">Compare pages</span></div>
+      <div class="stat"><span class="stat-number">5</span><span class="stat-label">Business days to review</span></div>
+    </div>
   </section>
 
-  <section class="section grid fade-in">
-    <div class="card">
+  <section class="section grid reveal-stagger plans" id="plans">
+    <div class="card plan-card" data-plan="basic">
       <h3>Basic listing</h3>
       <div class="price">Free</div>
-      <ul><li>Name, tagline, category, pricing, thumbnail</li><li>Nofollow link to your site</li><li>Reviewed within 5 business days</li></ul>
-      <a class="btn ghost" href="#listing-form" style="align-self:flex-start; margin-top:auto;">Submit free</a>
+      <ul><li>Review page with your description, category and pricing</li><li>Included in compare and alternatives pages</li><li>Nofollow link to your site</li><li>Reviewed within 5 business days</li></ul>
+      <button class="btn ghost plan-pick" type="button" data-pick="basic">Start a free listing</button>
     </div>
-    <div class="card highlighted">
-      <span class="pill">Recommended</span>
+    <div class="card highlighted plan-card" data-plan="featured">
+      <span class="pill">Most chosen</span>
       <h3>Featured listing</h3>
       <div class="price">{featured.price} <small>{featured.unit}</small></div>
-      <ul><li>Everything in basic</li><li>Dofollow link</li><li>Pinned to the top of your category</li><li>Considered for "best tools" roundups</li></ul>
-      <a class="btn" href="#listing-form" id="order-featured" style="align-self:flex-start; margin-top:auto;">Order featured</a>
+      <ul><li>Everything in basic</li><li>Dofollow link</li><li>Pinned to the top of its category for 12 months</li><li>Eligible for "best tools" roundups</li><li>Pay now, complete the listing at your own pace</li></ul>
+      <button class="btn plan-pick" type="button" data-pick="featured">Get featured</button>
     </div>
-    <div class="card">
+    <div class="card plan-card" data-plan="sponsored">
       <h3>Sponsored article</h3>
       <div class="price">{sponsored.price} <small>{sponsored.unit}</small></div>
       <ul>{sponsored.points.map((pt) => <li>{pt}</li>)}</ul>
-      <a class="btn ghost" href="#listing-form" id="order-sponsored" style="align-self:flex-start; margin-top:auto;">Order article</a>
+      <button class="btn ghost plan-pick" type="button" data-pick="sponsored">Book an article</button>
     </div>
   </section>
 
-  <section class="section fade-in" id="listing-form">
-    <h2 style="margin-top:0">Details</h2>
-    <p class="muted" style="margin-bottom:1rem;">Fill in the form below. Paid options go straight to a secure checkout (card, Apple Pay, Google Pay) and the receipt comes from Dodo Payments.</p>
-    <form class="stack" action={`${SITE.apiBase}/submissions`} method="POST" enctype="multipart/form-data">
-      <label>What would you like? <select name="listing_type" id="listing-type"><option value="basic">Basic listing (free)</option><option value="featured">Featured listing ({featuredPrice})</option><option value="sponsored">Sponsored article ({sponsoredPrice})</option></select></label>
-      <label>Company or tool name <input name="tool_name" required /></label>
-      <label>Website URL <input type="url" name="website" required placeholder="https://" /></label>
-      <label>Your email <input type="email" name="email" required /></label>
-      <label>Your name <input name="submitter_name" autocomplete="name" /></label>
+  <section class="section reveal" id="listing-form">
+    <div class="wizard-head">
+      <div>
+        <h2 id="form-title" style="margin:0;">Free listing</h2>
+        <p class="muted" id="form-sub" style="margin:.25rem 0 0;">Three short steps. Your draft is saved in this browser until you submit.</p>
+      </div>
+      <ol class="steps-nav" id="steps-nav" aria-label="Steps">
+        <li class="on" data-step="1"><span>1</span> Your tool</li>
+        <li data-step="2"><span>2</span> The review</li>
+        <li data-step="3"><span>3</span> Comparison data</li>
+      </ol>
+    </div>
+    <div class="progress" aria-hidden="true"><div class="progress-bar" id="progress-bar"></div></div>
 
-      <div id="tool-fields" style="display:contents;">
-        <label>One line tagline (max 140 characters) <input name="tagline" maxlength="140" required /></label>
-        <label>Category
-          <select name="vertical" id="vertical-select">
-            {VERTICALS.map((v) => <option value={v.slug}>{v.name}</option>)}
-          </select>
-        </label>
-        <label>Subcategory
-          <select name="category" id="category-select">
-            {VERTICALS[0].categories.map((c) => <option>{c}</option>)}
-            <option>Other (tell us in the notes)</option>
-          </select>
-        </label>
-        <label>Pricing model <select name="pricing"><option>Free</option><option>Freemium</option><option>Paid</option><option>Enterprise</option></select></label>
-        <label>Who is it best for? <input name="best_for" placeholder="e.g. teams of 5 to 50 without a dedicated admin" /></label>
-        <label>Screenshot or product image <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/webp" /></label>
-        <label>Or a link to the image <input type="url" name="thumbnail_url" placeholder="https://" /></label>
-        <p class="muted" style="margin:-.5rem 0 0; font-size:.84rem;">PNG, JPG or WebP up to 5 MB, at least 600px wide. We crop it to the card shape and compress it. Leave both empty and we will take one from your site.</p>
-        <hr style="margin:1rem 0; border:0; border-top:1px solid var(--border);" />
+    <form class="stack wizard" id="submit-form" action={`${SITE.apiBase}/submissions`} method="POST" enctype="multipart/form-data" novalidate data-featured-price={`${featured.price} ${featured.unit}`} data-sponsored-price={`${sponsored.price} ${sponsored.unit}`}>
+      <input type="hidden" name="listing_type" id="listing-type" value="basic" />
 
-        <label>What does your tool do? <textarea name="what_it_does" required placeholder="Explain the core workflow and what problem it solves."></textarea></label>
-        <label>What do you do better than the alternatives? <textarea name="where_it_shines" required placeholder="Be specific. e.g. 'Answers tickets in the customer's language before an agent sees them.'"></textarea></label>
-        <label>Who is this NOT a good fit for? <textarea name="where_it_falls_short" required placeholder="Be honest. e.g. 'Not for solo founders' or 'Needs a team of 50+ to pay off.'"></textarea></label>
-        <label>Conclusion (optional) <textarea name="conclusion" placeholder="One paragraph: who should pick it and why."></textarea></label>
-
-        <details class="optional">
-          <summary>Comparison data (optional, but it gets you into the "vs" and "alternatives" pages)</summary>
-          <div class="stack">
-            <p class="muted" style="margin:0; font-size:.88rem;">Everything here is checked by a person before it shows. Tick only what exists today.</p>
-            <label>Pros (one per line, 3 to 5) <textarea name="pros" rows="4" placeholder="Receipts match themselves from a phone photo&#10;Policy checks run at the point of purchase"></textarea></label>
-            <label>Cons (one per line, 2 to 4) <textarea name="cons" rows="3" placeholder="Cards are US only&#10;No JetBrains plugin"></textarea></label>
-            <div>
-              <span style="font-weight:600; font-size:.92rem;">Features it has</span>
-              <div class="chks" id="feature-box">{FEATURES[VERTICALS[0].slug].map((f) => <label class="chk"><input type="checkbox" name="key_features" value={f} /> {f}</label>)}</div>
-            </div>
-            <div>
-              <span style="font-weight:600; font-size:.92rem;">Platforms</span>
-              <div class="chks">{PLATFORMS.map((p) => <label class="chk"><input type="checkbox" name="platforms" value={p} /> {p}</label>)}</div>
-            </div>
-            <label>Native integrations (comma separated, up to 10) <input name="integrations" placeholder="Slack, HubSpot, QuickBooks" /></label>
-            <label>Starting price of the cheapest paid plan <input name="starting_price" maxlength="60" placeholder="$20 per user per month (leave empty if quote only)" /></label>
-            <label>Permanent free plan? <select name="free_tier"><option value="">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select></label>
-            <label>Free trial length in days (0 for none) <input type="number" name="trial_days" min="0" max="365" /></label>
-            <label>Deployment <select name="deployment"><option value="">Not sure</option>{DEPLOYMENTS.map((x) => <option value={x}>{x}</option>)}</select></label>
-            <div>
-              <span style="font-weight:600; font-size:.92rem;">Company size it fits</span>
-              <div class="chks">{COMPANY_SIZES.map((x) => <label class="chk"><input type="checkbox" name="company_size" value={x} /> {x}</label>)}</div>
-            </div>
-            <label>One line verdict (max 160 characters) <input name="verdict_line" maxlength="160" placeholder="Pick <name> if ..." /></label>
+      {/* ---- Step 1: shared by every plan ---- */}
+      <fieldset class="step" data-step="1">
+        <div class="two">
+          <label>Company or tool name <input name="tool_name" required maxlength="80" /></label>
+          <label>Website <input type="url" name="website" required placeholder="https://" /></label>
+        </div>
+        <div class="two">
+          <label>Your work email <input type="email" name="email" required autocomplete="email" /></label>
+          <label>Your name <input name="submitter_name" autocomplete="name" /></label>
+        </div>
+        <div class="two">
+          <label>Category <select name="vertical" id="vertical-select">{categoryOptions.map((v) => <option value={v.slug}>{v.name}</option>)}</select></label>
+          <label>Subcategory <select name="category" id="category-select">{subcategoryOptions.map((c) => <option>{c}</option>)}</select></label>
+        </div>
+        <div class="two">
+          <label>Pricing model <select name="pricing"><option>Free</option><option>Freemium</option><option>Paid</option><option>Enterprise</option></select></label>
+          <label class="basic-only">Tagline <small>max 140 characters, shown on the card</small><input name="tagline" maxlength="140" data-req-basic /></label>
+        </div>
+        <div class="sponsored-only" hidden>
+          <div class="two">
+            <label>Author name <small>who the article is attributed to</small><input name="author_name" /></label>
+            <label class="chk-row"><input type="checkbox" name="written_by_us" /> Write the article for me (+{SPONSORED_WRITING_FEE})</label>
           </div>
-        </details>
-        <label>Notes for the reviewer (not published) <textarea name="notes" placeholder="A category we are missing, a launch date, anything we should know."></textarea></label>
-      </div>
+        </div>
+        <p class="meta paid-only" hidden>Next: secure checkout with card, Apple Pay or Google Pay through Dodo Payments. The receipt comes from Dodo. After payment you get a private link to complete the listing, and a full refund if the editor declines it.</p>
+      </fieldset>
 
-      <div id="article-fields" style="display:none;">
-        <hr style="margin:1rem 0; border:0; border-top:1px solid var(--border);" />
-        <label style="display:flex; align-items:center; gap:.5rem; font-weight:normal; margin-bottom:.5rem;">
-          <input type="checkbox" name="written_by_us" style="width:auto; margin:0;" />
-          Write the article for me (+{SPONSORED_WRITING_FEE})
-        </label>
-        <label>Author name <input name="author_name" required placeholder="Who should we attribute this to?" /></label>
-        <label>Proposed article title <input name="article_title" required placeholder="e.g. What changed when we moved onboarding to an AI agent" /></label>
-        <label>Article draft or pitch <textarea name="article_draft" required placeholder="Paste a link to a Google Doc, or paste your draft or concept here."></textarea></label>
-        <label>Cover image (optional, 16:9) <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/webp" /></label>
-      </div>
+      {/* ---- Step 2: the review text, free listings only ---- */}
+      <fieldset class="step" data-step="2" hidden>
+        <label>What does it do? <small>the core workflow and the problem it solves, two to four sentences</small><textarea name="what_it_does" data-req-basic rows="4"></textarea></label>
+        <label>Where does it beat the alternatives? <small>be specific, name the workflow</small><textarea name="where_it_shines" data-req-basic rows="4"></textarea></label>
+        <label>Who is it not for? <small>an honest limit reads as credible</small><textarea name="where_it_falls_short" data-req-basic rows="3"></textarea></label>
+        <label>Best for <small>one phrase, e.g. teams of 5 to 50 without a dedicated admin</small><input name="best_for" maxlength="120" /></label>
+        <label>Conclusion <small>optional, one paragraph</small><textarea name="conclusion" rows="3"></textarea></label>
+        <div class="two">
+          <label>Screenshot or product image <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/webp" /></label>
+          <label>Or an image URL <input type="url" name="thumbnail_url" placeholder="https://" /></label>
+        </div>
+        <p class="meta" style="margin:-.5rem 0 0;">PNG, JPG or WebP up to 5 MB, at least 600 px wide. It is cropped to the card shape and compressed.</p>
+      </fieldset>
 
-      <hr style="margin:1rem 0 0; border:0; border-top:1px solid var(--border);" />
+      {/* ---- Step 3: comparison data, optional ---- */}
+      <fieldset class="step" data-step="3" hidden>
+        <p class="muted" style="margin:0;">Optional, and worth five minutes: this is what the "vs" and "alternatives" pages are built from. Tick only what exists today; an editor checks it.</p>
+        <div class="two">
+          <label>Pros <small>one per line, 3 to 5</small><textarea name="pros" rows="4" placeholder="Receipts match themselves from a phone photo&#10;Policy checks run at the point of purchase"></textarea></label>
+          <label>Cons <small>one per line, 2 to 4</small><textarea name="cons" rows="4" placeholder="Cards are US only&#10;No JetBrains plugin"></textarea></label>
+        </div>
+        <div><span class="lbl">Features it has</span><div class="chks" id="feature-box">{FEATURES[VERTICALS[0].slug].map((f) => <label class="chk"><input type="checkbox" name="key_features" value={f} /> {f}</label>)}</div></div>
+        <div><span class="lbl">Platforms</span><div class="chks">{PLATFORMS.map((p) => <label class="chk"><input type="checkbox" name="platforms" value={p} /> {p}</label>)}</div></div>
+        <label>Native integrations <small>comma separated, up to 10</small><input name="integrations" placeholder="Slack, HubSpot, QuickBooks" /></label>
+        <div class="two">
+          <label>Starting price <small>cheapest paid plan; empty if quote only</small><input name="starting_price" maxlength="60" placeholder="$20 per user per month" /></label>
+          <label>Free trial <small>days, 0 for none</small><input type="number" name="trial_days" min="0" max="365" /></label>
+        </div>
+        <div class="two">
+          <label>Permanent free plan <select name="free_tier"><option value="">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select></label>
+          <label>Deployment <select name="deployment"><option value="">Not sure</option>{DEPLOYMENTS.map((x) => <option value={x}>{x}</option>)}</select></label>
+        </div>
+        <div><span class="lbl">Company size it fits</span><div class="chks">{COMPANY_SIZES.map((x) => <label class="chk"><input type="checkbox" name="company_size" value={x} /> {x}</label>)}</div></div>
+        <label>One line verdict <small>"Pick &lt;name&gt; if …", max 160 characters</small><input name="verdict_line" maxlength="160" /></label>
+        <label>Notes for the editor <small>not published</small><textarea name="notes" rows="2" placeholder="A category we are missing, a launch date, anything the editor should know."></textarea></label>
+      </fieldset>
+
       <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
       {SITE.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={SITE.turnstileSiteKey}></div>}
-      <button class="btn" type="submit">Submit</button>
-      <p class="meta">We reply within one business day. Or email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+      <div class="wizard-foot">
+        <button class="btn ghost" type="button" id="btn-back" hidden>Back</button>
+        <span class="meta" id="step-hint">Step 1 of 3</span>
+        <button class="btn" type="button" id="btn-next">Continue</button>
+        <button class="btn" type="submit" id="btn-submit" hidden>Submit for review</button>
+      </div>
+      <p class="meta">Questions before you list? <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
     </form>
+  </section>
+
+  <section class="section reveal">
+    <div class="grid">
+      <div class="card"><h3>What the editor checks</h3><p class="muted desc">That the product exists and does what the listing says, that the category is right, and that the description reads like a review, not an advert. Marketing words are edited out.</p></div>
+      <div class="card"><h3>What paid placement buys</h3><p class="muted desc">Position and a dofollow link. Not the rating, not the verdict on a compare page, not a place in an alternatives ranking. Those come from the editorial data only.</p></div>
+      <div class="card"><h3>If a listing is declined</h3><p class="muted desc">You get the reason by email and a link to fix it. A paid listing that cannot be fixed is refunded in full.</p></div>
+    </div>
   </section>
 
   <script type="application/json" id="taxonomy-data" set:html={JSON.stringify(taxonomy)} />
   <script type="application/json" id="features-data" set:html={JSON.stringify(FEATURES)} />
   <script>
-    const sel = document.getElementById('listing-type') as HTMLSelectElement | null;
-    const toolFields = document.getElementById('tool-fields');
-    const articleFields = document.getElementById('article-fields');
+    const form = document.getElementById('submit-form') as HTMLFormElement;
+    const typeInput = document.getElementById('listing-type') as HTMLInputElement;
+    const steps = [...form.querySelectorAll<HTMLFieldSetElement>('.step')];
+    const nav = document.getElementById('steps-nav')!;
+    const bar = document.getElementById('progress-bar')!;
+    const back = document.getElementById('btn-back')!;
+    const next = document.getElementById('btn-next')!;
+    const submit = document.getElementById('btn-submit')!;
+    const hint = document.getElementById('step-hint')!;
+    const title = document.getElementById('form-title')!;
+    const sub = document.getElementById('form-sub')!;
+    const featuredPrice = form.dataset.featuredPrice || '';
+    const sponsoredPrice = form.dataset.sponsoredPrice || '';
+    let plan: 'basic' | 'featured' | 'sponsored' = 'basic';
+    let step = 1;
+    const total = () => (plan === 'basic' ? 3 : 1);
 
-    function updateForm() {
-      if (!sel || !toolFields || !articleFields) return;
-      const isArticle = sel.value === 'sponsored';
-      toolFields.style.display = isArticle ? 'none' : 'contents';
-      articleFields.style.display = isArticle ? 'contents' : 'none';
-
-      // Toggle required attributes so hidden fields don't block submission
-      toolFields.querySelectorAll('input, textarea, select').forEach((el) => {
-        if (el.hasAttribute('data-required')) {
-          isArticle ? el.removeAttribute('required') : el.setAttribute('required', 'true');
-        }
-      });
-      articleFields.querySelectorAll('input, textarea, select').forEach((el) => {
-        if (el.hasAttribute('data-required')) {
-          !isArticle ? el.removeAttribute('required') : el.setAttribute('required', 'true');
-        }
-      });
+    // Plan drives which fields exist and which are required
+    function applyPlan() {
+      typeInput.value = plan;
+      form.querySelectorAll<HTMLElement>('.sponsored-only').forEach((e) => (e.hidden = plan !== 'sponsored'));
+      form.querySelectorAll<HTMLElement>('.paid-only').forEach((e) => (e.hidden = plan === 'basic'));
+      form.querySelectorAll<HTMLElement>('.basic-only').forEach((e) => (e.hidden = plan !== 'basic'));
+      form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-req-basic]').forEach((e) => (e.required = plan === 'basic'));
+      nav.hidden = plan !== 'basic';
+      document.querySelectorAll<HTMLElement>('.plan-card').forEach((c) => c.classList.toggle('chosen', c.dataset.plan === plan));
+      title.textContent = plan === 'basic' ? 'Free listing' : plan === 'featured' ? `Featured listing, ${featuredPrice}` : `Sponsored article, ${sponsoredPrice}`;
+      sub.textContent = plan === 'basic'
+        ? 'Three short steps. Your draft is saved in this browser until you submit.'
+        : plan === 'featured'
+          ? 'Company, category and email now. Checkout next. The description, screenshot and comparison data come after, from your private link.'
+          : 'Company, author and email now. Checkout next. The title and draft come after, from your private link.';
+      submit.textContent = plan === 'basic' ? 'Submit for review' : 'Continue to payment';
+      step = 1; show();
     }
-
-    if (sel) {
-      document.querySelectorAll('#listing-form [required]').forEach((el) => el.setAttribute('data-required', 'true'));
-      sel.addEventListener('change', updateForm);
-      updateForm();
+    function show() {
+      steps.forEach((s) => (s.hidden = Number(s.dataset.step) !== step));
+      nav.querySelectorAll('li').forEach((li) => { const n = Number(li.dataset.step); li.classList.toggle('on', n === step); li.classList.toggle('done', n < step); });
+      bar.style.width = `${(step / total()) * 100}%`;
+      back.hidden = step === 1;
+      next.hidden = step === total();
+      submit.hidden = step !== total();
+      hint.textContent = plan === 'basic' ? `Step ${step} of ${total()}` : 'One step, then checkout';
     }
+    function valid(): boolean {
+      const fields = [...steps[step - 1].querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input, textarea, select')].filter((f) => !f.closest('[hidden]'));
+      for (const f of fields) if (!f.checkValidity()) { f.reportValidity(); return false; }
+      return true;
+    }
+    next.addEventListener('click', () => { if (!valid()) return; step++; show(); document.getElementById('listing-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    back.addEventListener('click', () => { step--; show(); });
+    form.addEventListener('submit', (e) => { if (!valid()) { e.preventDefault(); return; } try { localStorage.removeItem('lantle-submit-draft'); } catch {} });
+    document.querySelectorAll<HTMLButtonElement>('.plan-pick').forEach((b) => b.addEventListener('click', () => { plan = b.dataset.pick as typeof plan; applyPlan(); document.getElementById('listing-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    const wanted = new URLSearchParams(location.search).get('plan');
+    if (wanted === 'featured' || wanted === 'sponsored') plan = wanted;
 
-    document.getElementById('order-featured')?.addEventListener('click', () => {
-      if (sel) { sel.value = 'featured'; updateForm(); }
-    });
-    document.getElementById('order-sponsored')?.addEventListener('click', () => {
-      if (sel) { sel.value = 'sponsored'; updateForm(); }
-    });
-
-    // Subcategory options follow the chosen category
+    // Subcategory and feature options follow the category
     const taxonomy: Record<string, string[]> = JSON.parse(document.getElementById('taxonomy-data')?.textContent || '{}');
     const features: Record<string, string[]> = JSON.parse(document.getElementById('features-data')?.textContent || '{}');
-    const verticalSel = document.getElementById('vertical-select') as HTMLSelectElement | null;
-    const categorySel = document.getElementById('category-select') as HTMLSelectElement | null;
-    const featureBox = document.getElementById('feature-box');
-    verticalSel?.addEventListener('change', () => {
-      if (!categorySel) return;
-      const cats = taxonomy[verticalSel.value] || [];
+    const verticalSel = document.getElementById('vertical-select') as HTMLSelectElement;
+    const categorySel = document.getElementById('category-select') as HTMLSelectElement;
+    const featureBox = document.getElementById('feature-box')!;
+    verticalSel.addEventListener('change', () => {
       categorySel.innerHTML = '';
-      [...cats, 'Other (tell us in the notes)'].forEach((c) => {
-        const o = document.createElement('option');
-        o.textContent = c;
-        categorySel.appendChild(o);
-      });
-      // Feature checkboxes follow the vertical too
-      if (featureBox) {
-        featureBox.innerHTML = '';
-        (features[verticalSel.value] || []).forEach((f) => {
-          const l = document.createElement('label'); l.className = 'chk';
-          const i = document.createElement('input'); i.type = 'checkbox'; i.name = 'key_features'; i.value = f;
-          l.append(i, ' ' + f); featureBox.appendChild(l);
-        });
-      }
+      [...(taxonomy[verticalSel.value] || []), 'Other (tell us in the notes)'].forEach((c) => { const o = document.createElement('option'); o.textContent = c; categorySel.appendChild(o); });
+      featureBox.innerHTML = '';
+      (features[verticalSel.value] || []).forEach((f) => { const l = document.createElement('label'); l.className = 'chk'; const i = document.createElement('input'); i.type = 'checkbox'; i.name = 'key_features'; i.value = f; l.append(i, ' ' + f); featureBox.appendChild(l); });
     });
+
+    // Draft saved in this browser only (text fields), restored on return
+    const KEY = 'lantle-submit-draft';
+    const textFields = () => [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input:not([type=file]):not([type=checkbox]):not([type=hidden]), textarea, select')];
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+      textFields().forEach((f) => { if (saved[f.name] && f.name !== '_gotcha') f.value = saved[f.name]; });
+      if (saved.vertical) verticalSel.dispatchEvent(new Event('change'));
+      if (saved.category) categorySel.value = saved.category;
+    } catch {}
+    form.addEventListener('input', () => { try { const o: Record<string, string> = {}; textFields().forEach((f) => { if (f.value && f.name !== '_gotcha') o[f.name] = f.value; }); localStorage.setItem(KEY, JSON.stringify(o)); } catch {} });
+
+    applyPlan();
   </script>
 </Base>

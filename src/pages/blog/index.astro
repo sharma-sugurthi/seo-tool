@@ -2,43 +2,13 @@
 import Base from '../../layouts/Base.astro';
 import PostCard from '../../components/PostCard.astro';
 import { getCollection } from 'astro:content';
-import { slugify } from './tag/[tag].astro';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const tagCounts = new Map<string, number>();
-posts.forEach((p) => p.data.tags.forEach((t) => tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1)));
-const tags = [...tagCounts].sort((a, b) => b[1] - a[1]);
 ---
 <Base title="Blog: how teams actually use AI tools, by practitioners" description="Reviews, comparisons and how-tos on picking, rolling out and getting value from AI tools at work, written by people who use them.">
   <section class="hero">
     <h1>Blog</h1>
     <p class="lead">Practical guides on choosing, rolling out, and getting real value from AI tools. Written by practitioners who actually use them at work.</p>
-    <div class="row tag-filter" id="tag-filter" style="margin-top:.75rem;">
-      <a class="pill on" href="/blog/" data-tag="">All ({posts.length})</a>
-      {tags.map(([t, n]) => <a class="pill" href={`/blog/tag/${slugify(t)}/`} data-tag={t}>{t} ({n})</a>)}
-    </div>
   </section>
   <div class="grid reveal-stagger" id="post-grid">{posts.map((p) => <PostCard post={p} />)}</div>
-  <p class="muted" id="post-empty" hidden style="text-align:center; padding:2rem 0;">No articles with that tag yet.</p>
-
-  <script>
-    // Filter in place; the tag pages still exist for search engines and for a page without scripts.
-    const filter = document.getElementById('tag-filter');
-    const cards = [...document.querySelectorAll<HTMLElement>('#post-grid > .post-card')];
-    const empty = document.getElementById('post-empty');
-    filter?.addEventListener('click', (e) => {
-      const a = (e.target as Element).closest<HTMLAnchorElement>('a[data-tag]');
-      if (!a) return;
-      e.preventDefault();
-      filter.querySelectorAll('.on').forEach((x) => x.classList.remove('on'));
-      a.classList.add('on');
-      const tag = a.dataset.tag || '';
-      let shown = 0;
-      cards.forEach((c) => { const ok = !tag || (c.dataset.tags || '').split('|').includes(tag); c.hidden = !ok; if (ok) { shown++; c.style.animation = 'none'; c.offsetHeight; c.style.animation = ''; } });
-      if (empty) empty.hidden = shown > 0;
-      history.replaceState(null, '', tag ? `#${encodeURIComponent(tag)}` : '/blog/');
-    });
-    const initial = decodeURIComponent(location.hash.slice(1));
-    if (initial) filter?.querySelector<HTMLAnchorElement>(`a[data-tag="${CSS.escape(initial)}"]`)?.click();
-  </script>
 </Base>
