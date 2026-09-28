@@ -5,8 +5,11 @@
  */
 ---
 <div id="cookie-banner" class="cookie-banner" role="dialog" aria-label="Cookie consent" hidden>
-  <p>This site uses third-party services (Google Fonts, Dodo Payments) that may set cookies. By continuing to browse you accept their use. <a href="/privacy/">Privacy policy</a></p>
-  <button id="cookie-accept" class="btn btn-sm">Got it</button>
+  <p>We use essential cookies to make our site work and improve your experience.</p>
+  <div class="cookie-actions">
+    <a href="/privacy/" class="btn-link">Privacy Policy</a>
+    <button id="cookie-accept" class="btn btn-sm">Accept</button>
+  </div>
 </div>
 
 <style>
@@ -27,7 +30,9 @@
   }
   .cookie-banner[hidden] { display: none; }
   .cookie-banner p { margin: 0; flex: 1; }
-  .cookie-banner a { color: var(--accent-soft); }
+  .cookie-actions { display: flex; align-items: center; gap: 1.5rem; }
+  .cookie-banner .btn-link { color: var(--accent-soft); text-decoration: none; font-size: 0.82rem; font-weight: 500; }
+  .cookie-banner .btn-link:hover { text-decoration: underline; color: white; }
   .cookie-banner .btn-sm {
     padding: 0.35rem 1rem;
     font-size: 0.82rem;

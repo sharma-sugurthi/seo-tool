@@ -13,7 +13,7 @@ export const SITE = {
   // The backend (lantle-backend on Heroku). Forms post here, checkouts start here, and the build reads tools from here.
   // For a local build against a local backend, set TOOLS_API_URL in .env instead of changing this.
   // Set TOOLS_API_URL in Cloudflare Pages (and in a local .env) to point a build at a different backend.
-  apiBase: (typeof process !== 'undefined' && process.env.TOOLS_API_URL) || 'https://lantle-backend-ed132a1d726a.herokuapp.com',
+  apiBase: (typeof process !== 'undefined' && process.env.TOOLS_API_URL) || (typeof import.meta !== 'undefined' && (import.meta as any).env?.TOOLS_API_URL) || 'https://lantle-backend-ed132a1d726a.herokuapp.com',
   // Cloudflare Turnstile site key (public). Leave empty to disable the bot check widget.
   turnstileSiteKey: '',
   social: {

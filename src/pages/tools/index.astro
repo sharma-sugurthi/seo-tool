@@ -14,11 +14,15 @@ const byVertical = VERTICALS.map((v) => {
 const live = byVertical.filter((v) => v.tools.length > 0);
 const open = byVertical.filter((v) => v.tools.length === 0);
 const catCount = (c: string) => tools.filter((t) => t.data.category === c).length;
+
+const sortedLive = [...live].sort((a, b) => b.tools.length - a.tools.length);
+const popular = sortedLive.slice(0, 5);
+const more = sortedLive.slice(5);
 ---
-<Base title="AI tools directory: software for every part of a business" description="Browse AI and software tools by category, from finance and marketing to support and engineering. Every listing is checked by a person. Free to list.">
+<Base title="Software directory: discover and compare the best business tools" description="Discover, compare, and choose the best software for your business. Browse by category, from finance and marketing to support and engineering.">
   <section class="hero">
-    <h1>AI tools directory</h1>
-    <p class="lead">Software for finance, marketing, sales, support, engineering and the rest of the company. Every listing is checked by a person before it goes live. Featured listings are paid and marked. Editor's picks are our own recommendations and are never paid.</p>
+    <h1>Software directory</h1>
+    <p class="lead">Discover, compare, and choose the best software for your business.</p>
 
     <div class="search-bar" style="margin-top:1rem;">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -27,30 +31,37 @@ const catCount = (c: string) => tools.filter((t) => t.data.category === c).lengt
 
     <div class="filter-pills" id="filter-pills">
       <button class="pill active" data-filter="all">All ({tools.length})</button>
-      {live.length > 1 && live.map((v) => (
+      {popular.map((v) => (
         <button class="pill" data-filter={`v:${v.slug}`}>{v.short} ({v.tools.length})</button>
       ))}
-      {live.flatMap((v) => v.cats).map((c) => (
-        <button class="pill" data-filter={`c:${c}`}>{c} ({catCount(c)})</button>
+      {more.length > 0 && (
+        <button class="pill" id="more-btn">+ More</button>
+      )}
+      {more.map((v) => (
+        <button class="pill more-pill hidden" data-filter={`v:${v.slug}`}>{v.short} ({v.tools.length})</button>
       ))}
     </div>
   </section>
 
   {live.map((v) => (
     <section class="section tool-section fade-in" id={v.slug} data-vertical={v.slug}>
-      <div class="row" style="justify-content:space-between; align-items:baseline; margin-bottom:.25rem;">
+      <div class="row" style="justify-content:space-between; align-items:baseline; margin-bottom:1.5rem;">
         <h2 style="margin:0">{v.name}</h2>
-        <a href={`/categories/${v.slug}/`} style="font-size:.9rem; font-weight:500;">Category page</a>
       </div>
-      <p class="muted" style="margin:0 0 1.5rem;">{v.blurb}</p>
-      {v.cats.map((c) => (
-        <div class="tool-group" data-cat={c} id={c.toLowerCase().replace(/[^a-z0-9]+/g, '-')}>
-          <h3>{c}</h3>
-          <div class="grid">{v.tools.filter((t) => t.data.category === c).map((t) => <ToolCard tool={t} />)}</div>
-        </div>
-      ))}
+      
+      <div class="grid" style="margin-bottom: 1.5rem;">
+        {v.tools.slice(0, 3).map((t) => <ToolCard tool={t} />)}
+      </div>
+
+      <div style="text-align: right; border-top: 1px solid var(--border); padding-top: 1rem;">
+        <a href={`/categories/${v.slug}/`} style="font-weight: 500; color: var(--accent);">
+          View all &rarr;
+        </a>
+      </div>
     </section>
   ))}
+
+
 
   {open.length > 0 && (
     <section class="section fade-in" id="open-categories">
@@ -72,7 +83,6 @@ const catCount = (c: string) => tools.filter((t) => t.data.category === c).lengt
   <script>
     const pills = document.querySelectorAll<HTMLButtonElement>('#filter-pills .pill');
     const sections = document.querySelectorAll<HTMLElement>('.tool-section');
-    const groups = document.querySelectorAll<HTMLElement>('.tool-group');
     const cards = document.querySelectorAll<HTMLElement>('.tool-section .card');
     const search = document.getElementById('tool-search') as HTMLInputElement | null;
 
@@ -81,23 +91,24 @@ const catCount = (c: string) => tools.filter((t) => t.data.category === c).lengt
       pill.classList.add('active');
     };
 
-    const hideEmptySections = () => {
-      sections.forEach((s) => s.classList.toggle('hidden', !s.querySelector('.tool-group:not(.hidden)')));
+    const applyFilter = (filter: string) => {
+      sections.forEach((s) => {
+        const vertical = s.dataset.vertical;
+        const show = filter === 'all' || (filter.startsWith('v:') && vertical === filter.slice(2));
+        s.style.display = show ? '' : 'none';
+      });
     };
 
-    const applyFilter = (filter: string) => {
-      groups.forEach((g) => {
-        const vertical = g.closest<HTMLElement>('.tool-section')?.dataset.vertical;
-        const show =
-          filter === 'all' ||
-          (filter.startsWith('v:') && vertical === filter.slice(2)) ||
-          (filter.startsWith('c:') && g.dataset.cat === filter.slice(2));
-        g.classList.toggle('hidden', !show);
-      });
-      hideEmptySections();
-    };
+    const moreBtn = document.getElementById('more-btn');
+    const morePills = document.querySelectorAll('.more-pill');
+
+    moreBtn?.addEventListener('click', () => {
+      morePills.forEach(p => p.classList.remove('hidden'));
+      moreBtn.style.display = 'none';
+    });
 
     pills.forEach((pill) => {
+      if (pill.id === 'more-btn') return;
       pill.addEventListener('click', () => {
         if (search) search.value = '';
         cards.forEach((c) => (c.style.display = ''));
@@ -110,15 +121,17 @@ const catCount = (c: string) => tools.filter((t) => t.data.category === c).lengt
       const q = search.value.toLowerCase().trim();
       if (pills[0]) setActive(pills[0]);
       applyFilter('all');
+      
       cards.forEach((c) => {
         const hay = `${c.dataset.name || ''} ${c.textContent || ''}`.toLowerCase();
         c.style.display = !q || hay.includes(q) ? '' : 'none';
       });
-      groups.forEach((g) => {
-        const visible = [...g.querySelectorAll<HTMLElement>('.card')].some((c) => c.style.display !== 'none');
-        g.classList.toggle('hidden', !visible);
+
+      // Hide sections if all their cards are hidden by search
+      sections.forEach((s) => {
+        const visible = [...s.querySelectorAll<HTMLElement>('.card')].some((c) => c.style.display !== 'none');
+        s.style.display = visible ? '' : 'none';
       });
-      hideEmptySections();
     });
   </script>
 </Base>

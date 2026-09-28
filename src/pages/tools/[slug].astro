@@ -46,45 +46,56 @@ const sameVertical = allTools.filter((t) => t.data.vertical === d.vertical && t.
 const similar = [...sameCategory, ...sameVertical].slice(0, 3);
 ---
 <Base title={`${d.name} review: ${d.tagline}`} description={`${d.name} for ${d.category.toLowerCase()}. ${d.tagline} Pricing: ${d.pricing}. Best for ${d.bestFor}.`} jsonLd={jsonLd} image={d.thumbnail}>
-  <article class="section prose">
-    <p class="meta"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {d.category}</p>
-    <div class="row">
-      <span class="pill">{d.category}</span>
-      {d.featured && <span class="pill warn">Featured listing (paid)</span>}
-      {!d.featured && d.editorsPick && <span class="pill">Editor's pick (not paid)</span>}
-    </div>
-    <h1>{d.name}</h1>
-    <p class="lead muted">{d.tagline}</p>
-    {d.thumbnail && (
-      <figure class="tool-hero-img">
-        <img src={d.thumbnail} alt={`${d.name} screenshot`} width="1200" height="534" />
-      </figure>
-    )}
-    <div class="kpis">
-      <div class="card">
-        <span class="meta">Pricing</span>
-        <strong>{d.pricing}</strong>
+  <div class="section tool-layout">
+    <article class="prose tool-content">
+      <p class="meta"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {d.category}</p>
+      <div class="row">
+        <span class="pill">{d.category}</span>
+        {d.featured && <span class="pill warn">Featured listing (paid)</span>}
+        {!d.featured && d.editorsPick && <span class="pill">Editor's pick (not paid)</span>}
       </div>
-      <div class="card">
-        <span class="meta">Best for</span>
-        <strong style="font-size:1.05rem">{d.bestFor}</strong>
-      </div>
-      {d.rating && (
-        <div class="card">
-          <span class="meta">Our rating</span>
-          <div class="stars" style="font-size:1.2rem;" aria-label={`Rating: ${d.rating} out of 5`}>
-            {[1,2,3,4,5].map((i) => (
-              <span class={`star ${i <= fullStars ? 'filled' : ''}`}>★</span>
-            ))}
-          </div>
-        </div>
+      <h1>{d.name}</h1>
+      <p class="lead muted">{d.tagline}</p>
+      {d.thumbnail && (
+        <figure class="tool-hero-img">
+          <img src={d.thumbnail} alt={`${d.name} screenshot`} width="1200" height="534" />
+        </figure>
       )}
-    </div>
-    <p style="margin-top:1.25rem"><a class="btn" href={d.website} rel={rel} target="_blank">Visit {d.name} →</a></p>
-    <Content />
-    <hr />
-    <p class="meta">Listing added {d.addedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}. Spotted an error? <a href={`mailto:${SITE.email}`}>Tell us</a>. Want this listing featured? <a href="/submit-tool/">See options</a>.</p>
-  </article>
+      
+      <div class="tool-description">
+        <Content />
+      </div>
+    </article>
+
+    <aside class="tool-sidebar fade-in">
+      <div class="action-card">
+        <div class="sidebar-kpis">
+          <div class="kpi">
+            <span class="meta">Pricing</span>
+            <strong>{d.pricing}</strong>
+          </div>
+          <div class="kpi">
+            <span class="meta">Best for</span>
+            <strong style="font-size:1.05rem">{d.bestFor}</strong>
+          </div>
+          {d.rating && (
+            <div class="kpi">
+              <span class="meta">Our rating</span>
+              <div class="stars" style="font-size:1.2rem;" aria-label={`Rating: ${d.rating} out of 5`}>
+                {[1,2,3,4,5].map((i) => (
+                  <span class={`star ${i <= fullStars ? 'filled' : ''}`}>★</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <a class="btn" href={d.website} rel={rel} target="_blank" style="width:100%; justify-content:center; padding:1rem; font-size:1.05rem;">Visit {d.name} →</a>
+        <div style="text-align: center; margin-top: 1rem;">
+          <a href="/submit-tool/" style="font-size: 0.85rem; color: var(--muted); text-decoration: none;">Manage this listing</a>
+        </div>
+      </div>
+    </aside>
+  </div>
 
   {similar.length > 0 && (
     <section class="section fade-in">

@@ -64,6 +64,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
 }
 
 body {
@@ -558,6 +559,48 @@ footer.site .bottom-bar {
 .kpis { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
 .kpis .card { text-align: left; padding: 1.15rem 1.25rem; }
 
+.tool-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 4rem;
+  align-items: start;
+}
+.article-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 4rem;
+  align-items: start;
+}
+.tool-content.prose { max-width: none; min-width: 0; }
+.tool-sidebar, .article-sidebar {
+  position: sticky;
+  top: 6rem;
+}
+.article-sidebar a:hover {
+  color: var(--accent) !important;
+}
+.action-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+}
+.sidebar-kpis {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+.sidebar-kpis .kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.sidebar-kpis .kpi strong {
+  line-height: 1.4;
+}
+
 /* ── Stats bar ────────────────────────────────────────── */
 .stats-bar {
   display: flex;
@@ -599,7 +642,8 @@ footer.site .bottom-bar {
   width: 17px;
   height: 17px;
 }
-.filter-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.75rem 0 1.5rem; }
+.filter-pills { display: flex; gap: 0.5rem; overflow-x: auto; white-space: nowrap; margin: 0.75rem 0 1.5rem; padding-bottom: 0.25rem; scrollbar-width: none; }
+.filter-pills::-webkit-scrollbar { display: none; }
 .filter-pills button.pill {
   cursor: pointer;
   border: 1.5px solid transparent;
@@ -609,6 +653,8 @@ footer.site .bottom-bar {
   transition: all var(--t) var(--ease);
 }
 .filter-pills button.pill:hover { background: var(--accent-soft); color: var(--accent); }
+
+.more-pill.hidden { display: none !important; }
 .filter-pills button.pill.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 .tool-section { transition: opacity 0.25s ease; }
 .tool-section.hidden { display: none; }
