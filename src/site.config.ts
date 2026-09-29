@@ -63,12 +63,10 @@ export const ADVERTISE_PRICES: Price[] = [
  */
 export type FixedItem = { key: string; name: string; cents: number; unit: string; description: string; max: number; addon?: { key: string; label: string; cents: number; unit: string } };
 export const FIXED_PRICE_ITEMS: FixedItem[] = [
-  { key: 'featured', name: 'Featured listing', cents: 9900, unit: 'per year', max: 1, description: 'Dofollow link, pinned to the top of its category for 12 months, eligible for roundups. You complete the listing after payment.' },
-  { key: 'sponsored', name: 'Sponsored article', cents: 12900, unit: 'per article', max: 5, description: `${SPONSORED_ARTICLE_LENGTH}, up to 2 dofollow links, permanent, shared on LinkedIn and our newsletter. Add the draft after payment.`, addon: { key: 'writing_addon', label: 'Written by us from your brief', cents: 1900, unit: 'per article' } },
   { key: 'directory', name: 'Directory and listicle package', cents: 19900, unit: 'one time', max: 1, description: 'Manual submission to 100+ directories. A spreadsheet of every directory, URL, date and live status within 7 business days.' },
 ];
 /** Percent off when an order holds at least `minItems` different fixed-price items. Mirror of BUNDLE_DISCOUNT_PERCENT in the backend. */
-export const BUNDLE_DISCOUNT = { percent: 15, minItems: 2 };
+export const BUNDLE_DISCOUNT = { percent: 15, minItems: 99 };
 
 /**
  * Done-for-you services, split into Content (we write) and Distribution (we place).

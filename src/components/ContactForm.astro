@@ -1,8 +1,8 @@
 ---
 import { SITE } from '../site.config';
 interface Props {
-  /** Which backend endpoint receives it. */
   kind?: 'contact' | 'service-order' | 'guest-pitch';
+  /** Simple mode: freeform options dropdown + single textarea. Used on contact and write-for-us. */
   options?: string[];
   optionsLabel?: string;
   placeholder?: string;
@@ -11,23 +11,151 @@ interface Props {
 const {
   kind = 'contact',
   options,
-  optionsLabel = 'What are you interested in?',
+  optionsLabel = 'What is it about?',
   placeholder = 'What you need, links that help, and a deadline if there is one.',
   submitLabel = 'Send',
 } = Astro.props;
+
+// The services quote form is only shown for kind === 'service-order'
+const isServiceQuote = kind === 'service-order';
+
+const services = [
+  { value: 'Guest post outreach and placement', label: 'Guest post outreach and placement', placeholder: 'Which pages or features to promote, any target publications you have in mind, anchor text preferences, and how many placements you are looking for.' },
+  { value: 'SEO and GEO content', label: 'SEO and GEO content', placeholder: 'The topic or keyword cluster, any competing articles you want to beat, the page URL if you want an upgrade, and whether you need schema markup.' },
+  { value: 'LinkedIn ghostwriting', label: 'LinkedIn ghostwriting', placeholder: 'Whose profile the posts go on, the audience you want to reach (e.g. CFOs at mid-market companies), any topics or series ideas, and any posts you already like the style of.' },
+  { value: 'Content and distribution together', label: 'Content + distribution (both)', placeholder: 'The product or landing page to promote, the problem it solves, and what a typical buyer looks like. We will suggest the mix.' },
+];
 ---
-<form class="stack" action={`${SITE.apiBase}/forms/${kind}`} method="POST">
-  <label>Name <input name="name" required autocomplete="name" /></label>
-  <label>Work email <input type="email" name="email" required autocomplete="email" /></label>
-  <label>Company or website <input name="company" placeholder="https://" /></label>
-  {options && (
-    <label>{optionsLabel}
-      <select name="interest">{options.map((o) => <option>{o}</option>)}</select>
+
+{isServiceQuote ? (
+  /* ── Smart quote form for the Services page ── */
+  <form class="stack contact-form" id="service-quote-form" action={`${SITE.apiBase}/forms/${kind}`} method="POST" novalidate>
+    <div class="two">
+      <label>Your name <input name="name" required autocomplete="name" /></label>
+      <label>Work email <input type="email" name="email" required autocomplete="email" /></label>
+    </div>
+    <label>Company website <input type="url" name="company" required placeholder="https://" autocomplete="url" /></label>
+
+    <label>
+      Which service?
+      <select name="interest" id="quote-service" required>
+        {services.map((s) => <option value={s.value}>{s.label}</option>)}
+      </select>
     </label>
-  )}
-  <label>Details <textarea name="message" required placeholder={placeholder}></textarea></label>
-  <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
-  {SITE.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={SITE.turnstileSiteKey}></div>}
-  <button class="btn" type="submit">{submitLabel}</button>
-  <p class="meta">A person replies within one business day.</p>
-</form>
+
+    <div id="placement-qty-row">
+      <label>
+        How many placements?
+        <small>We will confirm availability after the brief</small>
+        <div class="qty-row">
+          <button type="button" class="qty-btn" id="qty-minus" aria-label="Decrease">-</button>
+          <input type="number" name="placements" id="placement-qty" value="3" min="1" max="20" readonly style="width:3.5rem;text-align:center;" />
+          <button type="button" class="qty-btn" id="qty-plus" aria-label="Increase">+</button>
+          <span class="qty-price" id="qty-price-label">3 placements - from $447</span>
+        </div>
+      </label>
+    </div>
+
+    <div class="two">
+      <label>
+        Monthly budget
+        <select name="budget">
+          <option value="">Prefer not to say</option>
+          <option value="under-500">Under $500</option>
+          <option value="500-1500">$500 - $1,500</option>
+          <option value="1500-5000">$1,500 - $5,000</option>
+          <option value="5000+">$5,000+</option>
+        </select>
+      </label>
+      <label>
+        Timeline
+        <select name="timeline">
+          <option value="asap">ASAP</option>
+          <option value="1-month">Within 1 month</option>
+          <option value="2-3-months">2 to 3 months</option>
+          <option value="exploring">Just exploring</option>
+        </select>
+      </label>
+    </div>
+
+    <label>
+      Brief
+      <small id="brief-hint">Tell us what you need and we will handle the rest.</small>
+      <textarea name="message" required rows="5" id="brief-textarea" placeholder="Tell us what you need and we will handle the rest."></textarea>
+    </label>
+
+    <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+    {SITE.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={SITE.turnstileSiteKey}></div>}
+    <button class="btn" type="submit">Send the brief</button>
+    <p class="meta" style="margin:0;">No pitch calls, no PDF decks. You get a fixed scope, a site list (for placements), and a payment link the same business day. A real person reads every brief.</p>
+  </form>
+) : (
+  /* ── Simple general form for contact and write-for-us ── */
+  <form class="stack" action={`${SITE.apiBase}/forms/${kind}`} method="POST">
+    <label>Name <input name="name" required autocomplete="name" /></label>
+    <label>Work email <input type="email" name="email" required autocomplete="email" /></label>
+    <label>Company or website <input name="company" placeholder="https://" /></label>
+    {options && (
+      <label>{optionsLabel}
+        <select name="interest">{options.map((o) => <option>{o}</option>)}</select>
+      </label>
+    )}
+    <label>Details <textarea name="message" required rows="5" placeholder={placeholder}></textarea></label>
+    <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+    {SITE.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={SITE.turnstileSiteKey}></div>}
+    <button class="btn" type="submit">{submitLabel}</button>
+    <p class="meta">A person replies within one business day.</p>
+  </form>
+)}
+
+<style>
+  .qty-row { display:flex; align-items:center; gap:.5rem; margin-top:.35rem; flex-wrap:wrap; }
+  .qty-btn { width:2rem; height:2rem; border:1px solid var(--border); background:var(--surface); border-radius:6px; font-size:1.1rem; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center; }
+  .qty-btn:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .qty-price { font-size:.88rem; color:var(--muted); }
+</style>
+
+<script>
+  const serviceSelect = document.getElementById('quote-service') as HTMLSelectElement | null;
+  if (serviceSelect) {
+    const placementRow = document.getElementById('placement-qty-row') as HTMLElement;
+    const briefHint = document.getElementById('brief-hint') as HTMLElement;
+    const briefTextarea = document.getElementById('brief-textarea') as HTMLTextAreaElement;
+    const qtyInput = document.getElementById('placement-qty') as HTMLInputElement;
+    const qtyPrice = document.getElementById('qty-price-label') as HTMLElement;
+
+    const placeholders: Record<string, string> = {
+      'Guest post outreach and placement': 'Which pages or features to promote, any target publications you have in mind, anchor text preferences, and how many placements you are looking for.',
+      'SEO and GEO content': 'The topic or keyword cluster, any competing articles you want to beat, the page URL if you want an upgrade, and whether you need schema markup.',
+      'LinkedIn ghostwriting': 'Whose profile the posts go on, the audience you want to reach (e.g. CFOs at mid-market companies), any topics or series ideas, and any posts you already like the style of.',
+      'Content and distribution together': 'The product or landing page to promote, the problem it solves, and what a typical buyer looks like. We will suggest the mix.',
+    };
+
+    function updateForm() {
+      const val = serviceSelect!.value;
+      placementRow.hidden = val !== 'Guest post outreach and placement';
+      const ph = placeholders[val] || 'Tell us what you need and we will handle the rest.';
+      briefTextarea.placeholder = ph;
+      briefHint.textContent = ph;
+    }
+
+    function updateQtyPrice() {
+      const qty = Math.max(1, Math.min(20, parseInt(qtyInput.value) || 1));
+      qtyInput.value = String(qty);
+      qtyPrice.textContent = `${qty} placement${qty > 1 ? 's' : ''} - from $${qty * 149}`;
+    }
+
+    document.getElementById('qty-minus')?.addEventListener('click', () => {
+      qtyInput.value = String(Math.max(1, parseInt(qtyInput.value) - 1));
+      updateQtyPrice();
+    });
+    document.getElementById('qty-plus')?.addEventListener('click', () => {
+      qtyInput.value = String(Math.min(20, parseInt(qtyInput.value) + 1));
+      updateQtyPrice();
+    });
+
+    serviceSelect.addEventListener('change', updateForm);
+    updateForm();
+    updateQtyPrice();
+  }
+</script>

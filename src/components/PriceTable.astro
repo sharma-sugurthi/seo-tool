@@ -1,7 +1,8 @@
 ---
+import { SITE } from '../site.config';
 import type { Price } from '../site.config';
-interface Props { items: Price[]; ctaHref: string; ctaLabel?: string }
-const { items, ctaHref, ctaLabel = 'Get started' } = Astro.props;
+interface Props { items: Price[]; ctaHref: string; ctaLabel?: string; ctaDataAttr?: string }
+const { items, ctaHref, ctaLabel = 'Get started', ctaDataAttr } = Astro.props;
 ---
 <div class="grid price-grid">
   {items.map((p) => (
@@ -11,7 +12,14 @@ const { items, ctaHref, ctaLabel = 'Get started' } = Astro.props;
       <div class="price">{p.price} {p.unit && <small>{p.unit}</small>}</div>
       <ul>{p.points.map((pt) => <li>{pt}</li>)}</ul>
       <div class="row" style="margin-top:auto;">
-        <a class={`btn ${p.badge || p.itemKey ? '' : 'ghost'}`} href={p.buyHref ?? ctaHref} data-item={p.itemKey}>{p.buyHref ? (p.buyLabel ?? 'Buy now') : ctaLabel}</a>
+        {p.itemKey ? (
+          <>
+            <a class="btn" href={`${SITE.apiBase}/checkout/direct?item=${p.itemKey}`}>Order</a>
+            <button class="btn ghost" type="button" onclick="document.getElementById('dir-modal')?.showModal()">How it works</button>
+          </>
+        ) : (
+          <a class={`btn ${p.badge ? '' : 'ghost'}`} href={p.buyHref ?? ctaHref} {...(ctaDataAttr ? { [ctaDataAttr]: p.name } : {})}>{p.buyHref ? (p.buyLabel ?? 'Buy now') : ctaLabel}</a>
+        )}
       </div>
     </div>
   ))}

@@ -37,7 +37,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       </ul>
       <button class="btn ghost plan-pick" type="button" data-pick="basic">Start a free listing</button>
     </div>
-    <div class="card highlighted plan-card" data-plan="featured">
+    <div class="card plan-card" data-plan="featured">
       <span class="pill">Most chosen</span>
       <h3>Featured listing</h3>
       <div class="price">{featured.price} <small>{featured.unit}</small></div>
@@ -45,7 +45,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
         <li>Full profile with sidebar, pros/cons and comparison pages</li>
         <li>Dofollow link · pinned to the top of your category for 12 months</li>
         <li>Eligible for "best tools" roundup articles</li>
-        <li>We do the heavy lifting — just pay and we build your page</li>
+        <li>We do the heavy lifting - just pay and we build your page</li>
       </ul>
       <button class="btn plan-pick" type="button" data-pick="featured">Get featured</button>
     </div>
@@ -75,7 +75,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       data-sponsored-price={`${sponsored.price} ${sponsored.unit}`}>
       <input type="hidden" name="listing_type" id="listing-type" value="basic" />
 
-      {/* ════ STEP 1: Core info — required for ALL plans ════ */}
+      {/* ════ STEP 1: Core info - required for ALL plans ════ */}
       <fieldset class="step" data-step="1">
         <div class="two">
           <label>Company or tool name <input name="tool_name" required maxlength="80" id="tool-name-input" /></label>
@@ -90,7 +90,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
           <label>Your name <input name="submitter_name" autocomplete="name" /></label>
         </div>
 
-        {/* Category + Pricing — basic only, paid plans skip */}
+        {/* Category + Pricing - basic only, paid plans skip */}
         <div class="two basic-only">
           <label>Category <select name="vertical" id="vertical-select">{categoryOptions.map((v) => <option value={v.slug}>{v.name}</option>)}</select></label>
           <label>Subcategory <select name="category" id="category-select">{subcategoryOptions.map((c) => <option>{c}</option>)}</select></label>
@@ -100,17 +100,17 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
           <label>Tagline <small>shown on the card, max 140 characters</small><input name="tagline" maxlength="140" data-req-basic id="tagline-input" /></label>
         </div>
 
-        {/* Screenshot — required for basic, shown for basic only (paid fills later) */}
+        {/* Screenshot - required for basic, shown for basic only (paid fills later) */}
         <div class="basic-only">
           <label>
-            Screenshot of main page <small>required — PNG, JPG or WebP up to 5 MB, at least 600 px wide</small>
+            Screenshot of main page <small>required - PNG, JPG or WebP up to 5 MB, at least 600 px wide</small>
             <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/webp" data-req-basic id="screenshot-input" />
           </label>
           <p class="meta" style="margin:.25rem 0 0; font-size:.82rem;">Or paste an image URL instead:</p>
           <input type="url" name="thumbnail_url" placeholder="https://" style="margin-top:.35rem;" />
         </div>
 
-        {/* What does it do — required for basic, shown for basic only */}
+        {/* What does it do - required for basic, shown for basic only */}
         <div class="basic-only">
           <label>
             What does it do?
@@ -120,7 +120,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
         </div>
 
         {/* Paid plan notice */}
-        <p class="meta paid-only" hidden>We do the heavy lifting. After checkout you get a private link by email — your full profile page will be built for you within 3 business days.</p>
+        <p class="meta paid-only" hidden>We do the heavy lifting. After checkout you get a private link by email - your full profile page will be built for you within 3 business days.</p>
 
         {/* Sponsored article extras */}
         <div class="sponsored-only" hidden>
@@ -131,17 +131,17 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
         </div>
       </fieldset>
 
-      {/* ════ STEP 2: Full profile — optional for free, not shown for paid ════ */}
+      {/* ════ STEP 2: Full profile - optional for free, not shown for paid ════ */}
       <fieldset class="step" data-step="2" hidden>
         <p class="muted" style="margin:0 0 .5rem;">This step is optional. Fill it in to unlock the sidebar, the pros/cons bullets, and inclusion in the "vs" and "alternatives" comparison pages. It takes about 5 minutes.</p>
 
         <label>Where does it beat the alternatives? <small>be specific, name the workflow or the customer type</small><textarea name="where_it_shines" rows="4" placeholder="e.g. Approval chains by threshold beat Stampli because they need zero IT setup."></textarea></label>
-        <label>Where does it fall short? <small>an honest limitation reads as credible — editors remove spin</small><textarea name="where_it_falls_short" rows="3" placeholder="e.g. Per-user pricing climbs fast when five people approve invoices."></textarea></label>
+        <label>Where does it fall short? <small>an honest limitation reads as credible - editors remove spin</small><textarea name="where_it_falls_short" rows="3" placeholder="e.g. Per-user pricing climbs fast when five people approve invoices."></textarea></label>
         <label>Conclusion <small>optional, one paragraph: who should pick it and why</small><textarea name="conclusion" rows="3"></textarea></label>
         <label>Best for <small>one phrase, e.g. "small businesses and accounting firms that pay many vendor bills"</small><input name="best_for" maxlength="120" /></label>
 
         <hr style="margin:.5rem 0;border:0;border-top:1px solid var(--border);" />
-        <p class="lbl" style="margin:.25rem 0 .5rem;">Sidebar data <small style="font-weight:400;color:var(--muted);">(optional — fills the sidebar on your tool page)</small></p>
+        <p class="lbl" style="margin:.25rem 0 .5rem;">Sidebar data <small style="font-weight:400;color:var(--muted);">(optional - fills the sidebar on your tool page)</small></p>
 
         <div class="two">
           <label>Starting price <small>cheapest paid plan; leave empty if quote-only</small><input name="starting_price" maxlength="60" placeholder="$20 per user per month" /></label>
@@ -205,7 +205,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
     const emailHint = document.getElementById('email-hint') as HTMLElement;
     const featuredPrice = form.dataset.featuredPrice || '';
     const sponsoredPrice = form.dataset.sponsoredPrice || '';
-    let plan: 'basic' | 'featured' | 'sponsored' = 'basic';
+    let plan: 'basic' | 'featured' | 'sponsored' = 'featured';
     let step = 1;
     const totalSteps = () => (plan === 'basic' ? 2 : 1);
 
@@ -246,10 +246,14 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       form.querySelectorAll<HTMLElement>('.basic-only').forEach((e) => (e.hidden = plan !== 'basic'));
       form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-req-basic]').forEach((e) => (e.required = plan === 'basic'));
       nav.hidden = plan !== 'basic';
-      document.querySelectorAll<HTMLElement>('.plan-card').forEach((c) => c.classList.toggle('chosen', c.dataset.plan === plan));
+      document.querySelectorAll<HTMLElement>('.plan-card').forEach((c) => {
+        const isChosen = c.dataset.plan === plan;
+        c.classList.toggle('chosen', isChosen);
+        c.classList.toggle('highlighted', isChosen);
+      });
       if (plan === 'basic') {
         title.textContent = 'Free listing';
-        sub.textContent = 'Two steps. Step 2 is optional — submit early for a basic profile or complete it for the full profile with sidebar and comparison pages.';
+        sub.textContent = 'Two steps. Step 2 is optional - submit early for a basic profile or complete it for the full profile with sidebar and comparison pages.';
       } else if (plan === 'featured') {
         title.textContent = `Featured listing · ${featuredPrice}`;
         sub.textContent = 'One step, then checkout. We build the full profile page for you within 3 business days.';
@@ -299,7 +303,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
     });
     back.addEventListener('click', () => { step--; show(); });
 
-    // "Submit basic listing" — skip Step 2 by removing required attrs from Step 2 fields then submit
+    // "Submit basic listing" - skip Step 2 by removing required attrs from Step 2 fields then submit
     skip.addEventListener('click', () => {
       allSteps[1]?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[required]').forEach((f) => f.removeAttribute('required'));
       form.requestSubmit();
@@ -318,9 +322,9 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       })
     );
 
-    // Pre-select plan from URL ?plan=featured or ?plan=sponsored
+    // Pre-select plan from URL ?plan=featured or ?plan=basic
     const wanted = new URLSearchParams(location.search).get('plan');
-    if (wanted === 'featured' || wanted === 'sponsored') plan = wanted;
+    if (wanted === 'basic' || wanted === 'featured' || wanted === 'sponsored') plan = wanted;
 
     // ── Subcategory + feature options follow the category ──
     const taxonomy: Record<string, string[]> = JSON.parse(document.getElementById('taxonomy-data')?.textContent || '{}');
