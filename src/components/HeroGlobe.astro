@@ -78,8 +78,9 @@ const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 
   for (let i = 0; i < N; i++) { const y = 1 - (i / (N - 1)) * 2; const r = Math.sqrt(1 - y * y); const th = i * 2.399963; const la = Math.asin(y) * 180 / Math.PI; const lo = Math.atan2(Math.sin(th) * r, Math.cos(th) * r) * 180 / Math.PI; const v = toVec(la, lo); if (isLand(la, lo)) dots.push(v); else if (i % 7 === 0) ocean.push(v); }
   const tilt = 22 * Math.PI / 180; const ct = Math.cos(tilt), st = Math.sin(tilt);
   let rot = 0.6; let W = 0, H = 0, R = 0, CX = 0, CY = 0;
-  function resize() { const r = canvas.getBoundingClientRect(); const dpr = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); R = Math.min(W, H) * 0.36; CX = W * 0.48; CY = H * 0.5; }
-  window.addEventListener('resize', resize); resize();
+  function resize() { const r = canvas.getBoundingClientRect(); if (r.width === 0) return; const dpr = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); R = Math.min(W, H) * 0.36; CX = W * 0.48; CY = H * 0.5; }
+  window.addEventListener('resize', resize);
+  if ('ResizeObserver' in window) new ResizeObserver(resize).observe(stage); else resize();
   function project(v: [number, number, number]) { const [x, y, z] = v; const cr = Math.cos(rot), sr = Math.sin(rot); const x1 = x * cr - z * sr, z1 = x * sr + z * cr; const y2 = y * ct - z1 * st, z2 = y * st + z1 * ct; return { x: CX + x1 * R, y: CY - y2 * R, z: z2 }; }
   type Arc = { a: { la: number; lo: number }; b: { la: number; lo: number }; t: number; speed: number; fade: number; ambient: boolean };
   const arcs: Arc[] = [];
