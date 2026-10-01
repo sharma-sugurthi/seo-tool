@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { toneFor, initial, hostOf } from '../lib/brand';
+interface Props { tool: CollectionEntry<'tools'>; rank?: number; showCategory?: boolean }
+const { tool, rank, showCategory = true } = Astro.props;
+const d = tool.data;
+const rel = d.featured ? 'sponsored noopener' : 'nofollow noopener';
+---
+<li class="trow">
+  {rank != null && <span class="trow-rank" aria-hidden="true">{rank}</span>}
+  {d.thumbnail
+    ? <img class="trow-thumb" src={d.thumbnail} alt="" width="96" height="64" loading="lazy" decoding="async" />
+    : <span class="trow-mono" style={`--tone:${toneFor(d.vertical)}`} aria-hidden="true">{initial(d.name)}</span>}
+  <div class="trow-main">
+    <div class="trow-title">
+      <a class="trow-name" href={`/tools/${tool.id}/`}>{d.name}</a>
+      {d.editorsPick && <span class="tag tag-pick" title="Editor's pick, never paid">Editor's pick</span>}
+      {d.featured && <span class="tag tag-paid" title="Paid placement">Featured</span>}
+      {d.deal && <span class="tag tag-deal">Deal</span>}
+    </div>
+    <p class="trow-tagline">{d.tagline}</p>
+    <div class="trow-meta">
+      {showCategory && <a class="trow-cat" href={`/categories/${d.vertical}/`}>{d.category}</a>}
+      <span>{d.pricing}{d.startingPrice ? ` · from ${d.startingPrice}` : ''}</span>
+      {d.dataCheckedAt && <span class="trow-checked" title="Pricing and features checked against the vendor's site">Verified</span>}
+    </div>
+  </div>
+  <div class="trow-side">
+    {d.rating && <span class="trow-rating" aria-label={`Rated ${d.rating} of 5`}><b>{d.rating}</b><small>/5</small></span>}
+    <a class="trow-visit" href={d.website} rel={rel} target="_blank" aria-label={`Visit ${d.name}`}>{hostOf(d.website)} ↗</a>
+  </div>
+</li>

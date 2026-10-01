@@ -3,6 +3,7 @@ import { SITE } from '../site.config';
 const path = Astro.url.pathname;
 const links = [
   { href: '/tools/', label: 'Tools' },
+  { href: '/tools/compare/', label: 'Compare' },
   { href: '/blog/', label: 'Blog' },
   { href: '/learn/', label: 'Learn' },
   { href: '/services/', label: 'Services' },
@@ -22,9 +23,9 @@ const links = [
     </button>
     <nav id="nav-menu" aria-label="Main">
       {links.map(({ href, label }) => (
-        <a href={href} class={path.startsWith(href) ? 'active' : ''}>{label}</a>
+        <a href={href} class={path === href || (path.startsWith(href) && !links.some((l) => l.href !== href && l.href.startsWith(href) && path.startsWith(l.href))) ? 'active' : ''}>{label}</a>
       ))}
-      <a class="cta" href="/submit-tool/">Submit a tool</a>
+      <a class="cta" href="/submit-tool/">List your tool</a>
     </nav>
     <button type="button" class="search-btn" data-search-open aria-label="Search the site" title="Search (Ctrl K)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>

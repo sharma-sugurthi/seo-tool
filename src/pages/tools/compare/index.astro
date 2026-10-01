@@ -1,0 +1,64 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { VERTICALS } from '../../../data/taxonomy';
+import { editorialRank, fmtDate } from '../../../lib/compare';
+import { breadcrumbList } from '../../../lib/schema';
+
+/** Hub for every comparison page: editorial verdicts first, then all same-category pairs grouped by vertical and category. */
+const all = await getCollection('tools');
+const verdicts = await getCollection('comparisons');
+const byId = new Map(all.map((t) => [t.id, t]));
+const editorial = verdicts.map((c) => ({ id: c.id, a: byId.get(c.data.toolA), b: byId.get(c.data.toolB), winner: c.data.winner ? byId.get(c.data.winner) : undefined, reason: c.data.winnerReason, reviewedAt: c.data.reviewedAt })).filter((p) => p.a && p.b);
+const groups = VERTICALS.map((v) => ({
+  v,
+  cats: v.categories.map((c) => {
+    const tools = all.filter((t) => t.data.vertical === v.slug && t.data.category === c).sort(editorialRank);
+    const pairs: { id: string; label: string }[] = [];
+    for (let i = 0; i < tools.length; i++) for (let j = i + 1; j < tools.length; j++) {
+      const [x, y] = [tools[i], tools[j]].sort((p, q) => p.id.localeCompare(q.id));
+      pairs.push({ id: `${x.id}-vs-${y.id}`, label: `${x.data.name} vs ${y.data.name}` });
+    }
+    return { c, pairs };
+  }).filter((c) => c.pairs.length > 0),
+})).filter((g) => g.cats.length > 0);
+const total = groups.reduce((n, g) => n + g.cats.reduce((m, c) => m + c.pairs.length, 0), 0) + editorial.filter((p) => p.a!.data.category !== p.b!.data.category).length;
+const jsonLd = [breadcrumbList(Astro.site, [{ name: 'Tools', path: '/tools/' }, { name: 'Compare', path: Astro.url.pathname }])];
+---
+<Base title={`Compare software: ${total} side-by-side pages`} description={`Every comparison page in the directory: ${editorial.length} editorial verdicts and ${total} side-by-side pages built from the vendors' own pricing and feature data.`} jsonLd={jsonLd}>
+  <section class="hero">
+    <nav class="meta eyebrow" aria-label="Breadcrumb"><a href="/tools/">Tools</a> / Compare</nav>
+    <h1>Compare tools side by side</h1>
+    <p class="lead">{total} comparison pages. Each one puts two tools' starting price, free plan, trial, platforms and feature list in one table, from the vendors' own pages. {editorial.length} pairs with real search demand also carry a hand-written verdict.</p>
+  </section>
+
+  {editorial.length > 0 && (
+    <section class="section fade-in">
+      <div class="section-head"><h2>Editorial verdicts</h2><span class="meta">Written by an editor; the winner is our call, never a vendor's</span></div>
+      <ul class="vs-grid">
+        {editorial.map((p) => (
+          <li class="card vs-card">
+            <a class="vs-pair" href={`/tools/compare/${p.id}/`}>{p.a!.data.name} <em>vs</em> {p.b!.data.name}</a>
+            <p class="muted" style="margin:.35rem 0 0; font-size:.93rem;">{p.winner ? `Our call: ${p.winner.data.name}. ${p.reason ?? ''}` : 'No clear winner: it depends on your team.'}</p>
+            {p.reviewedAt && <span class="meta">Reviewed {fmtDate(p.reviewedAt)}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="section fade-in">
+    <div class="section-head"><h2>All comparisons by category</h2></div>
+    {groups.map((g) => (
+      <details class="cmp-group" open={g.v.slug === 'finance'}>
+        <summary><strong>{g.v.name}</strong> <span class="meta">{g.cats.reduce((n, c) => n + c.pairs.length, 0)} pages</span></summary>
+        {g.cats.map((c) => (
+          <div class="cmp-cat">
+            <h3>{c.c}</h3>
+            <ul class="cmp-links">{c.pairs.map((p) => <li><a href={`/tools/compare/${p.id}/`}>{p.label}</a></li>)}</ul>
+          </div>
+        ))}
+      </details>
+    ))}
+  </section>
+</Base>

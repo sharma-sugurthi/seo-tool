@@ -1,40 +1,38 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { toneFor, initial } from '../lib/brand';
 interface Props { tool: CollectionEntry<'tools'> }
 const { tool } = Astro.props;
 const d = tool.data;
-const fullStars = d.rating ?? 0;
-const initial = d.name.charAt(0).toUpperCase();
 // Paid placement is tagged rel="sponsored" (Google's requirement for paid links); free listings are nofollow.
 const rel = d.featured ? 'sponsored noopener' : 'nofollow noopener';
 ---
 <article class="card tool-card" data-category={d.category} data-name={d.name.toLowerCase()}>
-  {d.thumbnail ? (
-    <img class="card-thumb" src={d.thumbnail} alt={`${d.name} screenshot`} width="600" height="400" loading="lazy" decoding="async" />
-  ) : (
-    <div class="card-thumb-placeholder" aria-hidden="true"><span>{initial}</span></div>
-  )}
-  <div class="row" style="justify-content:space-between; margin-bottom:.1rem;">
-    <span class="pill">{d.category}</span>
-    {d.featured && <span class="pill warn">Featured</span>}
-    {!d.featured && d.editorsPick && <span class="pill">Editor's pick</span>}
-  </div>
-  <h3><a class="card-title-link" href={`/tools/${tool.id}/`}>{d.name}</a></h3>
-  <p class="muted" style="margin:0; flex:1; font-size:.93rem;">{d.tagline}</p>
-  {d.rating && (
-    <div class="stars" aria-label={`Rating: ${d.rating} out of 5`}>
-      {[1,2,3,4,5].map((i) => (
-        <span class={`star ${i <= fullStars ? 'filled' : ''}`}>★</span>
-      ))}
+  <div class="tc-head" style={`--tone:${toneFor(d.vertical)}`}>
+    {d.thumbnail
+      ? <img class="tc-thumb" src={d.thumbnail} alt={`${d.name} screenshot`} width="600" height="400" loading="lazy" decoding="async" />
+      : <div class="tc-mono" aria-hidden="true"><span>{initial(d.name)}</span></div>}
+    <div class="tc-tags">
+      {d.featured && <span class="tag tag-paid">Featured</span>}
+      {!d.featured && d.editorsPick && <span class="tag tag-pick">Editor's pick</span>}
+      {d.deal && <span class="tag tag-deal">Deal</span>}
     </div>
-  )}
-  <div class="row card-actions" style="justify-content:space-between; margin-top:auto;">
-    <p class="meta" style="margin:0;">{d.pricing}</p>
-    {d.featured && (
-      <a class="btn ghost card-action-btn" href={d.website} target="_blank" rel={rel} style="font-size:.78rem; padding:.3rem .7rem;">Visit</a>
-    )}
   </div>
-  {/* Stretched overlay -- makes the whole card clickable to the Lantle review page */}
+  <div class="tc-body">
+    <div class="tc-title">
+      <h3><a class="card-title-link" href={`/tools/${tool.id}/`}>{d.name}</a></h3>
+      {d.rating && <span class="trow-rating" aria-label={`Rated ${d.rating} of 5`}><b>{d.rating}</b><small>/5</small></span>}
+    </div>
+    <p class="tc-tagline">{d.tagline}</p>
+    <div class="tc-meta">
+      <span class="trow-cat">{d.category}</span>
+      <span>{d.pricing}{d.startingPrice ? ` · from ${d.startingPrice}` : ''}</span>
+    </div>
+    <div class="tc-actions">
+      <a class="btn ghost sm card-action-btn" href={`/tools/${tool.id}/`}>Review</a>
+      {d.featured && <a class="btn ghost sm card-action-btn" href={d.website} target="_blank" rel={rel}>Visit</a>}
+    </div>
+  </div>
   {/* Decorative: the title above is the real, keyboard-reachable link. */}
   <a class="card-overlay" href={`/tools/${tool.id}/`} aria-hidden="true" tabindex="-1"></a>
 </article>

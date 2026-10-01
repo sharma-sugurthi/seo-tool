@@ -1,226 +1,237 @@
 ---
 import Base from '../layouts/Base.astro';
+import ToolRow from '../components/ToolRow.astro';
 import ToolCard from '../components/ToolCard.astro';
 import PostCard from '../components/PostCard.astro';
 import Newsletter from '../components/Newsletter.astro';
-import HeroGlobe from '../components/HeroGlobe.astro';
 import { getCollection } from 'astro:content';
-import { SITE } from '../site.config';
+import { SITE, REVIEW_SLA, INSTANT_PRICE, ADVERTISE_PRICES } from '../site.config';
 import { VERTICALS } from '../data/taxonomy';
-import { REVIEW_SLA } from '../site.config';
-import { editorialRank } from '../lib/compare';
+import { editorialRank, fmtDate, hasFreePlan } from '../lib/compare';
+import { toneFor } from '../lib/brand';
 
-const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick) || b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
+/**
+ * Directory-first landing page. Every number on it is computed from the published data at build time;
+ * nothing is simulated. Three columns on desktop: browse rail, ranked lists, proof and offers rail.
+ */
+const all = await getCollection('tools');
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const counts = new Map(VERTICALS.map((v) => [v.slug, tools.filter((t) => t.data.vertical === v.slug).length]));
-const verticals = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0));
+const verdicts = await getCollection('comparisons');
+const byId = new Map(all.map((t) => [t.id, t]));
+const pairs = verdicts.map((c) => ({ id: c.id, a: byId.get(c.data.toolA), b: byId.get(c.data.toolB), winner: c.data.winner ? byId.get(c.data.winner) : undefined, reason: c.data.winnerReason, reviewedAt: c.data.reviewedAt })).filter((p) => p.a && p.b);
 
-// Bento data. Every list here is editorial: rating, editor's pick or date. Paid placement never changes the order.
-const byName = new Map(tools.map((t) => [t.id, t]));
-const latest = [...tools].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf() || a.data.name.localeCompare(b.data.name));
-const picks = tools.filter((t) => t.data.editorsPick).sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0)).slice(0, 3);
-const pairs = (await getCollection('comparisons'))
-  .map((c) => ({ a: byName.get(c.data.toolA), b: byName.get(c.data.toolB), winner: c.data.winner ? byName.get(c.data.winner) : undefined, reason: c.data.winnerReason, id: c.id }))
-  .filter((p) => p.a && p.b);
-const tickerItems = latest.slice(0, 14);
-// Top rated: editorial ranking only (rating, then editor's pick). Paid placement never enters this list.
-const topRated = [...tools].sort(editorialRank).slice(0, 6);
-const comparePages = (() => { let n = 0; const byCat = new Map<string, number>(); tools.forEach((t) => byCat.set(t.data.category, (byCat.get(t.data.category) ?? 0) + 1)); byCat.forEach((c) => (n += (c * (c - 1)) / 2)); return n; })();
-const checkedCount = tools.filter((t) => t.data.dataCheckedAt).length;
-const deals = tools.filter((t) => t.data.deal).sort(editorialRank).slice(0, 4);
-const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const topRated = [...all].sort(editorialRank).slice(0, 8);
+const justAdded = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf() || a.data.name.localeCompare(b.data.name)).slice(0, 8);
+const picks = all.filter((t) => t.data.editorsPick).sort(editorialRank).slice(0, 8);
+const free = all.filter((t) => hasFreePlan(t.data)).sort(editorialRank).slice(0, 8);
+const deals = all.filter((t) => t.data.deal).sort(editorialRank).slice(0, 8);
+const verified = all.filter((t) => t.data.dataCheckedAt);
+const comparePages = (() => { let n = 0; const byCat = new Map<string, number>(); all.forEach((t) => byCat.set(t.data.category, (byCat.get(t.data.category) ?? 0) + 1)); byCat.forEach((c) => (n += (c * (c - 1)) / 2)); return n + pairs.filter((p) => p.a!.data.category !== p.b!.data.category).length; })();
+const altPages = all.filter((t) => all.filter((x) => x.data.category === t.data.category).length - 1 >= 3).length;
+const counts = new Map(VERTICALS.map((v) => [v.slug, all.filter((t) => t.data.vertical === v.slug).length]));
+const verticals = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0));
+const lastUpdated = new Date(Math.max(...all.flatMap((t) => [t.data.addedDate.getTime(), t.data.dataCheckedAt?.getTime() ?? 0])));
+const pricingCounts = ['Free', 'Freemium', 'Paid', 'Enterprise'].map((p) => [p, all.filter((t) => t.data.pricing === p).length] as const);
+const featuredPrice = ADVERTISE_PRICES.find((p) => p.name === 'Featured tool listing')!;
+const sponsoredPrice = ADVERTISE_PRICES.find((p) => p.name === 'Sponsored article')!;
+const tabs = [
+  { key: 'top', label: 'Top rated', items: topRated, note: 'Editorial rating, then editor\'s pick. Paid placement never moves a tool here.' },
+  { key: 'new', label: 'Just added', items: justAdded, note: 'Newest listings first, by the date they were published.' },
+  { key: 'picks', label: "Editor's picks", items: picks, note: 'Tools we would recommend to a friend. Picked by us, never paid for.' },
+  { key: 'free', label: 'Free plans', items: free, note: 'A permanent free plan according to the vendor\'s published pricing.' },
+  ...(deals.length ? [{ key: 'deals', label: 'Deals', items: deals, note: 'Offers vendors attached to their listing. Not a ranking input.' }] : []),
+];
+const altTargets = [...all].sort(editorialRank).filter((t) => all.filter((x) => x.data.category === t.data.category).length - 1 >= 3).slice(0, 6);
 ---
 <Base title="AI tools directory: reviews and comparisons" description={SITE.description}>
-  <section class="hero hero-globe">
-    <div>
-      <p class="meta eyebrow">Discover better software</p>
-      <h1>{SITE.tagline}</h1>
-      <p class="lead">Compare the best AI software for finance, marketing, engineering, and more. Read independent reviews, compare pricing side-by-side, and find the right tool for your team today.</p>
-      <div class="row" style="margin-top:1.25rem;">
-        <a class="btn" href="/tools/">Browse the tools</a>
-        <a class="btn ghost" href="/submit-tool/">List your tool, free</a>
-      </div>
-      <div class="stats-bar">
-        <div class="stat"><span class="stat-number" data-count={tools.length}>{tools.length}</span><span class="stat-label">Tools reviewed</span></div>
-        <div class="stat"><span class="stat-number" data-count={VERTICALS.length}>{VERTICALS.length}</span><span class="stat-label">Categories</span></div>
-        <div class="stat"><span class="stat-number" data-count={comparePages}>{comparePages}</span><span class="stat-label">Compare pages</span></div>
-        <div class="stat"><span class="stat-number" data-count={pairs.length}>{pairs.length}</span><span class="stat-label">Editorial verdicts</span></div>
-      </div>
+  <section class="home-hero">
+    <p class="meta eyebrow">Independent software reviews. Finance and accounting first.</p>
+    <h1>Software reviewed by people, compared on facts.</h1>
+    <p class="lead">{all.length} tools across {verticals.filter((v) => (counts.get(v.slug) ?? 0) > 0).length} categories, each read by an editor before it is listed. Side-by-side comparisons built from the vendors' own pricing pages, alternatives ranked by rating alone, and every paid placement labelled.</p>
+    <button type="button" class="home-search" data-search-open aria-label="Search the directory">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span>Search {all.length} tools, {comparePages} comparisons and every guide</span>
+      <kbd class="key">/</kbd>
+    </button>
+    <div class="row home-cta">
+      <a class="btn" href="/tools/">Browse the directory</a>
+      <a class="btn ghost" href="/submit-tool/">List your tool, free</a>
+      <span class="meta">Reviewed within {REVIEW_SLA}. Instant publish {INSTANT_PRICE}.</span>
     </div>
-    {/* scene="deep" gives the dark green globe panel on the light page */}
-    <HeroGlobe tools={tools} scene="light" />
+    <ul class="trust-strip" aria-label="What the directory holds">
+      <li><b>{all.length}</b> reviews written by a person</li>
+      <li><b>{comparePages}</b> compare pages from vendor data</li>
+      <li><b>{pairs.length}</b> editorial verdicts</li>
+      <li><b>{verified.length}</b> pricing checks logged{verified.length < all.length ? `, ${all.length - verified.length} to go` : ''}</li>
+      <li><b>0</b> ratings for sale</li>
+    </ul>
   </section>
 
-  <div class="ticker" aria-label="Recently listed tools">
-    <div class="ticker-track">
-      {tickerItems.map((t) => <a href={`/tools/${t.id}/`}>{t.data.name} <span class="meta">{t.data.category}</span></a>)}
-      {tickerItems.map((t) => <a class="dup" href={`/tools/${t.id}/`} aria-hidden="true" tabindex="-1">{t.data.name} <span class="meta">{t.data.category}</span></a>)}
-    </div>
-  </div>
+  <div class="home-grid">
+    <aside class="rail rail-left" aria-label="Browse">
+      <section class="rail-block">
+        <h2 class="rail-title">Browse by job</h2>
+        <ul class="rail-list">
+          {verticals.map((v) => (counts.get(v.slug) ?? 0) > 0 && (
+            <li><a href={`/categories/${v.slug}/`}><span class="dot" style={`background:${toneFor(v.slug)}`}></span>{v.short}<span class="n">{counts.get(v.slug)}</span></a></li>
+          ))}
+          <li><a href="/categories/" class="more">All categories, including the open ones</a></li>
+        </ul>
+      </section>
+      <section class="rail-block">
+        <h2 class="rail-title">By pricing</h2>
+        <ul class="rail-list">
+          {pricingCounts.map(([p, n]) => <li><a href={`/tools/?pricing=${p}`}>{p}<span class="n">{n}</span></a></li>)}
+        </ul>
+      </section>
+      <section class="rail-block">
+        <h2 class="rail-title">Alternatives</h2>
+        <ul class="rail-list">
+          {altTargets.map((t) => <li><a href={`/tools/alternatives/${t.id}/`}>{t.data.name} alternatives</a></li>)}
+          <li><a class="more" href="/tools/compare/">All comparisons</a></li>
+        </ul>
+      </section>
+      <section class="rail-block">
+        <h2 class="rail-title">For developers and AI assistants</h2>
+        <p class="meta" style="margin:0 0 .4rem;">Free JSON API and an MCP server over the same data.</p>
+        <a class="link-more" href="/api-reference/">API reference</a>
+      </section>
+    </aside>
 
-  <section class="section">
-    <div class="section-head"><div><h2 style="margin:0">Top rated</h2><p class="muted" style="margin:.25rem 0 0;">Ranked by our rating and editor's picks. Featured placement never moves a tool up this list.</p></div><a class="link-more" href="/tools/">All {tools.length} tools</a></div>
-    <div class="grid reveal-stagger">{topRated.map((t) => <ToolCard tool={t} />)}</div>
-  </section>
-
-  {pairs.length > 0 && (
-    <section class="section reveal">
-      <div class="section-head"><div><h2 style="margin:0">Head to head</h2><p class="muted" style="margin:.25rem 0 0;">Editorial verdicts on the pairs people actually compare. {checkedCount} of {tools.length} tools have had pricing checked against the vendor site.</p></div></div>
-      <ul class="vs-grid">
-        {pairs.slice(0, 6).map((p) => (
-          <li class="card vs-card">
-            <a class="vs-pair" href={`/tools/compare/${p.id}/`}>{p.a!.data.name} vs {p.b!.data.name}</a>
-            <p class="muted" style="margin:.35rem 0 0; font-size:.93rem;">{p.winner ? `Our call: ${p.winner.data.name}. ${p.reason ?? ''}` : 'No clear winner: it depends on your team.'}</p>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )}
-
-  <section class="section">
-    <div class="bento reveal-stagger">
-      <div class="tile t-search">
-        <p class="meta eyebrow">Find a tool</p>
-        <h2>What job do you need done?</h2>
-        <button type="button" class="search-fake" data-search-open aria-label="Search the directory">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <span>Search {tools.length} tools, {VERTICALS.length} categories and every guide</span>
-          <kbd class="key">/</kbd>
-        </button>
-        <p class="lead-sm">Every listing is checked by a person. Ratings and rankings are never for sale.</p>
-        <p class="try">Try:
-          {['invoice automation', 'coding assistant', 'e-signature', 'help desk', 'SEO', 'meeting notes'].map((q) => <button type="button" class="try-chip" data-search-open={q}>{q}</button>)}
-        </p>
-        <div class="chips">
-          {verticals.slice(0, 6).map((v) => <a class="pill" href={`/categories/${v.slug}/`}>{v.short} <span class="n">{counts.get(v.slug) ?? 0}</span></a>)}
-          <a class="pill" href="/categories/">All categories</a>
-        </div>
+    <main class="home-main">
+      <div class="tabs" role="tablist" aria-label="Tool lists">
+        {tabs.map((t, i) => <button type="button" role="tab" class={`tab${i === 0 ? ' on' : ''}`} id={`tab-${t.key}`} aria-controls={`panel-${t.key}`} aria-selected={i === 0 ? 'true' : 'false'} data-tab={t.key}>{t.label}</button>)}
+        <a class="tabs-more" href="/tools/">All {all.length} →</a>
       </div>
-
-      {verticals.slice(0, 4).map((v, i) => (
-        <div class={`tile t-cat c${i + 1}`}>
-          <span class="tile-arrow" aria-hidden="true">↗</span>
-          <span class="tile-num" data-count={counts.get(v.slug) ?? 0}>{counts.get(v.slug) ?? 0}</span>
-          <span class="tile-name">{v.name}</span>
-          <p class="muted">{v.categories.slice(0, 3).join(', ')}</p>
-          <a class="tile-link" href={`/categories/${v.slug}/`} aria-label={`${v.name}: ${counts.get(v.slug) ?? 0} tools`}></a>
-        </div>
+      {tabs.map((t, i) => (
+        <section role="tabpanel" id={`panel-${t.key}`} aria-labelledby={`tab-${t.key}`} class="tab-panel" hidden={i !== 0}>
+          <p class="meta tab-note">{t.note}</p>
+          <ol class="trows">{t.items.map((tool, n) => <ToolRow tool={tool} rank={n + 1} />)}</ol>
+        </section>
       ))}
 
-      <div class="tile t-new">
-        <p class="meta eyebrow">Just added</p>
-        <ul class="plain">
-          {latest.slice(0, 5).map((t) => <li><a href={`/tools/${t.id}/`}>{t.data.name}</a><span class="meta">{t.data.category} · {fmt(t.data.addedDate)}</span></li>)}
-        </ul>
-        <a class="link-more" href="/tools/" style="margin-top:auto;">All {tools.length} tools</a>
-      </div>
-
-      <div class="tile t-vs">
-        <p class="meta eyebrow">Head to head</p>
-        <ul class="vs-list" id="vs-list">
-          {pairs.map((p, i) => (
-            <li class={i === 0 ? 'on' : ''}>
-              <a class="vs-pair" href={`/tools/compare/${p.id}/`}>{p.a!.data.name} vs {p.b!.data.name}</a>
-              <p class="vs-call muted">{p.winner ? `Our call: ${p.winner.data.name}. ${p.reason ?? ''}` : 'No clear winner: it depends on your team. See who each one fits.'}</p>
-            </li>
-          ))}
-        </ul>
-        {pairs.length > 1 && <div class="vs-dots" id="vs-dots" aria-hidden="true">{pairs.map((_, i) => <button type="button" class={i === 0 ? 'on' : ''} data-i={i}></button>)}</div>}
-      </div>
-
-      <div class="tile t-picks">
-        <p class="meta eyebrow">Editor's picks</p>
-        <ul class="plain">
-          {picks.map((t) => <li><a href={`/tools/${t.id}/`}>{t.data.name}</a><span class="stars" aria-label={`Rated ${t.data.rating} out of 5`}>{[1, 2, 3, 4, 5].map((i) => <span class={`star ${i <= (t.data.rating ?? 0) ? 'filled' : ''}`}>★</span>)}</span></li>)}
-        </ul>
-        <p class="meta" style="margin-top:auto;">Picked by us, never paid.</p>
-      </div>
-
-      <div class="tile t-learn">
-        <p class="meta eyebrow">Free tools for buyers</p>
-        <div class="learn-row">
-          <a href="/learn/tool-evaluation-scorecard/">Evaluation scorecard <small>Eight weighted criteria, three tools side by side</small></a>
-          <a href="/learn/software-cost-calculator/">Cost calculator <small>Seats, add-ons and setup over three years</small></a>
-          <a href="/learn/ai-vendor-security-checklist/">Security checklist <small>The questions vendors go quiet on</small></a>
-        </div>
-      </div>
-
-      {deals.length > 0 && (
-        <div class="tile t-deals">
-          <p class="meta eyebrow">Deals</p>
-          <ul class="plain">
-            {deals.map((t) => <li><a href={`/tools/${t.id}/`}>{t.data.name}</a><span class="meta">{t.data.deal!.text}</span></li>)}
+      {pairs.length > 0 && (
+        <section class="home-section">
+          <div class="section-head"><h2>Head to head</h2><a class="link-more" href="/tools/compare/">All {comparePages} comparisons</a></div>
+          <ul class="vs-grid">
+            {pairs.slice(0, 6).map((p) => (
+              <li class="card vs-card">
+                <a class="vs-pair" href={`/tools/compare/${p.id}/`}>{p.a!.data.name} <em>vs</em> {p.b!.data.name}</a>
+                <p class="muted" style="margin:.35rem 0 0; font-size:.93rem;">{p.winner ? `Our call: ${p.winner.data.name}. ${p.reason ?? ''}` : 'No clear winner: it depends on your team.'}</p>
+                {p.reviewedAt && <span class="meta">Reviewed {fmtDate(p.reviewedAt)}</span>}
+              </li>
+            ))}
           </ul>
-          <p class="meta" style="margin-top:auto;">Vendor offers. Never a ranking input.</p>
-        </div>
+        </section>
       )}
 
-      <div class="tile t-cta">
-        <div>
-          <h2>Build software? Get in front of the people comparing it.</h2>
-          <p>A basic listing is free and reviewed within {REVIEW_SLA}. Instant publish, featured placement, sponsored articles and done-for-you growth services are there when you want more.</p>
+      <section class="home-section">
+        <div class="section-head"><h2>Categories</h2><a class="link-more" href="/categories/">Open categories are free to claim</a></div>
+        <div class="cat-grid">
+          {verticals.map((v) => {
+            const n = counts.get(v.slug) ?? 0;
+            const top = all.filter((t) => t.data.vertical === v.slug).sort(editorialRank).slice(0, 3).map((t) => t.data.name);
+            return (
+              <a class="cat-tile" href={`/categories/${v.slug}/`} style={`--tone:${toneFor(v.slug)}`}>
+                <span class="cat-n">{n > 0 ? n : 'Open'}</span>
+                <strong>{v.name}</strong>
+                <span class="meta">{top.length ? top.join(', ') : v.categories.slice(0, 3).join(', ')}</span>
+              </a>
+            );
+          })}
         </div>
-        <div class="row">
-          <a class="btn" href="/submit-tool/">List your tool</a>
-          <a class="btn ghost" href="/services/">Growth services</a>
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
+
+    <aside class="rail rail-right" aria-label="About the directory">
+      <section class="rail-block proof-card">
+        <h2 class="rail-title">The directory in numbers</h2>
+        <dl class="proof-dl">
+          <div><dt>Tools reviewed</dt><dd>{all.length}</dd></div>
+          <div><dt>Compare pages</dt><dd>{comparePages}</dd></div>
+          <div><dt>Alternatives pages</dt><dd>{altPages}</dd></div>
+          <div><dt>Editorial verdicts</dt><dd>{pairs.length}</dd></div>
+          <div><dt>Vendor pricing checks</dt><dd>{verified.length}</dd></div>
+          <div><dt>Last updated</dt><dd>{fmtDate(lastUpdated)}</dd></div>
+        </dl>
+        <p class="meta">Counted from the published database at build time. Traffic and backlink figures appear here once there are 30 days of them to show.</p>
+      </section>
+
+      <section class="rail-block offer-card">
+        <h2 class="rail-title">List your tool</h2>
+        <ul class="offer-list">
+          <li><span>Free listing</span><b>$0</b></li>
+          <li><span>Instant publish, live in 24h</span><b>{INSTANT_PRICE}</b></li>
+          <li><span>Featured, 12 months</span><b>{featuredPrice.price}</b></li>
+          <li><span>Sponsored article</span><b>{sponsoredPrice.price}</b></li>
+        </ul>
+        <p class="meta" style="margin:.25rem 0 .75rem;">Preview before you pay. Edit for free, forever. Paid links are tagged rel=sponsored, as Google requires.</p>
+        <a class="btn" href="/submit-tool/" style="width:100%; justify-content:center;">Start a listing</a>
+      </section>
+
+      <section class="rail-block">
+        <h2 class="rail-title">Directory package</h2>
+        <p class="meta" style="margin:0 0 .5rem;">Manual submission to 62 directories, every domain rating published before you pay, indexed-link report at 30 days.</p>
+        <a class="link-more" href="/directory-package/">See every directory and its DR</a>
+      </section>
+
+      {posts.length > 0 && (
+        <section class="rail-block">
+          <h2 class="rail-title">From the blog</h2>
+          <ul class="rail-posts">
+            {posts.slice(0, 3).map((p) => <li><a href={`/blog/${p.id}/`}>{p.data.title}</a><span class="meta">{p.data.pubDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span></li>)}
+          </ul>
+          <a class="link-more" href="/blog/">All articles</a>
+        </section>
+      )}
+
+      <section class="rail-block">
+        <h2 class="rail-title">Free tools for buyers</h2>
+        <ul class="rail-posts">
+          <li><a href="/learn/tool-evaluation-scorecard/">Evaluation scorecard</a></li>
+          <li><a href="/learn/software-cost-calculator/">Three-year cost calculator</a></li>
+          <li><a href="/learn/ai-vendor-security-checklist/">Vendor security checklist</a></li>
+          <li><a href="/learn/month-end-close-checklist/">Month end close checklist</a></li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+
+  <section class="section how">
+    <div class="section-head"><h2>How a listing works</h2><span class="meta">The same three steps for free and paid listings</span></div>
+    <ol class="how-steps">
+      <li><span class="how-n">1</span><h3>Submit</h3><p>Name, site, category, a tagline and a short description. You see the card exactly as it will appear before you send it, and before you pay for anything.</p></li>
+      <li><span class="how-n">2</span><h3>A person reads it</h3><p>Within {REVIEW_SLA}. The editor checks the product exists and does what the listing says, trims the marketing words, and files it under the right category.</p></li>
+      <li><span class="how-n">3</span><h3>Published with proof</h3><p>Your review page shows when it was listed, when pricing was last checked, the link type, and every compare and alternatives page it appears on. Edit it for free, forever.</p></li>
+    </ol>
   </section>
 
-  <section class="section reveal">
-    <div class="section-head"><h2>Just added</h2><a class="link-more" href="/submit-tool/">Submit yours, free</a></div>
-    <div class="grid reveal-stagger">{latest.slice(0, 3).map((t) => <ToolCard tool={t} />)}</div>
+  <section class="section">
+    <div class="section-head"><h2>Latest reviews</h2><a class="link-more" href="/tools/">All {all.length} tools</a></div>
+    <div class="grid reveal-stagger">{justAdded.slice(0, 6).map((t) => <ToolCard tool={t} />)}</div>
   </section>
 
-  <section class="section reveal">
-    <div class="section-head"><h2>From the blog</h2><a class="link-more" href="/blog/">All articles</a></div>
-    <div class="grid reveal-stagger">{posts.slice(0, 3).map((p) => <PostCard post={p} />)}</div>
-  </section>
-
-  <section class="section reveal">
-    <div class="section-head"><h2>Work with us</h2><a class="link-more" href="/services/">Everything we offer</a></div>
-    <div class="grid reveal-stagger">
-      <div class="card">
-        <h3>Get in front of buyers</h3>
-        <p class="muted desc">Sponsored articles and featured listings, read by the people comparing tools before they buy.</p>
-        <a class="link-more" href="/submit-tool/">See advertising options</a>
-      </div>
-      <div class="card">
-        <h3>Get cited by AI and ranked on Google</h3>
-        <p class="muted desc">Guest post placement, directory submissions, SEO content and LinkedIn ghostwriting, done for you.</p>
-        <a class="link-more" href="/services/">See growth services</a>
-      </div>
-      <div class="card">
-        <h3>Share your expertise</h3>
-        <p class="muted desc">Practitioners and founders can publish free guest posts if they teach something real.</p>
-        <a class="link-more" href="/write-for-us/">Read the guidelines</a>
-      </div>
-    </div>
-  </section>
+  {posts.length > 0 && (
+    <section class="section reveal">
+      <div class="section-head"><h2>From the blog</h2><a class="link-more" href="/blog/">All articles</a></div>
+      <div class="grid reveal-stagger">{posts.slice(0, 3).map((p) => <PostCard post={p} />)}</div>
+    </section>
+  )}
 
   <section class="section reveal">
     <Newsletter />
   </section>
 
   <script>
-    // Head to head tile: cycle through the editorial pairs, pause on hover, dots jump
-    const list = document.getElementById('vs-list');
-    const dots = document.getElementById('vs-dots');
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (list && !reduced) {
-      const items = [...list.children] as HTMLElement[];
-      const dotEls = dots ? ([...dots.children] as HTMLElement[]) : [];
-      let i = 0; let timer: number | undefined;
-      const show = (n: number) => { items[i].classList.remove('on'); dotEls[i]?.classList.remove('on'); i = (n + items.length) % items.length; items[i].classList.add('on'); dotEls[i]?.classList.add('on'); };
-      const start = () => { stop(); if (items.length > 1) timer = window.setInterval(() => show(i + 1), 4500); };
-      const stop = () => { if (timer) window.clearInterval(timer); };
-      dotEls.forEach((d, n) => d.addEventListener('click', () => { show(n); start(); }));
-      const tile = list.closest('.tile');
-      tile?.addEventListener('mouseenter', stop);
-      tile?.addEventListener('mouseleave', start);
-      document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
-      start();
-    }
+    // Tabs: server-rendered panels, one visible at a time. Deep-linkable via #tab-<key>.
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('.tab')];
+    const panels = [...document.querySelectorAll<HTMLElement>('.tab-panel')];
+    const show = (key: string) => {
+      tabs.forEach((t) => { const on = t.dataset.tab === key; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
+      panels.forEach((p) => (p.hidden = p.id !== `panel-${key}`));
+    };
+    tabs.forEach((t) => t.addEventListener('click', () => { show(t.dataset.tab!); history.replaceState(null, '', `#tab-${t.dataset.tab}`); }));
+    const h = location.hash.replace('#tab-', '');
+    if (h && tabs.some((t) => t.dataset.tab === h)) show(h);
   </script>
 </Base>
