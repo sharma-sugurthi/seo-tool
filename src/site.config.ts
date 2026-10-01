@@ -15,9 +15,9 @@ export const SITE = {
   // Set TOOLS_API_URL in Cloudflare Pages (and in a local .env) to point a build at a different backend.
   // Production API lives on its own subdomain (CNAME api.lantle.ai -> the Heroku app's DNS target; add the domain in Heroku).
   // Never expose the raw herokuapp.com hostname to visitors: it leaks the app name and splits trust across two domains.
-  apiBase: (typeof process !== 'undefined' && process.env.TOOLS_API_URL) || (typeof import.meta !== 'undefined' && (import.meta as any).env?.TOOLS_API_URL) || 'https://lantle-backend-ed132a1d726a.herokuapp.com',
+  apiBase: (typeof process !== 'undefined' && process.env.TOOLS_API_URL) || (typeof import.meta !== 'undefined' && (import.meta as any).env?.TOOLS_API_URL) || 'https://api.lantle.ai',
   // Cloudflare Turnstile site key (public). Leave empty to disable the bot check widget.
-  turnstileSiteKey: '',
+  turnstileSiteKey: '0x4AAAAAAFLtF2GV-0qXV3o7',
   // Company LinkedIn page. Leave empty until it exists: an empty value hides the icon instead of linking to a placeholder.
   social: {
     linkedin: '',
