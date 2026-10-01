@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE, ADVERTISE_PRICES, SPONSORED_WRITING_FEE, SPONSORED_ARTICLE_LENGTH } from '../site.config';
-import { VERTICALS, FEATURES, PLATFORMS, DEPLOYMENTS, COMPANY_SIZES } from '../data/taxonomy';
+import { SITE, ADVERTISE_PRICES, SPONSORED_WRITING_FEE, REVIEW_SLA, INSTANT_PRICE } from '../site.config';
+import { VERTICALS, FEATURES, PLATFORMS, DEPLOYMENTS } from '../data/taxonomy';
 import { getCollection } from 'astro:content';
 
 const featured = ADVERTISE_PRICES.find((p) => p.name === 'Featured tool listing')!;
@@ -13,19 +13,19 @@ const comparePages = (() => { let n = 0; const byCat = new Map<string, number>()
 const categoryOptions = VERTICALS.map((v) => ({ slug: v.slug, name: v.name }));
 const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the notes)'];
 ---
-<Base title="List your tool" description="List any software or AI tool. An editor reviews it within five business days; it gets a review page, a place in its category, and appears on the compare and alternatives pages automatically.">
+<Base title="List your tool: free, instant or featured" description={`List any software or AI tool. Free listings are reviewed within ${REVIEW_SLA}; instant publish goes live in 24 hours. Every tool gets a review page, a category place and compare pages.`}>
   <section class="hero">
     <p class="meta eyebrow">For the people who build software</p>
     <h1>List your tool</h1>
-    <p class="lead">Every listing is reviewed by an editor within five business days. Approved tools get a dedicated review page, appear in their category, and are included in the compare and alternatives pages automatically. Ratings are never for sale.</p>
+    <p class="lead">Every listing is read by an editor within {REVIEW_SLA}, or goes live within 24 hours with instant publish. Approved tools get a dedicated review page, appear in their category, and are included in the compare and alternatives pages automatically. You see the listing before you pay, you can edit it for free forever, and ratings are never for sale.</p>
     <div class="stats-bar">
       <div class="stat"><span class="stat-number" data-count={tools.length}>{tools.length}</span><span class="stat-label">Tools listed</span></div>
       <div class="stat"><span class="stat-number" data-count={comparePages}>{comparePages}</span><span class="stat-label">Compare pages</span></div>
-      <div class="stat"><span class="stat-number">5</span><span class="stat-label">Business days to review</span></div>
+      <div class="stat"><span class="stat-number">{REVIEW_SLA.split(' ')[0]}</span><span class="stat-label">{REVIEW_SLA.split(' ').slice(1).join(' ')} to review</span></div>
     </div>
   </section>
 
-  <section class="section grid reveal-stagger plans" id="plans">
+  <section class="section grid reveal-stagger plans plans-4" id="plans">
     <div class="card plan-card" data-plan="basic">
       <h3>Basic listing</h3>
       <div class="price">Free</div>
@@ -33,9 +33,20 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
         <li>Review page with tagline, screenshot and pricing</li>
         <li>Included in category listings</li>
         <li>Upgrade to a full profile at any time to unlock the sidebar and comparison pages</li>
-        <li>Nofollow link · reviewed within 5 business days</li>
+        <li>Nofollow link · reviewed within {REVIEW_SLA}</li>
       </ul>
       <button class="btn ghost plan-pick" type="button" data-pick="basic">Start a free listing</button>
+    </div>
+    <div class="card plan-card" data-plan="instant">
+      <h3>Instant publish</h3>
+      <div class="price">{INSTANT_PRICE} <small>one time</small></div>
+      <ul>
+        <li>Skip the queue: live within 24 hours of payment</li>
+        <li>Same page, category place and compare pages as a free listing</li>
+        <li>Nofollow link; an editor still reads it after it is live</li>
+        <li>Refunded in full if the editor declines it</li>
+      </ul>
+      <button class="btn ghost plan-pick" type="button" data-pick="instant">Publish now</button>
     </div>
     <div class="card plan-card" data-plan="featured">
       <span class="pill">Most chosen</span>
@@ -43,7 +54,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       <div class="price">{featured.price} <small>{featured.unit}</small></div>
       <ul>
         <li>Full profile with sidebar, pros/cons and comparison pages</li>
-        <li>Dofollow link · pinned to the top of your category for 12 months</li>
+        <li>Followed link, tagged rel="sponsored" · pinned to the top of your category for 12 months</li>
         <li>Eligible for "best tools" roundup articles</li>
         <li>We do the heavy lifting - just pay and we build your page</li>
       </ul>
@@ -72,7 +83,9 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
 
     <form class="stack wizard" id="submit-form" action={`${SITE.apiBase}/submissions`} method="POST" enctype="multipart/form-data" novalidate
       data-featured-price={`${featured.price} ${featured.unit}`}
-      data-sponsored-price={`${sponsored.price} ${sponsored.unit}`}>
+      data-sponsored-price={`${sponsored.price} ${sponsored.unit}`}
+      data-instant-price={`${INSTANT_PRICE} one time`}
+      data-sla={REVIEW_SLA}>
       <input type="hidden" name="listing_type" id="listing-type" value="basic" />
 
       {/* ════ STEP 1: Core info - required for ALL plans ════ */}
@@ -100,11 +113,11 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
           <label>Tagline <small>shown on the card, max 140 characters</small><input name="tagline" maxlength="140" data-req-basic id="tagline-input" /></label>
         </div>
 
-        {/* Screenshot - required for basic, shown for basic only (paid fills later) */}
+        {/* Screenshot - optional: a listing without one gets a letter placeholder and the editor adds a screenshot during review */}
         <div class="basic-only">
           <label>
-            Screenshot of main page <small>required - PNG, JPG or WebP up to 5 MB, at least 600 px wide</small>
-            <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/webp" data-req-basic id="screenshot-input" />
+            Screenshot of main page <small>optional - PNG, JPG or WebP up to 5 MB, at least 600 px wide. Leave it out and the editor adds one during review.</small>
+            <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/webp" id="screenshot-input" />
           </label>
           <p class="meta" style="margin:.25rem 0 0; font-size:.82rem;">Or paste an image URL instead:</p>
           <input type="url" name="thumbnail_url" placeholder="https://" style="margin-top:.35rem;" />
@@ -165,6 +178,19 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
         <label>Notes for the editor <small>not published</small><textarea name="notes" rows="2" placeholder="A category we are missing, a launch date, anything the editor should know."></textarea></label>
       </fieldset>
 
+      {/* Live preview: exactly the card the directory will show, built from the fields above. Nothing is paid for blind. */}
+      <div class="preview-wrap basic-only" aria-live="polite">
+        <p class="lbl" style="margin:0 0 .5rem;">Preview <small style="font-weight:400;color:var(--muted);">how your card will look in its category</small></p>
+        <article class="card tool-card preview-card" id="preview-card">
+          <div class="card-thumb-placeholder" id="pv-ph" aria-hidden="true"><span id="pv-initial">?</span></div>
+          <img class="card-thumb" id="pv-img" alt="" width="600" height="400" hidden />
+          <div class="row" style="justify-content:space-between; margin-bottom:.1rem;"><span class="pill" id="pv-cat">Category</span><span class="pill warn" id="pv-plan" hidden>Featured</span></div>
+          <h3 id="pv-name">Your tool</h3>
+          <p class="muted" id="pv-tagline" style="margin:0; flex:1; font-size:.93rem;">Your tagline appears here.</p>
+          <div class="row card-actions" style="justify-content:space-between; margin-top:auto;"><p class="meta" id="pv-pricing" style="margin:0;">Free</p></div>
+        </article>
+      </div>
+
       <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
       {SITE.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={SITE.turnstileSiteKey}></div>}
       <div class="wizard-foot">
@@ -181,7 +207,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
   <section class="section reveal">
     <div class="grid">
       <div class="card"><h3>What the editor checks</h3><p class="muted desc">That the product exists and does what the listing says, that the category is right, and that the description reads like a review, not an advert. Marketing words are edited out.</p></div>
-      <div class="card"><h3>What paid placement buys</h3><p class="muted desc">Position and a dofollow link. Not the rating, not the verdict on a compare page, not a place in an alternatives ranking. Those come from editorial data only.</p></div>
+      <div class="card"><h3>What paid placement buys</h3><p class="muted desc">Position and a followed link (tagged rel="sponsored", as Google requires for paid placement). Not the rating, not the verdict on a compare page, not a place in an alternatives ranking. Those come from editorial data only.</p></div>
       <div class="card"><h3>If a listing is declined</h3><p class="muted desc">You get the reason by email and a link to fix it. A paid listing that cannot be fixed is refunded in full.</p></div>
     </div>
   </section>
@@ -205,9 +231,36 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
     const emailHint = document.getElementById('email-hint') as HTMLElement;
     const featuredPrice = form.dataset.featuredPrice || '';
     const sponsoredPrice = form.dataset.sponsoredPrice || '';
-    let plan: 'basic' | 'featured' | 'sponsored' = 'featured';
+    const instantPrice = form.dataset.instantPrice || '';
+    const sla = form.dataset.sla || '';
+    let plan: 'basic' | 'instant' | 'featured' | 'sponsored' = 'featured';
     let step = 1;
     const totalSteps = () => (plan === 'basic' ? 2 : 1);
+    // "basic-only" fields are the listing fields: shown for the free and the instant plan (both publish what you type)
+    const listingPlan = () => plan === 'basic' || plan === 'instant';
+
+    // ── Live preview card ──────────────────────────────────
+    const pv = (id: string) => document.getElementById(id) as HTMLElement;
+    const pvImg = pv('pv-img') as HTMLImageElement;
+    const previewFrom = () => {
+      const name = (form.elements.namedItem('tool_name') as HTMLInputElement)?.value.trim() || 'Your tool';
+      const tagline = (form.elements.namedItem('tagline') as HTMLInputElement)?.value.trim() || 'Your tagline appears here.';
+      const cat = (form.elements.namedItem('category') as HTMLSelectElement)?.value || 'Category';
+      const pricing = (form.elements.namedItem('pricing') as HTMLSelectElement)?.value || 'Free';
+      if(pv('pv-name')) pv('pv-name').textContent = name; 
+      if(pv('pv-tagline')) pv('pv-tagline').textContent = tagline; 
+      if(pv('pv-cat')) pv('pv-cat').textContent = cat; 
+      if(pv('pv-pricing')) pv('pv-pricing').textContent = pricing;
+      if(pv('pv-initial')) pv('pv-initial').textContent = name.charAt(0).toUpperCase() || '?';
+      if(pv('pv-plan')) pv('pv-plan').hidden = plan !== 'featured';
+    };
+    form.addEventListener('input', previewFrom);
+    form.addEventListener('change', previewFrom);
+    (document.getElementById('screenshot-input') as HTMLInputElement | null)?.addEventListener('change', (e) => {
+      const f = (e.target as HTMLInputElement).files?.[0];
+      if (!f) { if(pvImg) pvImg.hidden = true; if(pv('pv-ph')) pv('pv-ph').hidden = false; return; }
+      const r = new FileReader(); r.onload = () => { if(pvImg) { pvImg.src = String(r.result); pvImg.hidden = false; } if(pv('pv-ph')) pv('pv-ph').hidden = true; }; r.readAsDataURL(f);
+    });
 
     // ── Email MX check ──────────────────────────────────
     let mxTimer: ReturnType<typeof setTimeout> | null = null;
@@ -221,7 +274,8 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
         emailHint.style.color = 'var(--muted)';
         emailHint.style.display = 'block';
         try {
-          const res = await fetch(`/api/check-email?email=${encodeURIComponent(v)}`);
+          // The check lives on the API host (the form's action), not on the static site.
+          const res = await fetch(`${new URL(form.action).origin}/api/check-email?email=${encodeURIComponent(v)}`);
           const data = await res.json() as { valid: boolean; reason?: string };
           mxValid = data.valid;
           if (data.valid) {
@@ -242,9 +296,9 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
     function applyPlan() {
       typeInput.value = plan;
       form.querySelectorAll<HTMLElement>('.sponsored-only').forEach((e) => (e.hidden = plan !== 'sponsored'));
-      form.querySelectorAll<HTMLElement>('.paid-only').forEach((e) => (e.hidden = plan === 'basic'));
-      form.querySelectorAll<HTMLElement>('.basic-only').forEach((e) => (e.hidden = plan !== 'basic'));
-      form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-req-basic]').forEach((e) => (e.required = plan === 'basic'));
+      form.querySelectorAll<HTMLElement>('.paid-only').forEach((e) => (e.hidden = listingPlan()));
+      form.querySelectorAll<HTMLElement>('.basic-only').forEach((e) => (e.hidden = !listingPlan()));
+      form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-req-basic]').forEach((e) => (e.required = listingPlan()));
       nav.hidden = plan !== 'basic';
       document.querySelectorAll<HTMLElement>('.plan-card').forEach((c) => {
         const isChosen = c.dataset.plan === plan;
@@ -253,7 +307,10 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       });
       if (plan === 'basic') {
         title.textContent = 'Free listing';
-        sub.textContent = 'Two steps. Step 2 is optional - submit early for a basic profile or complete it for the full profile with sidebar and comparison pages.';
+        sub.textContent = `Two steps. Step 2 is optional - submit early for a basic profile or complete it for the full profile with sidebar and comparison pages. Reviewed within ${sla}.`;
+      } else if (plan === 'instant') {
+        title.textContent = `Instant publish · ${instantPrice}`;
+        sub.textContent = 'One step, then checkout. Your listing goes live within 24 hours of payment, exactly as previewed below. An editor reads it afterwards; if it is declined you are refunded in full.';
       } else if (plan === 'featured') {
         title.textContent = `Featured listing · ${featuredPrice}`;
         sub.textContent = 'One step, then checkout. We build the full profile page for you within 3 business days.';
@@ -264,6 +321,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       submitBtn.textContent = plan === 'basic' ? 'Submit for review' : 'Continue to payment';
       step = 1;
       show();
+      previewFrom();
     }
 
     function show() {
@@ -322,9 +380,9 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       })
     );
 
-    // Pre-select plan from URL ?plan=featured or ?plan=basic
+    // Pre-select plan from URL ?plan=featured, ?plan=sponsored or ?plan=instant
     const wanted = new URLSearchParams(location.search).get('plan');
-    if (wanted === 'basic' || wanted === 'featured' || wanted === 'sponsored') plan = wanted;
+    if (wanted === 'basic' || wanted === 'featured' || wanted === 'sponsored' || wanted === 'instant') plan = wanted;
 
     // ── Subcategory + feature options follow the category ──
     const taxonomy: Record<string, string[]> = JSON.parse(document.getElementById('taxonomy-data')?.textContent || '{}');

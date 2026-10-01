@@ -5,11 +5,12 @@ const { tool } = Astro.props;
 const d = tool.data;
 const fullStars = d.rating ?? 0;
 const initial = d.name.charAt(0).toUpperCase();
-const rel = d.featured ? 'noopener' : 'nofollow noopener';
+// Paid placement is tagged rel="sponsored" (Google's requirement for paid links); free listings are nofollow.
+const rel = d.featured ? 'sponsored noopener' : 'nofollow noopener';
 ---
 <article class="card tool-card" data-category={d.category} data-name={d.name.toLowerCase()}>
   {d.thumbnail ? (
-    <img class="card-thumb" src={d.thumbnail} alt={d.name} width="1200" height="534" loading="lazy" />
+    <img class="card-thumb" src={d.thumbnail} alt={`${d.name} screenshot`} width="600" height="400" loading="lazy" decoding="async" />
   ) : (
     <div class="card-thumb-placeholder" aria-hidden="true"><span>{initial}</span></div>
   )}
@@ -18,7 +19,7 @@ const rel = d.featured ? 'noopener' : 'nofollow noopener';
     {d.featured && <span class="pill warn">Featured</span>}
     {!d.featured && d.editorsPick && <span class="pill">Editor's pick</span>}
   </div>
-  <h3>{d.name}</h3>
+  <h3><a class="card-title-link" href={`/tools/${tool.id}/`}>{d.name}</a></h3>
   <p class="muted" style="margin:0; flex:1; font-size:.93rem;">{d.tagline}</p>
   {d.rating && (
     <div class="stars" aria-label={`Rating: ${d.rating} out of 5`}>
@@ -34,5 +35,6 @@ const rel = d.featured ? 'noopener' : 'nofollow noopener';
     )}
   </div>
   {/* Stretched overlay -- makes the whole card clickable to the Lantle review page */}
-  <a class="card-overlay" href={`/tools/${tool.id}/`} aria-label={`Read ${d.name} review`} tabindex="-1"></a>
+  {/* Decorative: the title above is the real, keyboard-reachable link. */}
+  <a class="card-overlay" href={`/tools/${tool.id}/`} aria-hidden="true" tabindex="-1"></a>
 </article>

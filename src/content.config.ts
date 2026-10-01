@@ -17,7 +17,7 @@ const blog = defineCollection({
     authorBio: z.string().optional(),
     thumbnail: z.string().optional(),
     tags: z.array(z.string()).default([]),
-    // Set true for paid posts. As promised in pricing, these get up to 2 dofollow links.
+    // Set true for paid posts. As promised in pricing, these get up to 2 followed links; every external link in the body is tagged rel="sponsored" at build time.
     sponsored: z.boolean().default(false),
     draft: z.boolean().default(false),
   }),
@@ -36,11 +36,13 @@ const tools = defineCollection({
       pricing: z.enum(['Free', 'Freemium', 'Paid', 'Enterprise']),
       bestFor: z.string(),
       rating: z.number().min(1).max(5).optional(),
-      // featured: paid listing, dofollow link, pinned to top of category. Computed by the API from the paid term.
+      // featured: paid listing, followed link tagged rel="sponsored", pinned to top of category. Computed by the API from the paid term.
       featured: z.boolean().default(false),
       featuredUntil: z.coerce.date().optional(),
       // editorsPick: our own recommendation. Shown with a pill and sorted after featured. Never paid.
       editorsPick: z.boolean().default(false),
+      // basic: free listing with the core fields only (card, tagline, screenshot). full: description sections and sidebar data present.
+      profileTier: z.enum(['basic', 'full']).default('full'),
       thumbnail: z.string().optional(),
       addedDate: z.coerce.date(),
       // Comparison data, filled in the admin (or by the submitter) and shown on the vs, alternatives and tool pages. All optional.
@@ -60,6 +62,8 @@ const tools = defineCollection({
       verdictLine: z.string().optional(),
       // When a person last checked pricing and features against the vendor's site. Shown under the tables.
       dataCheckedAt: z.coerce.date().optional(),
+      // One live discount a vendor has attached. Shown on the tool page, category page and home. Never a ranking input.
+      deal: z.object({ text: z.string(), code: z.string().optional(), url: z.string().url().optional(), until: z.coerce.date().optional() }).optional(),
     })
     .superRefine((d, ctx) => {
       const v = getVertical(d.vertical);

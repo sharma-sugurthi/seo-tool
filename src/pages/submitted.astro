@@ -1,11 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE } from '../site.config';
+import { SITE, REVIEW_SLA } from '../site.config';
 ---
 <Base title="Submission received" noindex>
   <section class="hero" style="max-width:44rem;">
     <h1 id="s-title">Submission received</h1>
-    <p class="lead" id="s-body">An editor reads every submission within five business days. You get an email when it is live.</p>
+    <p class="lead" id="s-body">An editor reads every submission within {REVIEW_SLA}. You get an email when it is live.</p>
     <p class="notice" id="s-note" hidden></p>
     <div id="order-box" hidden>
       <div class="card" style="margin-top:1rem;">
@@ -37,7 +37,8 @@ import { SITE } from '../site.config';
     if (status === 'error') {
       say('That did not go through', msg || 'Go back and check the form.');
     } else if (status === 'paid') {
-      say(kind === 'sponsored' ? 'Paid. Now add the article' : kind === 'bundle' ? 'Paid. Now complete your order' : 'Paid. Now complete your listing',
+      if (kind === 'instant') say('Paid. Your listing goes live within 24 hours', 'The receipt comes from Dodo Payments. The page publishes exactly as you previewed it; your private edit link is below and in the confirmation email.');
+      else say(kind === 'sponsored' ? 'Paid. Now add the article' : kind === 'bundle' ? 'Paid. Now complete your order' : 'Paid. Now complete your listing',
         'The receipt comes from Dodo Payments. Everything you bought is listed below with a private link; the same links are in your confirmation email.');
     } else if (pay === 'later' || pay === 'failed') {
       say('Order saved', 'A person reviews it and sends the payment link within one business day. Featured placement and publication start once it is paid.',

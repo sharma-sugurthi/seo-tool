@@ -2,7 +2,7 @@
 
 A content site plus directory for AI and software tools across every business function (finance and accounting first), with pages that sell sponsored posts, link insertions, featured listings and done-for-you growth services (Reddit, LinkedIn, SEO content, directory placement, outreach).
 
-Built with [Astro](https://astro.build). No database, no server. Content is Markdown. Hosts free on Cloudflare Pages, Netlify or Vercel.
+Built with [Astro](https://astro.build). Hosts free on Cloudflare Pages, Netlify or Vercel. Content is loaded at build time from the backend database (Supabase via Lantle Backend). Features data-driven category pages, public API, Deals rail, and an MCP server for AI agents.
 
 ## Run it
 
@@ -20,23 +20,11 @@ npm run build    # type check + static build into dist/
 4. **About page.** Replace the placeholder paragraph in `src/pages/about.astro` with your name, background and LinkedIn. Real people earn trust and sales.
 5. **Favicon and logo.** `public/favicon.svg`.
 
-## Publish a blog post in three steps
+## Content Management
 
-1. Copy `templates/blog-post.md` to `src/content/blog/your-slug.md`. The filename becomes the URL.
-2. Fill in the frontmatter (title, description, date, author, tags) and write the post in Markdown.
-3. Change `draft: true` to `draft: false`, run `npm run build`, push. Tag pages at `/blog/tag/<tag>/` update automatically.
-
-Sponsored post? Set `sponsored: true` and write the sponsor's links as `<a href="https://sponsor.com" rel="sponsored">Sponsor</a>`. The disclosure notice appears automatically.
-
-New tool? Copy `templates/tool-listing.md` to `src/content/tools/tool-name.md`.
-
-## Add content
-
-- **Blog post:** create `src/content/blog/my-post.md` with the frontmatter shown in existing posts. Set `sponsored: true` for paid articles. The layout adds the disclosure notice. Add `rel="sponsored"` to the sponsor's links in the Markdown, for example `<a href="https://sponsor.com" rel="sponsored">Sponsor</a>`.
-- **Tool listing:** create `src/content/tools/tool-name.md`. Set `featured: true` for paid listings (dofollow link, pinned). Free listings get nofollow automatically.
-- **Draft:** `draft: true` hides a post from the build.
-
-The filename becomes the URL: `src/content/blog/hello.md` becomes `/blog/hello/`.
+- **Database-Driven Content:** All blog posts, editorial articles, and tool listings are submitted and managed via the `lantle-backend` admin panel. No markdown files needed!
+- **Instant Publish & Deals:** Vendors can submit Free, Instant Publish ($29), and Featured listings. They can also attach deals (coupons/offers) that automatically show up on their profile.
+- **Awards & Directory Packages:** Sell a $199 directory submission package, run Readers' Choice awards, and offer high-value SEO services.
 
 ## Deploy (free)
 

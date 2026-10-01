@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { faqPage, breadcrumbList } from '../../lib/schema';
 const sections = [
   { title: 'Before the month ends (days -3 to -1)', items: [
     'Chase missing receipts and vendor invoices, with a named owner per item',
@@ -41,12 +42,19 @@ const sections = [
   ]},
 ];
 const total = sections.reduce((n, s) => n + s.items.length, 0);
+// FAQ answers are drawn from the checklist itself, not from outside figures.
+const faqs = [
+  { q: 'What is a month end close checklist?', a: `A list of every task needed to finalise the books for a month, in order: chasing documents before the month ends, reconciling cash and subledgers, posting accruals, prepaids and depreciation, then reviewing and reporting. This one has ${total} items grouped by the day they happen.` },
+  { q: 'How many days should the month end close take?', a: 'This checklist is organised for a three business day close: day one for cash and subledgers, day two for accruals, prepaids and fixed assets, day three for review and reporting, with the document chasing done before the month ends. Log the duration each month and fix one thing that slowed it down.' },
+  { q: 'Which parts of the close can be automated?', a: 'Most of day one and day two: card and expense platforms deliver receipts already coded, AI categorisation clears the uncategorised queue, and scheduled journals post accruals and amortisation. Review, variance explanations and the management report stay with a person.' },
+];
+const jsonLd = [faqPage(faqs), breadcrumbList(Astro.site, [{ name: 'Learn', path: '/learn/' }, { name: 'Month end close checklist', path: Astro.url.pathname }])];
 ---
-<Base title="Month end close checklist: 30 items for a three day close" description="A working month end close checklist for small finance teams and bookkeepers, grouped by day. Tick items in your browser, print it, or copy it into your task tool.">
+<Base title="Month end close checklist (2026): 30 items" description="A working month end close checklist for small finance teams and bookkeepers, grouped by day for a three day close. Tick items in your browser, print it, or copy it into your task tool." jsonLd={jsonLd}>
   <section class="hero">
     <p class="meta"><a href="/learn/">Learn</a> / checklist</p>
     <h1>Month end close checklist</h1>
-    <p class="lead">{total} items, grouped by when they happen. Progress is saved in this browser only. Print it, or copy the text into your own task tool.</p>
+    <p class="lead">{total} items, grouped by when they happen, for a three business day close. Progress is saved in this browser only. Print it, or copy the text into your own task tool.</p>
     <div class="row">
       <span class="pill" id="progress">0 of {total} done</span>
       <button class="btn ghost" type="button" id="reset">Reset</button>
@@ -74,6 +82,12 @@ const total = sections.reduce((n, s) => n + s.items.length, 0);
         </ul>
       </div>
     ))}
+  </section>
+
+  <section class="section prose">
+    <h2 style="margin-top:0">Questions</h2>
+    {faqs.map((f) => <details><summary><strong>{f.q}</strong></summary><p>{f.a}</p></details>)}
+    <p>The tools that do the automating are listed under <a href="/categories/finance/">finance and accounting</a>: see the bookkeeping, accounts payable and expense management sections.</p>
   </section>
 
   <section class="section prose">

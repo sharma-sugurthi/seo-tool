@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import PriceTable from '../components/PriceTable.astro';
 import ContactForm from '../components/ContactForm.astro';
 import { SITE, CONTENT_SERVICES, DISTRIBUTION_SERVICES, FIXED_PRICE_ITEMS } from '../site.config';
+import { faqPage } from '../lib/schema';
 const directoryItem = FIXED_PRICE_ITEMS[0];
 
 const faqs = [
@@ -43,7 +44,7 @@ const steps = [
 ];
 const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US')}`;
 ---
-<Base title="Growth services for B2B software: links, directories, content and LinkedIn" description="Guest post placement, directory and listicle submissions, SEO and GEO content and LinkedIn ghostwriting for SaaS and AI software companies. Priced per deliverable, paid only when live.">
+<Base title="Growth services for B2B software" description="Guest post placement, directory submissions, SEO and GEO content and LinkedIn ghostwriting for SaaS and AI companies. Priced per deliverable, paid only when live." jsonLd={faqPage(faqs)}>
   <section class="hero">
     <p class="meta eyebrow">For SaaS and AI product teams</p>
     <h1>Get found on Google, LinkedIn and inside AI answers</h1>
@@ -53,7 +54,7 @@ const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US')}`;
 
   <section class="section reveal">
     <div class="section-head"><div><p class="meta eyebrow" style="margin-bottom:.35rem;">Distribution</p><h2>Placements on sites people actually read</h2></div></div>
-    <p class="muted" style="margin:0 0 1.25rem; max-width:44rem;">Real publications with organic traffic, vetted by hand. You approve the list first and pay per live link.</p>
+    <p class="muted" style="margin:0 0 1.25rem; max-width:44rem;">Real publications with organic traffic, vetted by hand. You approve the list first and pay per live link. The directory package publishes <a href="/directory-package/">its full list with every domain rating</a> before you pay.</p>
     <PriceTable items={DISTRIBUTION_SERVICES} ctaHref="#quote" ctaLabel="Get a quote" ctaDataAttr="data-service" />
   </section>
 

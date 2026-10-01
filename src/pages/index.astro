@@ -7,6 +7,8 @@ import HeroGlobe from '../components/HeroGlobe.astro';
 import { getCollection } from 'astro:content';
 import { SITE } from '../site.config';
 import { VERTICALS } from '../data/taxonomy';
+import { REVIEW_SLA } from '../site.config';
+import { editorialRank } from '../lib/compare';
 
 const tools = (await getCollection('tools')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick) || b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -21,9 +23,14 @@ const pairs = (await getCollection('comparisons'))
   .map((c) => ({ a: byName.get(c.data.toolA), b: byName.get(c.data.toolB), winner: c.data.winner ? byName.get(c.data.winner) : undefined, reason: c.data.winnerReason, id: c.id }))
   .filter((p) => p.a && p.b);
 const tickerItems = latest.slice(0, 14);
+// Top rated: editorial ranking only (rating, then editor's pick). Paid placement never enters this list.
+const topRated = [...tools].sort(editorialRank).slice(0, 6);
+const comparePages = (() => { let n = 0; const byCat = new Map<string, number>(); tools.forEach((t) => byCat.set(t.data.category, (byCat.get(t.data.category) ?? 0) + 1)); byCat.forEach((c) => (n += (c * (c - 1)) / 2)); return n; })();
+const checkedCount = tools.filter((t) => t.data.dataCheckedAt).length;
+const deals = tools.filter((t) => t.data.deal).sort(editorialRank).slice(0, 4);
 const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 ---
-<Base title="AI tools directory: reviews, comparisons and free listings" description={SITE.description}>
+<Base title="AI tools directory: reviews and comparisons" description={SITE.description}>
   <section class="hero hero-globe">
     <div>
       <p class="meta eyebrow">Discover better software</p>
@@ -36,8 +43,8 @@ const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 
       <div class="stats-bar">
         <div class="stat"><span class="stat-number" data-count={tools.length}>{tools.length}</span><span class="stat-label">Tools reviewed</span></div>
         <div class="stat"><span class="stat-number" data-count={VERTICALS.length}>{VERTICALS.length}</span><span class="stat-label">Categories</span></div>
+        <div class="stat"><span class="stat-number" data-count={comparePages}>{comparePages}</span><span class="stat-label">Compare pages</span></div>
         <div class="stat"><span class="stat-number" data-count={pairs.length}>{pairs.length}</span><span class="stat-label">Editorial verdicts</span></div>
-        <div class="stat"><span class="stat-number" data-count={posts.length}>{posts.length}</span><span class="stat-label">Articles</span></div>
       </div>
     </div>
     {/* scene="deep" gives the dark green globe panel on the light page */}
@@ -50,6 +57,25 @@ const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 
       {tickerItems.map((t) => <a class="dup" href={`/tools/${t.id}/`} aria-hidden="true" tabindex="-1">{t.data.name} <span class="meta">{t.data.category}</span></a>)}
     </div>
   </div>
+
+  <section class="section">
+    <div class="section-head"><div><h2 style="margin:0">Top rated</h2><p class="muted" style="margin:.25rem 0 0;">Ranked by our rating and editor's picks. Featured placement never moves a tool up this list.</p></div><a class="link-more" href="/tools/">All {tools.length} tools</a></div>
+    <div class="grid reveal-stagger">{topRated.map((t) => <ToolCard tool={t} />)}</div>
+  </section>
+
+  {pairs.length > 0 && (
+    <section class="section reveal">
+      <div class="section-head"><div><h2 style="margin:0">Head to head</h2><p class="muted" style="margin:.25rem 0 0;">Editorial verdicts on the pairs people actually compare. {checkedCount} of {tools.length} tools have had pricing checked against the vendor site.</p></div></div>
+      <ul class="vs-grid">
+        {pairs.slice(0, 6).map((p) => (
+          <li class="card vs-card">
+            <a class="vs-pair" href={`/tools/compare/${p.id}/`}>{p.a!.data.name} vs {p.b!.data.name}</a>
+            <p class="muted" style="margin:.35rem 0 0; font-size:.93rem;">{p.winner ? `Our call: ${p.winner.data.name}. ${p.reason ?? ''}` : 'No clear winner: it depends on your team.'}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   <section class="section">
     <div class="bento reveal-stagger">
@@ -119,10 +145,20 @@ const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 
         </div>
       </div>
 
+      {deals.length > 0 && (
+        <div class="tile t-deals">
+          <p class="meta eyebrow">Deals</p>
+          <ul class="plain">
+            {deals.map((t) => <li><a href={`/tools/${t.id}/`}>{t.data.name}</a><span class="meta">{t.data.deal!.text}</span></li>)}
+          </ul>
+          <p class="meta" style="margin-top:auto;">Vendor offers. Never a ranking input.</p>
+        </div>
+      )}
+
       <div class="tile t-cta">
         <div>
           <h2>Build software? Get in front of the people comparing it.</h2>
-          <p>A basic listing is free and reviewed within five business days. Featured placement, sponsored articles and done-for-you growth services are there when you want more.</p>
+          <p>A basic listing is free and reviewed within {REVIEW_SLA}. Instant publish, featured placement, sponsored articles and done-for-you growth services are there when you want more.</p>
         </div>
         <div class="row">
           <a class="btn" href="/submit-tool/">List your tool</a>
@@ -133,9 +169,8 @@ const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 
   </section>
 
   <section class="section reveal">
-    <div class="section-head"><h2>Latest tools</h2><a class="link-more" href="/submit-tool/">Submit yours, free</a></div>
-    <div class="grid reveal-stagger">{tools.slice(0, 6).map((t) => <ToolCard tool={t} />)}</div>
-    {tools.length > 6 && <p style="margin-top:1rem;"><a class="link-more" href="/tools/">View all {tools.length} tools</a></p>}
+    <div class="section-head"><h2>Just added</h2><a class="link-more" href="/submit-tool/">Submit yours, free</a></div>
+    <div class="grid reveal-stagger">{latest.slice(0, 3).map((t) => <ToolCard tool={t} />)}</div>
   </section>
 
   <section class="section reveal">

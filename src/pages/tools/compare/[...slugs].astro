@@ -4,6 +4,7 @@ import ToolCard from '../../../components/ToolCard.astro';
 import { getCollection } from 'astro:content';
 import { getVertical } from '../../../data/taxonomy';
 import { derivedPicks, editorialRank, featureMatrix, fmtDate, hasFreePlan, midSentence, pairPath, specRows, type Tool } from '../../../lib/compare';
+import { breadcrumbList, faqPage } from '../../../lib/schema';
 
 export async function getStaticPaths() {
   const tools = await getCollection('tools');
@@ -35,12 +36,16 @@ const b = toolB.data;
 const v = getVertical(a.vertical);
 const sameCategory = a.category === b.category;
 const scope = sameCategory ? a.category : v.name;
-const relA = a.featured ? 'noopener' : 'nofollow noopener';
-const relB = b.featured ? 'noopener' : 'nofollow noopener';
+// Paid placement is tagged rel="sponsored"; free listings are nofollow.
+const relA = a.featured ? 'sponsored noopener' : 'nofollow noopener';
+const relB = b.featured ? 'sponsored noopener' : 'nofollow noopener';
 
 const rows = specRows([a, b]);
 const matrix = featureMatrix(a.vertical, [a, b]);
 const hasData = (d: typeof a) => d.pros.length > 0 || d.keyFeatures.length > 0 || !!d.startingPrice;
+// Thin-page gate: without an editorial verdict and without structured data on both sides, the page is a templated shell.
+// It still exists for visitors who click through, but it stays out of the index and the sitemap (mirrored in astro.config.mjs).
+const noindex = !verdict && (!hasData(a) || !hasData(b));
 const checked = [a.dataCheckedAt, b.dataCheckedAt].filter(Boolean) as Date[];
 const lastChecked = checked.length === 2 ? new Date(Math.min(...checked.map((d) => d.getTime()))) : undefined;
 
@@ -82,21 +87,30 @@ if (!verdict) {
 
 const allTools = await getCollection('tools');
 const related = allTools.filter((t) => t.data.category === a.category && t.id !== toolA.id && t.id !== toolB.id).sort(editorialRank).slice(0, 3);
-const otherPairs = allTools
-  .filter((t) => t.data.category === a.category && t.id !== toolA.id && t.id !== toolB.id)
-  .sort(editorialRank)
-  .slice(0, 4)
-  .flatMap((t) => [{ label: `${a.name} vs ${t.data.name}`, href: pairPath(toolA.id, t.id) }, { label: `${b.name} vs ${t.data.name}`, href: pairPath(toolB.id, t.id) }])
-  .slice(0, 6);
+// Compare pages exist only for same-category pairs, so each tool is paired with peers from its own category.
+// (A cross-category editorial pair such as Brex vs Ramp used to link B to A's peers, which 404ed.)
+const peersOf = (tool: Tool, d: typeof a) => allTools.filter((t) => t.data.category === d.category && t.id !== toolA.id && t.id !== toolB.id).sort(editorialRank).slice(0, 3);
+const otherPairs = [
+  ...peersOf(toolA, a).map((t) => ({ label: `${a.name} vs ${t.data.name}`, href: pairPath(toolA.id, t.id) })),
+  ...peersOf(toolB, b).map((t) => ({ label: `${b.name} vs ${t.data.name}`, href: pairPath(toolB.id, t.id) })),
+].slice(0, 6);
 
 const year = new Date().getFullYear();
-// Keep the title tag near 60 characters: long product names drop the descriptive tail.
+// Keep the full title tag (with the " | Lantle" suffix) at or under 60 characters: long product names drop the descriptive tail.
 const base = `${a.name} vs ${b.name} (${year})`;
-const title = base.length <= 30 ? `${base}: pricing, features and which to pick` : base.length <= 45 ? `${base}: which to pick` : base;
+const title = base.length <= 21 ? `${base}: pricing and which to pick` : base.length <= 36 ? `${base}: which to pick` : base;
 const description = `${a.name} or ${b.name} for ${scope.toLowerCase()}? Starting price, free plans, platforms, a feature by feature matrix, pros and cons, and who each one is for.`;
 const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const faq = [
+  { q: `Which is cheaper, ${a.name} or ${b.name}?`, a: `${a.name} ${a.startingPrice ? `starts at ${a.startingPrice}` : a.pricing === 'Free' ? 'is free' : 'quotes on request'}${hasFreePlan(a) ? ' and has a free plan' : ''}. ${b.name} ${b.startingPrice ? `starts at ${b.startingPrice}` : b.pricing === 'Free' ? 'is free' : 'quotes on request'}${hasFreePlan(b) ? ' and has a free plan' : ''}.` },
+  { q: `When should I pick ${a.name}?`, a: pickA.length ? pickA.join('. ') + '.' : `Pick ${a.name} if you are ${midSentence(a.bestFor)}.` },
+  { q: `When should I pick ${b.name}?`, a: pickB.length ? pickB.join('. ') + '.' : `Pick ${b.name} if you are ${midSentence(b.bestFor)}.` },
+  ...(winnerName ? [{ q: `${a.name} or ${b.name}: which is better for most buyers?`, a: `${winnerName}. ${verdict!.data.winnerReason ?? ''}`.trim() }] : []),
+];
 const jsonLd = [
   { '@context': 'https://schema.org', '@type': 'WebPage', name: `${a.name} vs ${b.name}`, description, url: pageUrl, ...(verdict?.data.reviewedAt ? { dateModified: verdict.data.reviewedAt.toISOString().slice(0, 10) } : {}) },
+  breadcrumbList(Astro.site, [{ name: 'Tools', path: '/tools/' }, { name: v.name, path: `/categories/${v.slug}/` }, { name: `${a.name} vs ${b.name}`, path: Astro.url.pathname }]),
+  ...(noindex ? [] : [faqPage(faq)]),
   {
     '@context': 'https://schema.org', '@type': 'ItemList', name: `${a.name} vs ${b.name}`, url: pageUrl,
     itemListElement: [toolA, toolB].map((t, i) => ({ '@type': 'ListItem', position: i + 1, url: new URL(`/tools/${t.id}/`, Astro.site).toString(), name: t.data.name })),
@@ -104,9 +118,9 @@ const jsonLd = [
 ];
 const mark = (m: 'yes' | 'no' | 'unknown') => (m === 'yes' ? '<span class="mark yes" title="Listed by the vendor">✓</span>' : m === 'no' ? '<span class="mark no" title="Not in the vendor\'s feature list">✕</span>' : '<span class="mark unknown">not listed</span>');
 ---
-<Base title={title} description={description} jsonLd={jsonLd}>
+<Base title={title} description={description} jsonLd={jsonLd} noindex={noindex}>
   <section class="hero">
-    <p class="meta eyebrow"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {scope}</p>
+    <nav class="meta eyebrow" aria-label="Breadcrumb"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {scope}</nav>
     <h1>{a.name} vs {b.name}</h1>
     <p class="lead"><strong>Short answer:</strong> {shortAnswer}</p>
     <p class="meta">

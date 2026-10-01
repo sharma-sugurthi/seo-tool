@@ -1,8 +1,11 @@
 ---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/inter/wght-italic.css';
+import '@fontsource/instrument-serif';
+import '@fontsource/instrument-serif/400-italic.css';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import CookieConsent from '../components/CookieConsent.astro';
 import Search from '../components/Search.astro';
 import { SITE } from '../site.config';
 
@@ -21,12 +24,27 @@ const ogImage = image ? new URL(image, Astro.site).toString() : new URL('/og-def
 const org = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': `${SITE.url}/#organization`,
   name: SITE.name,
   url: SITE.url,
   email: SITE.email,
-  sameAs: Object.values(SITE.social).filter((s) => !s.includes('REPLACE_ME')),
+  description: SITE.description,
+  logo: { '@type': 'ImageObject', url: new URL('/apple-touch-icon.png', Astro.site).toString(), width: 180, height: 180 },
+  sameAs: Object.values(SITE.social).filter(Boolean),
+  ...(SITE.founder.name
+    ? { founder: { '@type': 'Person', name: SITE.founder.name, ...(SITE.founder.title ? { jobTitle: SITE.founder.title } : {}), ...(SITE.founder.linkedin ? { sameAs: [SITE.founder.linkedin] } : {}) } }
+    : {}),
 };
-const ld = [org, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])];
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${SITE.url}/#website`,
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  publisher: { '@id': `${SITE.url}/#organization` },
+};
+const ld = [org, website, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])];
 ---
 <!doctype html>
 <html lang="en">
@@ -39,10 +57,7 @@ const ld = [org, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])]
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex,follow" />}
 
-    <!-- Fonts (loaded in <head> to avoid render-blocking @import chain) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=Instrument+Serif:ital@0;1&display=swap" />
+    <!-- Fonts are self-hosted (@fontsource, imported above): no render-blocking cross-origin stylesheet, no third-party IP logging. -->
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -56,10 +71,17 @@ const ld = [org, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])]
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={fullTitle} />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     <script type="application/ld+json" set:html={JSON.stringify(ld)} />
     {SITE.turnstileSiteKey && <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
-    <script data-goatcounter="https://devrel.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+    {SITE.analytics.goatcounter && <script data-goatcounter={`https://${SITE.analytics.goatcounter}.goatcounter.com/count`} async src="https://gc.zgo.at/count.js"></script>}
   </head>
   <body>
     <Header />
@@ -67,7 +89,6 @@ const ld = [org, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])]
       <slot />
     </main>
     <Footer />
-    <CookieConsent />
     <Search />
     <div class="read-progress" id="read-progress" hidden aria-hidden="true"></div>
 
@@ -92,25 +113,26 @@ const ld = [org, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])]
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // Scroll reveals: .fade-in and .reveal appear as they enter the viewport; .reveal-stagger children follow one another.
+      // Content is never hidden before this script runs: anything already on screen is marked .in first, and only then
+      // is the html element "armed" (CSS hides .fade-in:not(.in) under .reveal-armed). First paint and LCP are unaffected,
+      // crawlers and screenshots see the full page, and only below-the-fold sections animate in as the reader scrolls.
       const targets = document.querySelectorAll<HTMLElement>('.fade-in, .reveal, .reveal-stagger');
       targets.forEach((el) => { if (el.classList.contains('reveal-stagger')) [...el.children].forEach((c, i) => (c as HTMLElement).style.setProperty('--i', String(Math.min(i, 11)))); });
       if ('IntersectionObserver' in window && !reduced) {
-        const io = new IntersectionObserver((entries) => {
-          for (const e of entries) {
-            if (e.isIntersecting || e.boundingClientRect.top < 0) { e.target.classList.add('in'); io.unobserve(e.target); }
-          }
-        }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
-        targets.forEach((el) => io.observe(el));
+        const vh = window.innerHeight;
+        const below: HTMLElement[] = [];
+        targets.forEach((el) => { if (el.getBoundingClientRect().top < vh * 1.1) el.classList.add('in'); else below.push(el); });
+        if (below.length) {
+          document.documentElement.classList.add('reveal-armed');
+          const io = new IntersectionObserver((entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting || e.boundingClientRect.top < 0) { e.target.classList.add('in'); io.unobserve(e.target); }
+            }
+          }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
+          below.forEach((el) => io.observe(el));
+        }
       } else {
         targets.forEach((el) => el.classList.add('in'));
-      }
-
-      // Hero headline: one word at a time (plain-text headlines only)
-      const h1 = document.querySelector<HTMLElement>('.hero h1');
-      if (h1 && !reduced && h1.children.length === 0 && h1.textContent) {
-        const words = h1.textContent.trim().split(/\s+/);
-        h1.setAttribute('aria-label', h1.textContent.trim());
-        h1.innerHTML = words.map((w, i) => `<span class="w" style="--i:${i}" aria-hidden="true">${w.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] as string)}</span>`).join(' ');
       }
 
       // Count-up numbers: any element with data-count

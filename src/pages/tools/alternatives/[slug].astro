@@ -4,6 +4,7 @@ import ToolCard from '../../../components/ToolCard.astro';
 import { getCollection } from 'astro:content';
 import { getVertical } from '../../../data/taxonomy';
 import { deployCell, editorialRank, fmtDate, freeCell, labelAlternatives, midSentence, pairPath, priceCell, ratingCell, situations, sizeCell, platformsCell, hasFreePlan } from '../../../lib/compare';
+import { breadcrumbList } from '../../../lib/schema';
 
 export async function getStaticPaths() {
   const tools = await getCollection('tools');
@@ -35,7 +36,8 @@ const description = count >= 3
   : `Tools that compete with ${d.name} in ${d.category.toLowerCase()}, with pricing and fit. More alternatives are added as the category grows.`;
 const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
 const jsonLd = [
-  { '@context': 'https://schema.org', '@type': 'WebPage', name: `${d.name} alternatives`, description, url: pageUrl },
+  { '@context': 'https://schema.org', '@type': 'WebPage', name: `${d.name} alternatives`, description, url: pageUrl, ...(lastChecked ? { dateModified: lastChecked.toISOString().slice(0, 10) } : {}) },
+  breadcrumbList(Astro.site, [{ name: 'Tools', path: '/tools/' }, { name: d.name, path: `/tools/${tool.id}/` }, { name: 'Alternatives', path: Astro.url.pathname }]),
   {
     '@context': 'https://schema.org', '@type': 'ItemList', name: `${d.name} alternatives`, url: pageUrl,
     itemListElement: alternatives.map((t, i) => ({ '@type': 'ListItem', position: i + 1, url: new URL(`/tools/${t.id}/`, Astro.site).toString(), name: t.data.name })),
@@ -101,7 +103,8 @@ const jsonLd = [
               {t.data.verdictLine && <p class="verdict-line" style="text-align:left;">{t.data.verdictLine}</p>}
               <div class="row" style="gap:.5rem; margin-top:.6rem;">
                 <a class="btn ghost sm" href={`/tools/${t.id}/`}>Review</a>
-                <a class="btn ghost sm" href={pairPath(tool.id, t.id)}>{d.name} vs {t.data.name}</a>
+                {/* Compare pages are only built for pairs in the same category (see compare/[...slugs].astro). */}
+                {t.data.category === d.category && <a class="btn ghost sm" href={pairPath(tool.id, t.id)}>{d.name} vs {t.data.name}</a>}
               </div>
             </div>
           </li>

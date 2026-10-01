@@ -7,7 +7,7 @@ const tools = await getCollection('tools');
 const counts = new Map(VERTICALS.map((v) => [v.slug, tools.filter((t) => t.data.vertical === v.slug).length]));
 const ordered = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0));
 ---
-<Base title="Software categories: browse AI tools by what they do" description="Every category in the directory, from finance and marketing to developer tools and HR. See what is listed and where your product would sit.">
+<Base title="Browse AI tools by category" description="Every category in the directory, from finance and marketing to developer tools and HR. See what is listed and where your product would sit.">
   <section class="hero">
     <h1>Categories</h1>
     <p class="lead">The directory is organised by the job a tool does in a business. Pick a category to see what is listed, or submit a product to any category that fits. Empty categories are open and the first listing is free.</p>

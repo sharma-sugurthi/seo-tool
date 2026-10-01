@@ -1,0 +1,84 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, FIXED_PRICE_ITEMS } from '../site.config';
+import { CHECKED_AT, MIN_DR, included, excluded } from '../data/directories';
+import { faqPage, breadcrumbList } from '../lib/schema';
+import { fmtDate } from '../lib/compare';
+
+const item = FIXED_PRICE_ITEMS.find((i) => i.key === 'directory')!;
+const price = `$${(item.cents / 100).toLocaleString('en-US')}`;
+const list = included();
+const out = excluded();
+const checked = fmtDate(new Date(CHECKED_AT));
+const fmt = (n: number) => n.toLocaleString('en-US');
+const avgDr = Math.round(list.reduce((s, d) => s + d.dr, 0) / list.length);
+const types = [...new Set(list.map((d) => d.type))];
+const faqs = [
+  { q: 'Which directories are in the package?', a: `All ${list.length} directories listed on this page, each with a domain rating of ${MIN_DR} or higher as measured by Ahrefs on ${checked}. You see the exact list before you pay and can strike any you do not want.` },
+  { q: 'Are the links followed?', a: 'It depends on the directory and often on its plan or badge rules, so we do not promise a link type up front. The report you receive marks every live listing with the link type we found when it went live.' },
+  { q: 'What do I get at the end?', a: `A spreadsheet with one row per directory: the live URL, the date it went live, the link type found, and 30 days after delivery a second pass that records whether Google has indexed the listing page. Listings that disappear within 90 days are resubmitted at no charge.` },
+  { q: 'How long does it take?', a: 'Submissions are made by hand over five to seven business days, because many directories reject bulk or automated submissions and a slow, natural pace indexes better. Approval times on the directories themselves vary from minutes to several weeks.' },
+  { q: 'Why not 500 directories?', a: `Because most of those are generic web directories with no traffic that add noise, not authority. The ${out.length} sites below the ${MIN_DR} threshold on this page are shown so you can see what is left out and why.` },
+];
+const jsonLd = [faqPage(faqs), breadcrumbList(Astro.site, [{ name: 'Services', path: '/services/' }, { name: 'Directory package', path: Astro.url.pathname }])];
+---
+<Base title={`Directory submission package: ${list.length} directories, ${price}`} description={`Manual submission to ${list.length} software, AI and startup directories (average DR ${avgDr}, every DR measured by Ahrefs). You approve the list first and get an indexed-link report.`} jsonLd={jsonLd}>
+  <section class="hero">
+    <nav class="meta eyebrow" aria-label="Breadcrumb"><a href="/services/">Services</a> / Directory package</nav>
+    <h1>Every directory in the {price} package, with its real domain rating</h1>
+    <p class="lead">Most "submit to 100 directories" services will not show you the list until you have paid, and pad it with sites nobody visits. This is ours: {list.length} software, AI and startup directories, every domain rating pulled from the Ahrefs API on {checked}. You approve the list before anything is submitted, and you get a report with the live URL and link type for every listing, plus an index check 30 days later.</p>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-number" data-count={list.length}>{list.length}</span><span class="stat-label">Directories</span></div>
+      <div class="stat"><span class="stat-number" data-count={avgDr}>{avgDr}</span><span class="stat-label">Average DR</span></div>
+      <div class="stat"><span class="stat-number" data-count={list.filter((d) => d.dr >= 70).length}>{list.filter((d) => d.dr >= 70).length}</span><span class="stat-label">DR 70 or higher</span></div>
+      <div class="stat"><span class="stat-number">{price}</span><span class="stat-label">One time</span></div>
+    </div>
+    <div class="row" style="margin-top:1rem;"><a class="btn" href="/services/#order">Order the package</a><a class="btn ghost" href="#list">See the list</a></div>
+  </section>
+
+  <section class="section fade-in">
+    <div class="grid">
+      <div class="card"><h3>You approve the list first</h3><p class="muted desc">Strike any directory you do not want before we start. Nothing is submitted blind, and nothing is added later without asking.</p></div>
+      <div class="card"><h3>Manual, over five to seven business days</h3><p class="muted desc">A person fills every form with your approved description and screenshots. Bulk tools get rejected and look like spam to the directories' moderators.</p></div>
+      <div class="card"><h3>Indexed-link report</h3><p class="muted desc">One row per directory: live URL, date, link type found. Thirty days after delivery we check which listing pages Google has indexed and add that column.</p></div>
+      <div class="card"><h3>Replaced if removed</h3><p class="muted desc">A listing that disappears within 90 days is resubmitted at no charge. Directories that stop accepting submissions are swapped for the next one down this list.</p></div>
+    </div>
+  </section>
+
+  <section class="section fade-in" id="list">
+    <h2 style="margin-top:0">The {list.length} directories</h2>
+    <p class="muted" style="max-width:48rem;">Domain rating, referring domains and estimated monthly organic traffic from Ahrefs, {checked}. Types: {types.join(', ').toLowerCase()}. Link type is recorded per listing in your report rather than promised here, because directories change it with plans and badge rules.</p>
+    <div class="compare-table-wrap">
+      <table class="compare-table dir-table">
+        <thead><tr><th>#</th><th>Directory</th><th>Type</th><th>DR</th><th>Referring domains</th><th>Organic visits / month</th></tr></thead>
+        <tbody>
+          {list.map((d, i) => (
+            <tr><td class="meta">{i + 1}</td><td><strong>{d.name}</strong><br /><span class="meta">{d.domain}</span></td><td>{d.type}</td><td><strong>{d.dr}</strong></td><td>{fmt(d.refdomains)}</td><td>{fmt(d.traffic)}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Left out on purpose</h2>
+    <p class="muted" style="max-width:48rem;">Below DR {MIN_DR} or without measurable traffic. Services that quote "300+ directories" are counting sites like these.</p>
+    <div class="compare-table-wrap">
+      <table class="compare-table dir-table">
+        <thead><tr><th>Directory</th><th>DR</th><th>Organic visits / month</th><th>Why</th></tr></thead>
+        <tbody>{out.map((d) => <tr><td>{d.name} <span class="meta">{d.domain}</span></td><td>{d.dr}</td><td>{fmt(d.traffic)}</td><td class="meta">Below the DR {MIN_DR} threshold</td></tr>)}</tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section fade-in prose">
+    <h2 style="margin-top:0">Questions</h2>
+    {faqs.map((f) => <details><summary><strong>{f.q}</strong></summary><p>{f.a}</p></details>)}
+    <p class="meta" style="margin-top:1rem;">Something missing from the list? Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> with the directory and we will measure it.</p>
+  </section>
+
+  <section class="section fade-in" style="text-align:center;">
+    <a class="btn" href="/services/#order">Order the {price} package</a>
+    <p class="meta" style="margin-top:.75rem;">Checkout by card, Apple Pay or Google Pay. The list above is confirmed with you by email before submissions start.</p>
+  </section>
+</Base>

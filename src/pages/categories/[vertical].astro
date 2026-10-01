@@ -3,6 +3,9 @@ import Base from '../../layouts/Base.astro';
 import ToolCard from '../../components/ToolCard.astro';
 import { getCollection } from 'astro:content';
 import { VERTICALS, type Vertical } from '../../data/taxonomy';
+import { REVIEW_SLA } from '../../site.config';
+import { breadcrumbList, faqPage } from '../../lib/schema';
+import { editorialRank, fmtDate, hasFreePlan, labelAlternatives, priceCell } from '../../lib/compare';
 
 export async function getStaticPaths() {
   const all = await getCollection('tools');
@@ -23,28 +26,99 @@ const others = VERTICALS.filter((x) => x.slug !== v.slug);
 const lower = v.name.charAt(0).toLowerCase() + v.name.slice(1);
 const anchor = (c: string) => c.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-const title = empty ? `AI ${lower} tools: open for listings` : `AI ${lower} tools: ${sorted.length} reviewed and compared`;
+const title = empty ? `AI ${lower} tools: open for listings` : `Best AI ${lower} tools (${new Date().getFullYear()})`;
 const description = empty
   ? `The ${lower} category is open. List any tool for free and be the first product people see here. Categories: ${v.categories.join(', ')}.`
   : `${sorted.length} AI tools for ${lower}, checked by a person and compared on pricing and fit. ${v.categories.slice(0, 4).join(', ')} and more.`;
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'CollectionPage',
-  name: `AI tools for ${lower}`,
-  description,
-  url: new URL(Astro.url.pathname, Astro.site).toString(),
-};
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+// The newest change on the page: a listing added or a vendor check logged. Shown to readers and in dateModified.
+const dates = sorted.flatMap((t) => [t.data.addedDate, t.data.dataCheckedAt].filter(Boolean)) as Date[];
+const updated = dates.length ? new Date(Math.max(...dates.map((d) => d.getTime()))) : undefined;
+const ranked = [...sorted].sort(editorialRank);
+// Top picks: the five best-rated tools in the vertical with at most one label each (free, cheapest, enterprise ...). Editorial only.
+const picks = labelAlternatives(ranked).slice(0, 5);
+const free = ranked.filter((t) => hasFreePlan(t.data));
+const year = new Date().getFullYear();
+const faqs = empty ? [] : [
+  { q: `What is the best AI tool for ${lower} in ${year}?`, a: `${ranked[0].data.name} is our highest rated ${lower} tool${ranked[0].data.rating ? ` at ${ranked[0].data.rating} of 5` : ''}: ${ranked[0].data.tagline} ${ranked.length > 1 ? `${ranked.slice(1, 4).map((t) => t.data.name).join(', ')} follow it in our ranking.` : ''}`.trim() },
+  ...(free.length ? [{ q: `Which ${lower} tools have a free plan?`, a: `${free.slice(0, 6).map((t) => t.data.name).join(', ')} ${free.length === 1 ? 'has' : 'have'} a permanent free plan according to the vendor's published pricing${updated ? `, as checked on ${fmtDate(updated)}` : ''}.` }] : []),
+  { q: 'How are these tools ranked?', a: 'By our editorial rating first, then editor\'s picks, then name. Featured (paid) placement pins a tool to the top of its sub-category card grid and is labelled, but it never changes a rating, this ranking or an alternatives list.' },
+];
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `AI tools for ${lower}`,
+    description,
+    url: pageUrl,
+    ...(updated ? { dateModified: updated.toISOString().slice(0, 10) } : {}),
+  },
+  breadcrumbList(Astro.site, [{ name: 'Tools', path: '/tools/' }, { name: 'Categories', path: '/categories/' }, { name: v.name, path: Astro.url.pathname }]),
+  ...(empty ? [] : [faqPage(faqs)]),
+  ...(empty ? [] : [{
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: `AI tools for ${lower}`,
+    url: pageUrl,
+    numberOfItems: ranked.length,
+    itemListElement: ranked.map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.data.name, url: new URL(`/tools/${t.id}/`, Astro.site).toString() })),
+  }]),
+];
 ---
 <Base title={title} description={description} noindex={empty} jsonLd={jsonLd}>
   <section class="hero">
-    <p class="meta"><a href="/tools/">Tools</a> / <a href="/categories/">Categories</a> / {v.name}</p>
+    <nav class="meta" aria-label="Breadcrumb"><a href="/tools/">Tools</a> / <a href="/categories/">Categories</a> / {v.name}</nav>
     <h1>AI tools for {lower}</h1>
     <p class="lead">{v.blurb}</p>
+    {!empty && <p class="meta">{sorted.length} tool{sorted.length === 1 ? '' : 's'}, each read by a person before listing.{updated && ` Last updated ${fmtDate(updated)}.`} Featured listings are labelled; ratings and order within a category are editorial.</p>}
     <div class="row" style="margin-top:.75rem;">
       {v.categories.map((c) => <span class="pill">{c}</span>)}
     </div>
   </section>
+
+  {!empty && (
+    <section class="section fade-in" id="top-picks">
+      <div class="section-head"><div><h2 style="margin:0">Top picks for {lower} in {year}</h2><p class="muted" style="margin:.25rem 0 0;">Ranked by our rating and editor's picks only. Prices are the vendor's entry paid plan where published.</p></div></div>
+      <ol class="picks">
+        {picks.map(({ tool: t, label }, i) => (
+          <li class="card pick-row">
+            <span class="pick-rank">{i + 1}</span>
+            <div class="pick-body">
+              <div class="row" style="gap:.5rem; align-items:baseline;">
+                <h3 style="margin:0;"><a class="card-title-link" href={`/tools/${t.id}/`}>{t.data.name}</a></h3>
+                {label && <span class="pill">{label}</span>}
+                {t.data.rating && <span class="meta">{t.data.rating} / 5</span>}
+              </div>
+              <p class="muted" style="margin:.3rem 0 .5rem;">{t.data.tagline}</p>
+              <dl class="facts pick-facts">
+                <div><dt>Price</dt><dd>{priceCell(t.data)}</dd></div>
+                <div><dt>Free plan</dt><dd>{hasFreePlan(t.data) ? 'Yes' : t.data.freeTier === false ? 'No' : 'Not listed'}</dd></div>
+                <div><dt>Best for</dt><dd>{t.data.bestFor}</dd></div>
+              </dl>
+              {t.data.verdictLine && <p class="verdict-line" style="font-size:1rem;">{t.data.verdictLine}</p>}
+            </div>
+            <div class="pick-actions"><a class="btn ghost sm" href={`/tools/${t.id}/`}>Review</a><a class="btn ghost sm" href={`/tools/alternatives/${t.id}/`}>Alternatives</a></div>
+          </li>
+        ))}
+      </ol>
+      <p class="meta" style="margin-top:.75rem;">How we rank: editorial rating, then editor's pick, then name. Paid placement is labelled "Featured" and only affects position within the sub-category grids below. {updated && `Data last updated ${fmtDate(updated)}.`} <a href="/about/">Editorial policy</a>.</p>
+    </section>
+  )}
+
+  {ranked.some((t) => t.data.deal) && (
+    <section class="section fade-in" id="deals">
+      <div class="section-head"><div><h2 style="margin:0">Deals from {lower} vendors</h2><p class="muted" style="margin:.25rem 0 0;">Offers listed vendors attached to their listing. They do not affect any ranking and we earn nothing from them.</p></div></div>
+      <ul class="deal-list">
+        {ranked.filter((t) => t.data.deal).map((t) => (
+          <li class="card deal-row">
+            <div><a class="card-title-link" href={`/tools/${t.id}/`}><strong>{t.data.name}</strong></a> <span class="meta">{t.data.category}</span><p style="margin:.25rem 0 0;">{t.data.deal!.text}</p></div>
+            <div class="deal-side">{t.data.deal!.code && <code>{t.data.deal!.code}</code>}<a class="btn ghost sm" href={`/tools/${t.id}/`}>Details</a></div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   {cats.length > 1 && (
     <nav class="subnav" id="subnav" aria-label="Categories on this page">
@@ -75,8 +149,15 @@ const jsonLd = {
   {!empty && (
     <section class="section fade-in">
       <div class="notice">
-        <strong>Have a {lower} tool that is not here?</strong> Basic listings are free and reviewed within five business days. <a href="/submit-tool/">Submit it</a>.
+        <strong>Have a {lower} tool that is not here?</strong> Basic listings are free and reviewed within {REVIEW_SLA}. <a href="/submit-tool/">Submit it</a>.
       </div>
+    </section>
+  )}
+
+  {!empty && (
+    <section class="section fade-in prose" style="max-width:48rem;">
+      <h2 style="margin-top:0">Questions buyers ask</h2>
+      {faqs.map((f) => <details><summary><strong>{f.q}</strong></summary><p>{f.a}</p></details>)}
     </section>
   )}
 

@@ -13,14 +13,33 @@ export const SITE = {
   // The backend (lantle-backend on Heroku). Forms post here, checkouts start here, and the build reads tools from here.
   // For a local build against a local backend, set TOOLS_API_URL in .env instead of changing this.
   // Set TOOLS_API_URL in Cloudflare Pages (and in a local .env) to point a build at a different backend.
-  apiBase: (typeof process !== 'undefined' && process.env.TOOLS_API_URL) || (typeof import.meta !== 'undefined' && (import.meta as any).env?.TOOLS_API_URL) || 'https://lantle-backend-ed132a1d726a.herokuapp.com',
+  // Production API lives on its own subdomain (CNAME api.lantle.ai -> the Heroku app's DNS target; add the domain in Heroku).
+  // Never expose the raw herokuapp.com hostname to visitors: it leaks the app name and splits trust across two domains.
+  apiBase: (typeof process !== 'undefined' && process.env.TOOLS_API_URL) || (typeof import.meta !== 'undefined' && (import.meta as any).env?.TOOLS_API_URL) || 'https://api.lantle.ai',
   // Cloudflare Turnstile site key (public). Leave empty to disable the bot check widget.
   turnstileSiteKey: '',
+  // Company LinkedIn page. Leave empty until it exists: an empty value hides the icon instead of linking to a placeholder.
   social: {
-    linkedin: 'https://www.linkedin.com/company/REPLACE_ME',
+    linkedin: '',
+  },
+  // The person behind the site. Shown on the About page and in the Organization schema. Fill all three before launch:
+  // an anonymous directory does not get paid listings. Leave empty to hide the block rather than show placeholder text.
+  founder: {
+    name: '',
+    title: '',
+    linkedin: '',
+  },
+  // Privacy-first analytics. GoatCounter site code (the subdomain of your-code.goatcounter.com). Empty disables the script.
+  analytics: {
+    goatcounter: '',
   },
   paymentMethods: 'Card, Apple Pay or Google Pay through Dodo Payments',
 };
+
+/** The review promise shown on the submit page, the thank-you page, emails and category pages. Change it in one place. */
+export const REVIEW_SLA = '2 business days';
+/** Instant publish: skip the review queue, live within 24 hours. One-time. Must match config.prices.instant in the backend. */
+export const INSTANT_PRICE = '$29';
 
 export type Price = { name: string; price: string; unit?: string; points: string[]; badge?: string; buyHref?: string; buyLabel?: string; /** key in FIXED_PRICE_ITEMS: the Order button pre-ticks it in the builder */ itemKey?: string };
 
@@ -36,7 +55,7 @@ export const ADVERTISE_PRICES: Price[] = [
     price: '$129',
     unit: 'per article',
     points: [
-      'Dedicated page with up to 2 dofollow links (rel="sponsored")',
+      'Dedicated page with up to 2 followed links, tagged rel="sponsored" as Google requires for paid placement',
       `${SPONSORED_ARTICLE_LENGTH}, written by you or by us (+${SPONSORED_WRITING_FEE})`,
       'Permanent, indexed, and shared on LinkedIn',
       'Featured in our newsletter to subscribers',
@@ -49,7 +68,7 @@ export const ADVERTISE_PRICES: Price[] = [
     price: '$99',
     unit: 'per year',
     points: [
-      'Dedicated tool page with dofollow link and custom thumbnail',
+      'Dedicated tool page with a followed, sponsored-tagged link and custom thumbnail',
       'Pinned to the top of your category for 12 months',
       'Eligible for "best tools" roundup articles',
       'Pay now, complete the listing from a private link',
@@ -118,9 +137,11 @@ export const DISTRIBUTION_SERVICES: Price[] = [
     points: [
       'Manual submission to 100+ active SaaS and product directories',
       'Works for any vertical: dev tools, fintech, ecommerce, B2B SaaS',
-      'Spreadsheet report: every directory, URL, status and date live',
-      'One time fee, all listings are permanent (5 to 7 days turnaround)',
+      'Spreadsheet report: every directory, URL, link type and date live, plus an index check at 30 days',
+      'One time fee, listings replaced if removed within 90 days (5 to 7 days turnaround)',
     ],
     itemKey: 'directory',
+    buyHref: '/directory-package/',
+    buyLabel: 'See every directory and its DR',
   },
 ];

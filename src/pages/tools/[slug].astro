@@ -6,6 +6,7 @@ import { getCollection, render } from 'astro:content';
 import { SITE } from '../../site.config';
 import { getVertical } from '../../data/taxonomy';
 import { deployCell, fmtDate, freeCell, pairPath, priceCell, trialCell, editorialRank } from '../../lib/compare';
+import { breadcrumbList, metaDescription, priceValue } from '../../lib/schema';
 
 export async function getStaticPaths() {
   const tools = await getCollection('tools');
@@ -15,17 +16,30 @@ const { tool } = Astro.props;
 const d = tool.data;
 const v = getVertical(d.vertical);
 const { Content } = await render(tool);
-// Paid (featured) listings get a dofollow link. Free listings are nofollow.
-const rel = d.featured ? 'noopener' : 'nofollow noopener';
+// Paid (featured) listings get a followed link tagged rel="sponsored", which Google requires for paid placement.
+// Free listings are nofollow. Never emit an untagged followed link to a paying customer: that is a link-scheme penalty risk for the whole domain.
+const rel = d.featured ? 'sponsored noopener' : 'nofollow noopener';
 const fullStars = d.rating ?? 0;
-const jsonLd = {
+const year = new Date().getFullYear();
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+// Offers: a real number when we have one (free, or a parsed starting price); otherwise no Offer at all. An Offer without a
+// price is a Rich Results error, which is what the previous template emitted for every paid tool.
+const price = d.pricing === 'Free' ? 0 : priceValue(d.startingPrice);
+const offers = price != null ? { offers: { '@type': 'Offer', price: String(price), priceCurrency: 'USD', ...(d.startingPrice && price > 0 ? { description: d.startingPrice } : {}), availability: 'https://schema.org/InStock' } } : {};
+const jsonLd = [{
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
   name: d.name,
   url: d.website,
   applicationCategory: 'BusinessApplication',
+  applicationSubCategory: d.category,
+  operatingSystem: d.platforms.length ? d.platforms.join(', ') : 'Web',
   description: d.tagline,
-  offers: { '@type': 'Offer', price: d.pricing === 'Free' ? '0' : undefined, priceCurrency: 'USD' },
+  ...(d.keyFeatures.length ? { featureList: d.keyFeatures } : {}),
+  datePublished: d.addedDate.toISOString().slice(0, 10),
+  dateModified: (d.dataCheckedAt ?? d.addedDate).toISOString().slice(0, 10),
+  mainEntityOfPage: pageUrl,
+  ...offers,
   // A single editorial rating is a Review, not an AggregateRating (which implies many user ratings).
   ...(d.rating
     ? {
@@ -37,7 +51,7 @@ const jsonLd = {
       }
     : {}),
   ...(d.thumbnail ? { image: new URL(d.thumbnail, Astro.site).toString() } : {}),
-};
+}, breadcrumbList(Astro.site, [{ name: 'Tools', path: '/tools/' }, { name: v.name, path: `/categories/${v.slug}/` }, { name: d.name, path: Astro.url.pathname }])];
 
 // Similar tools: same category first, then the rest of the vertical
 const allTools = await getCollection('tools');
@@ -47,6 +61,10 @@ const sameVertical = allTools.filter((t) => t.data.vertical === d.vertical && t.
 const similar = [...sameCategory, ...sameVertical].slice(0, 3);
 // Compare links use the editorial ranking (rating, then editor's pick), never paid placement.
 const comparePeers = [...sameCategory].sort(editorialRank).slice(0, 3);
+// "About this listing": the facts a founder checks before paying and a buyer checks before trusting. All real, all from the data.
+const comparePages = sameCategory.length;
+const altPagesListedOn = sameCategory.length; // every same-category peer's alternatives page lists this tool
+const linkType = d.featured ? 'Followed link, tagged rel="sponsored" (paid placement)' : 'Nofollow link (free listing)';
 const facts: [string, string][] = [
   ...(d.startingPrice || d.pricing === 'Free' || d.pricing === 'Enterprise' ? [['Starting price', priceCell(d)] as [string, string]] : []),
   ...(d.freeTier != null || d.pricing === 'Free' ? [['Free plan', freeCell(d)] as [string, string]] : []),
@@ -55,10 +73,10 @@ const facts: [string, string][] = [
   ...(d.platforms.length ? [['Platforms', d.platforms.join(', ')] as [string, string]] : []),
 ];
 ---
-<Base title={`${d.name} review: ${d.tagline}`} description={`${d.name} for ${d.category.toLowerCase()}. ${d.tagline} Pricing: ${d.pricing}. Best for ${d.bestFor}.`} jsonLd={jsonLd} image={d.thumbnail}>
+<Base title={`${d.name} review (${year}): pricing, pros and cons`} description={metaDescription(`${d.name} review: ${d.tagline} ${d.pricing}${d.startingPrice ? `, from ${d.startingPrice}` : ''}. Best for ${d.bestFor}.`)} jsonLd={jsonLd} image={d.thumbnail}>
   <div class="section tool-layout">
     <article class="prose tool-content">
-      <p class="meta"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {d.category}</p>
+      <nav class="meta" aria-label="Breadcrumb"><a href="/tools/">Tools</a> / <a href={`/categories/${v.slug}/`}>{v.name}</a> / {d.category}</nav>
       <div class="row">
         <span class="pill">{d.category}</span>
         {d.featured && <span class="pill warn">Featured listing (paid)</span>}
@@ -68,13 +86,17 @@ const facts: [string, string][] = [
       <p class="lead muted">{d.tagline}</p>
       {d.thumbnail && (
         <figure class="tool-hero-img">
-          <img src={d.thumbnail} alt={`${d.name} screenshot`} width="1200" height="534" />
+          <img src={d.thumbnail} alt={`${d.name} screenshot`} width="1200" height="534" fetchpriority="high" decoding="async" />
         </figure>
       )}
       
+      <p class="tool-definition"><strong>{d.name}</strong> is {/^[aeiou]/i.test(d.category) ? 'an' : 'a'} {d.category.toLowerCase()} tool for {v.name.toLowerCase()}, listed under {d.pricing.toLowerCase()} pricing and best suited to {d.bestFor.charAt(0).toLowerCase() + d.bestFor.slice(1)}.</p>
       <div class="tool-description">
         <Content />
       </div>
+      {d.profileTier === 'basic' && (
+        <p class="notice"><strong>Basic profile.</strong> The vendor listed the essentials only. Pros, cons, pricing details and comparison pages appear once the full profile is completed from the private link in their listing email.</p>
+      )}
     </article>
 
     <aside class="tool-sidebar fade-in">
@@ -105,8 +127,17 @@ const facts: [string, string][] = [
           </dl>
         )}
         <a class="btn" href={d.website} rel={rel} target="_blank" style="width:100%; justify-content:center; padding:1rem; font-size:1.05rem;">Visit {d.name} →</a>
-        <div style="text-align: center; margin-top: 1rem;">
-          <a href="/submit-tool/" style="font-size: 0.85rem; color: var(--muted); text-decoration: none;">Manage this listing</a>
+        {d.deal && (
+          <div class="deal-box">
+            <p class="deal-label">Deal from the vendor</p>
+            <p class="deal-text">{d.deal.text}</p>
+            {d.deal.code && <p class="deal-code"><span>Code</span><code>{d.deal.code}</code><button type="button" class="copy-code" data-code={d.deal.code}>Copy</button></p>}
+            <p class="meta" style="margin:.35rem 0 0;">{d.deal.until ? `Ends ${fmtDate(d.deal.until)}. ` : ''}<a href={d.deal.url ?? d.website} rel={rel} target="_blank">Where it applies</a>. Offers are the vendor's; we do not earn a commission.</p>
+          </div>
+        )}
+        <div class="row" style="justify-content:center; gap:1rem; margin-top: 1rem; font-size:.85rem;">
+          <a href="/badge/" style="color: var(--muted); text-decoration: none;">Get the badge</a>
+          <a href={`mailto:${SITE.email}?subject=${encodeURIComponent(`Listing: ${d.name}`)}`} style="color: var(--muted); text-decoration: none;">Claim or correct</a>
         </div>
       </div>
       {(d.pros.length || d.cons.length) > 0 && (
@@ -118,6 +149,21 @@ const facts: [string, string][] = [
       )}
     </aside>
   </div>
+
+  <section class="section fade-in" id="about-listing">
+    <div class="card listing-proof">
+      <h3 style="margin-top:0">About this listing</h3>
+      <dl class="facts proof-facts">
+        <div><dt>Listed</dt><dd>{fmtDate(d.addedDate)}</dd></div>
+        <div><dt>Data checked</dt><dd>{d.dataCheckedAt ? fmtDate(d.dataCheckedAt) : 'Not yet verified against the vendor site'}</dd></div>
+        <div><dt>Link to vendor</dt><dd>{linkType}</dd></div>
+        <div><dt>Placement</dt><dd>{d.featured ? `Featured (paid) until ${d.featuredUntil ? fmtDate(d.featuredUntil) : 'renewal'}` : 'Free listing'}</dd></div>
+        <div><dt>Appears on</dt><dd>{comparePages} compare page{comparePages === 1 ? '' : 's'} and {altPagesListedOn} alternatives page{altPagesListedOn === 1 ? '' : 's'}</dd></div>
+        <div><dt>Rating</dt><dd>{d.rating ? `${d.rating} of 5, editorial. Never paid for.` : 'Not rated yet'}</dd></div>
+      </dl>
+      <p class="meta" style="margin:.75rem 0 0;">Paid placement buys position and the link type. It never changes the rating, the verdict on a compare page or the order of an alternatives list. <a href="/about/">Editorial policy</a>.</p>
+    </div>
+  </section>
 
   {similar.length > 0 && (
     <section class="section fade-in">
@@ -138,4 +184,10 @@ const facts: [string, string][] = [
   <section class="section fade-in">
     <Newsletter />
   </section>
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>('.copy-code').forEach((b) => b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(b.dataset.code || ''); const t = b.textContent; b.textContent = 'Copied'; setTimeout(() => (b.textContent = t), 1500); } catch {}
+    }));
+  </script>
 </Base>

@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+const api = SITE.apiBase.replace(/\/$/, '');
+const ex = (path: string) => `${api}${path}`;
+---
+<Base title="Public API and MCP server" description="Free, no-key JSON API and an MCP server for the Lantle directory: tools, alternatives and comparisons with pricing, platforms, pros and cons. CORS enabled.">
+  <section class="hero">
+    <p class="meta eyebrow">For developers and AI assistants</p>
+    <h1>Public API and MCP server</h1>
+    <p class="lead">Every published listing, its structured facts and the editorial comparisons are available as JSON, free and without a key. The same data powers an MCP server so Claude, ChatGPT and other assistants can look tools up directly. Rate limit: 120 requests a minute per IP. Responses are cached for 60 seconds.</p>
+  </section>
+
+  <section class="section prose fade-in">
+    <h2 style="margin-top:0">Endpoints</h2>
+    <table class="compare-table">
+      <thead><tr><th>Endpoint</th><th>Returns</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/v1/tools</code></td><td>Published tools. Filters: <code>q</code> (name or tagline), <code>vertical</code>, <code>category</code>, <code>pricing</code> (Free, Freemium, Paid, Enterprise), <code>limit</code> (max 200).</td></tr>
+        <tr><td><code>GET /api/v1/tools/:slug</code></td><td>One tool with pricing, free plan, trial, platforms, integrations, pros, cons, verdict line and the date its data was last checked.</td></tr>
+        <tr><td><code>GET /api/v1/tools/:slug/alternatives</code></td><td>Same-category alternatives in editorial order (rating, then editor's pick). Paid placement never changes this order.</td></tr>
+        <tr><td><code>GET /api/v1/compare?a=slug&amp;b=slug</code></td><td>Both tools side by side plus the editorial verdict when one exists.</td></tr>
+        <tr><td><code>GET /api/v1/deals</code></td><td>Live vendor offers attached to listings: text, code, end date and the page where each applies.</td></tr>
+        <tr><td><code>GET /api/v1/categories</code></td><td>Verticals, their categories and the number of published tools in each.</td></tr>
+      </tbody>
+    </table>
+    <p class="meta">Every tool object carries <code>url</code> (the review page) and <code>website</code> (the vendor). Fields that are not verified are omitted rather than guessed; <code>dataCheckedAt</code> is present only when a person has checked pricing and features against the vendor's site.</p>
+
+    <h2>Example</h2>
+    <pre><code>curl "{ex('/api/v1/tools?vertical=finance&pricing=Freemium&limit=5')}"</code></pre>
+    <pre><code>curl "{ex('/api/v1/compare?a=brex&b=ramp')}"</code></pre>
+
+    <h2>MCP server</h2>
+    <p>The MCP server exposes five tools to any MCP-capable assistant: <code>lantle_find_tools</code>, <code>lantle_tool_details</code>, <code>lantle_alternatives</code>, <code>lantle_compare</code> and <code>lantle_deals</code>. It runs over stdio and calls the public API above, so it needs no credentials.</p>
+    <pre><code>{`{
+  "mcpServers": {
+    "lantle": {
+      "command": "npx",
+      "args": ["-y", "lantle-mcp"],
+      "env": { "LANTLE_API_BASE": "${api}" }
+    }
+  }
+}`}</code></pre>
+    <p class="meta">The server source lives in the backend repository under <code>src/mcp/</code>. Until it is published to npm, run it from a checkout with <code>npm run build &amp;&amp; node dist/mcp/server.js</code>.</p>
+
+    <h2>Terms</h2>
+    <ul>
+      <li>Attribution: link to the review page (<code>url</code>) when you display a listing.</li>
+      <li>Ratings, verdicts and alternatives order are editorial and must not be presented as paid or sponsored.</li>
+      <li>No bulk republishing of review bodies; the API returns structured facts, not the full review text.</li>
+    </ul>
+  </section>
+</Base>

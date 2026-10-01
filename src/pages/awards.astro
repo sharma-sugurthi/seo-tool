@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+import { getCollection } from 'astro:content';
+import { getVertical } from '../data/taxonomy';
+import { breadcrumbList, faqPage } from '../lib/schema';
+
+/**
+ * Readers' Choice scaffold. Nominations open now; results are published only after real votes are counted.
+ * Nothing on this page claims a winner. Categories are the finance sub-categories with at least two listed tools.
+ */
+const year = new Date().getFullYear();
+const finance = getVertical('finance');
+const tools = (await getCollection('tools')).filter((t) => t.data.vertical === 'finance');
+const categories = finance.categories.map((c) => ({ name: c, tools: tools.filter((t) => t.data.category === c) })).filter((c) => c.tools.length >= 2);
+const faqs = [
+  { q: 'Who can vote?', a: 'People who use the software: bookkeepers, accountants, controllers, founders and finance teams. One vote per person per category, verified by a work email. Vendors cannot vote for themselves and bought votes disqualify the product.' },
+  { q: 'Can a vendor pay to win or be shortlisted?', a: 'No. Featured listings, sponsored articles and services buy nothing here. The shortlist is every listed tool in the category and the result is the vote count.' },
+  { q: 'When are results published?', a: `Voting closes at the end of the year. Results, with vote counts per category, are published in January ${year + 1} on this page and each winner's tool page carries a badge linking back here.` },
+  { q: 'How do I get my tool on the ballot?', a: 'List it. Every published tool in a finance category is on the ballot automatically, free listings included. Submit it at least 30 days before voting closes.' },
+];
+const jsonLd = [faqPage(faqs), breadcrumbList(Astro.site, [{ name: 'Awards', path: Astro.url.pathname }])];
+---
+<Base title={`Readers' Choice ${year}: finance and accounting software`} description={`Vote for the finance and accounting software you actually use. One vote per person per category, verified by work email, results published with vote counts. Vendors cannot pay to win.`} jsonLd={jsonLd}>
+  <section class="hero">
+    <p class="meta eyebrow">Readers' Choice {year}</p>
+    <h1>The finance and accounting software its users would pick again</h1>
+    <p class="lead">An annual vote by the people who run the books, not by vendors and not by us. Every listed tool in each finance category is on the ballot. One vote per person per category, verified by a work email. Results are published with the vote counts, and nothing here can be bought.</p>
+    <div class="row" style="margin-top:1rem;"><a class="btn" href={`mailto:${SITE.email}?subject=${encodeURIComponent(`Readers' Choice ${year}: vote`)}`}>Request a ballot</a><a class="btn ghost" href="/submit-tool/">List a tool to get on the ballot</a></div>
+    <p class="meta">Voting opens by email while the ballot form is built. Nominations and ballots are logged with a timestamp and the voter's work domain.</p>
+  </section>
+
+  <section class="section fade-in">
+    <h2 style="margin-top:0">Categories on the {year} ballot</h2>
+    <div class="grid">
+      {categories.map((c) => (
+        <div class="card">
+          <h3 style="margin:0 0 .4rem;">{c.name}</h3>
+          <p class="meta" style="margin:0 0 .5rem;">{c.tools.length} tools on the ballot</p>
+          <p class="muted" style="margin:0; font-size:.93rem;">{c.tools.map((t) => t.data.name).join(', ')}</p>
+        </div>
+      ))}
+    </div>
+    <p class="meta" style="margin-top:.75rem;">Categories with fewer than two listed tools are not on the ballot. List a tool to open one.</p>
+  </section>
+
+  <section class="section fade-in prose" style="max-width:48rem;">
+    <h2 style="margin-top:0">Rules</h2>
+    {faqs.map((f) => <details><summary><strong>{f.q}</strong></summary><p>{f.a}</p></details>)}
+  </section>
+</Base>

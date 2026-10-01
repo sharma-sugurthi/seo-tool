@@ -1,0 +1,81 @@
+/**
+ * Directories the $199 package submits to. Every number comes from the Ahrefs API (batch-analysis, subdomains mode),
+ * pulled on the date in CHECKED_AT. Refresh with the same call before quoting new numbers. Link type is verified per directory
+ * during fulfilment and is deliberately not claimed here: most directories change it with plan or badge requirements.
+ *
+ * Policy: directories under DR 30 or with no organic traffic are listed as excluded, so buyers can see what is NOT padded in.
+ */
+export const CHECKED_AT = '2026-10-01';
+export type Directory = { name: string; domain: string; dr: number; refdomains: number; traffic: number; type: string };
+export const DIRECTORIES: Directory[] = [
+  { name: "SourceForge", domain: "sourceforge.net", dr: 93, refdomains: 273719, traffic: 3296586, type: "Software directory" },
+  { name: "Product Hunt", domain: "producthunt.com", dr: 91, refdomains: 96973, traffic: 216199, type: "Launch platform" },
+  { name: "G2", domain: "g2.com", dr: 91, refdomains: 79230, traffic: 1130050, type: "Review marketplace" },
+  { name: "Capterra", domain: "capterra.com", dr: 91, refdomains: 48349, traffic: 707414, type: "Review marketplace" },
+  { name: "Crunchbase", domain: "crunchbase.com", dr: 91, refdomains: 123847, traffic: 3976336, type: "Company database" },
+  { name: "Software Advice", domain: "softwareadvice.com", dr: 87, refdomains: 26251, traffic: 359431, type: "Review marketplace" },
+  { name: "Wellfound", domain: "wellfound.com", dr: 87, refdomains: 41454, traffic: 285688, type: "Startup directory" },
+  { name: "GoodFirms", domain: "goodfirms.co", dr: 86, refdomains: 22818, traffic: 231314, type: "Review marketplace" },
+  { name: "GetApp", domain: "getapp.com", dr: 85, refdomains: 17593, traffic: 39368, type: "Review marketplace" },
+  { name: "TrustRadius", domain: "trustradius.com", dr: 85, refdomains: 18152, traffic: 92153, type: "Review marketplace" },
+  { name: "Startup Fame", domain: "startupfa.me", dr: 84, refdomains: 8362, traffic: 36327, type: "Launch platform" },
+  { name: "F6S", domain: "f6s.com", dr: 83, refdomains: 31643, traffic: 637085, type: "Startup directory" },
+  { name: "Fazier", domain: "fazier.com", dr: 83, refdomains: 7038, traffic: 3452, type: "Launch platform" },
+  { name: "AppSumo", domain: "appsumo.com", dr: 83, refdomains: 17869, traffic: 146840, type: "Deals marketplace" },
+  { name: "Dang.ai", domain: "dang.ai", dr: 82, refdomains: 4993, traffic: 35093, type: "AI directory" },
+  { name: "AlternativeTo", domain: "alternativeto.net", dr: 81, refdomains: 22955, traffic: 224467, type: "Alternatives directory" },
+  { name: "Indie Hackers", domain: "indiehackers.com", dr: 81, refdomains: 22733, traffic: 228541, type: "Community" },
+  { name: "SaaSHub", domain: "saashub.com", dr: 80, refdomains: 11083, traffic: 21424, type: "Alternatives directory" },
+  { name: "ToolPilot", domain: "toolpilot.ai", dr: 79, refdomains: 2795, traffic: 6789, type: "AI directory" },
+  { name: "StackShare", domain: "stackshare.io", dr: 78, refdomains: 15893, traffic: 102857, type: "Developer directory" },
+  { name: "BetaList", domain: "betalist.com", dr: 77, refdomains: 8359, traffic: 19522, type: "Launch platform" },
+  { name: "There's An AI For That", domain: "theresanaiforthat.com", dr: 77, refdomains: 13579, traffic: 1648232, type: "AI directory" },
+  { name: "Uneed", domain: "uneed.best", dr: 76, refdomains: 4243, traffic: 11869, type: "Launch platform" },
+  { name: "PeerPush", domain: "peerpush.com", dr: 76, refdomains: 2522, traffic: 1830, type: "Launch platform" },
+  { name: "SaaSworthy", domain: "saasworthy.com", dr: 75, refdomains: 7467, traffic: 22584, type: "Review marketplace" },
+  { name: "LaunchIgniter", domain: "launchigniter.com", dr: 75, refdomains: 2323, traffic: 4, type: "Launch platform" },
+  { name: "Crozdesk", domain: "crozdesk.com", dr: 74, refdomains: 7364, traffic: 44406, type: "Review marketplace" },
+  { name: "StartupBase", domain: "startupbase.io", dr: 74, refdomains: 2046, traffic: 108, type: "Startup directory" },
+  { name: "Toolify", domain: "toolify.ai", dr: 73, refdomains: 9359, traffic: 42495, type: "AI directory" },
+  { name: "TinyLaunch", domain: "tinylaunch.com", dr: 73, refdomains: 2076, traffic: 11330, type: "Launch platform" },
+  { name: "Futurepedia", domain: "futurepedia.io", dr: 72, refdomains: 5985, traffic: 54274, type: "AI directory" },
+  { name: "SideProjectors", domain: "sideprojectors.com", dr: 71, refdomains: 8092, traffic: 8600, type: "Startup directory" },
+  { name: "KillerStartups", domain: "killerstartups.com", dr: 71, refdomains: 3225, traffic: 0, type: "Startup directory" },
+  { name: "Slant", domain: "slant.co", dr: 69, refdomains: 5657, traffic: 69, type: "Alternatives directory" },
+  { name: "LibHunt", domain: "libhunt.com", dr: 66, refdomains: 7104, traffic: 7344, type: "Developer directory" },
+  { name: "Startup Stash", domain: "startupstash.com", dr: 65, refdomains: 5862, traffic: 174528, type: "Startup directory" },
+  { name: "DevHunt", domain: "devhunt.org", dr: 65, refdomains: 4404, traffic: 17349, type: "Launch platform" },
+  { name: "TopAI.tools", domain: "topai.tools", dr: 64, refdomains: 5517, traffic: 8903, type: "AI directory" },
+  { name: "MicroLaunch", domain: "microlaunch.net", dr: 64, refdomains: 1677, traffic: 3097, type: "Launch platform" },
+  { name: "SaaSGenius", domain: "saasgenius.com", dr: 62, refdomains: 2062, traffic: 32157, type: "Review marketplace" },
+  { name: "OpenAlternative", domain: "openalternative.co", dr: 61, refdomains: 1574, traffic: 2154, type: "Alternatives directory" },
+  { name: "StartupRanking", domain: "startupranking.com", dr: 61, refdomains: 6328, traffic: 10263, type: "Startup directory" },
+  { name: "Easy With AI", domain: "easywithai.com", dr: 60, refdomains: 2549, traffic: 24814, type: "AI directory" },
+  { name: "AllTopStartups", domain: "alltopstartups.com", dr: 58, refdomains: 2805, traffic: 1422, type: "Startup directory" },
+  { name: "AIToolNet", domain: "aitoolnet.com", dr: 57, refdomains: 2520, traffic: 250, type: "AI directory" },
+  { name: "AI Top Tools", domain: "aitoptools.com", dr: 56, refdomains: 4070, traffic: 23012, type: "AI directory" },
+  { name: "Launching Next", domain: "launchingnext.com", dr: 54, refdomains: 2200, traffic: 427, type: "Launch platform" },
+  { name: "BetaPage", domain: "betapage.co", dr: 53, refdomains: 1725, traffic: 168, type: "Launch platform" },
+  { name: "AI Tools Directory", domain: "aitoolsdirectory.com", dr: 50, refdomains: 2450, traffic: 14319, type: "AI directory" },
+  { name: "ToolDirectory.ai", domain: "tooldirectory.ai", dr: 50, refdomains: 2867, traffic: 545, type: "AI directory" },
+  { name: "Insidr.ai", domain: "insidr.ai", dr: 48, refdomains: 965, traffic: 838, type: "AI directory" },
+  { name: "Workspaces", domain: "workspaces.xyz", dr: 48, refdomains: 977, traffic: 224, type: "Community" },
+  { name: "aitools.fyi", domain: "aitools.fyi", dr: 43, refdomains: 3432, traffic: 8786, type: "AI directory" },
+  { name: "Foundr.ai", domain: "foundr.ai", dr: 41, refdomains: 1308, traffic: 2978, type: "AI directory" },
+  { name: "ProductBurst", domain: "productburst.com", dr: 40, refdomains: 992, traffic: 0, type: "Launch platform" },
+  { name: "AIcyclopedia", domain: "aicyclopedia.com", dr: 39, refdomains: 1297, traffic: 98, type: "AI directory" },
+  { name: "FindMyAITool", domain: "findmyaitool.com", dr: 37, refdomains: 1529, traffic: 16403, type: "AI directory" },
+  { name: "NoCodeList", domain: "nocodelist.co", dr: 37, refdomains: 2391, traffic: 852, type: "Developer directory" },
+  { name: "AI Valley", domain: "aivalley.ai", dr: 34, refdomains: 2956, traffic: 19302, type: "AI directory" },
+  { name: "Launched", domain: "launched.io", dr: 33, refdomains: 952, traffic: 18, type: "Launch platform" },
+  { name: "GPTE", domain: "gpte.ai", dr: 31, refdomains: 446, traffic: 189, type: "AI directory" },
+  { name: "10words", domain: "10words.io", dr: 31, refdomains: 849, traffic: 0, type: "Launch platform" },
+  { name: "SaaSBaba", domain: "saasbaba.com", dr: 26, refdomains: 1175, traffic: 0, type: "Startup directory" },
+  { name: "Betafy", domain: "betafy.co", dr: 17, refdomains: 820, traffic: 0, type: "Launch platform" },
+  { name: "Ben.ai", domain: "ben.ai", dr: 13, refdomains: 624, traffic: 3, type: "AI directory" },
+];
+
+/** Included in the package: DR 30 or higher. Excluded ones are shown on the page with the reason. */
+export const MIN_DR = 30;
+export const included = () => DIRECTORIES.filter((d) => d.dr >= MIN_DR).sort((a, b) => b.dr - a.dr);
+export const excluded = () => DIRECTORIES.filter((d) => d.dr < MIN_DR).sort((a, b) => b.dr - a.dr);

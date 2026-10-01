@@ -13,6 +13,17 @@ const { post } = Astro.props;
 const d = post.data;
 const { Content, headings } = await render(post);
 
+// Sponsored posts: every external link in the body is tagged rel="sponsored" (Google's requirement for paid links),
+// whatever the author typed. Editorial posts render untouched through <Content />.
+const siteHost = new URL(SITE.url).host;
+const sponsoredHtml = d.sponsored && post.rendered?.html
+  ? post.rendered.html.replace(/<a\s([^>]*?)href="(https?:\/\/[^"]+)"([^>]*)>/gi, (m, pre: string, href: string, postAttrs: string) => {
+      if (new URL(href).host === siteHost) return m;
+      const attrs = `${pre}href="${href}"${postAttrs}`.replace(/\srel="[^"]*"/i, '');
+      return `<a ${attrs} rel="sponsored noopener">`;
+    })
+  : null;
+
 // Read time estimate
 const wordCount = post.body ? post.body.split(/\s+/).length : 0;
 const readMin = Math.max(1, Math.ceil(wordCount / 200));
@@ -39,7 +50,11 @@ const jsonLd = {
   description: d.description,
   datePublished: d.pubDate.toISOString(),
   dateModified: (d.updatedDate ?? d.pubDate).toISOString(),
-  author: { '@type': 'Organization', name: d.author },
+  // A named person is a Person; the house byline is the Organization. Typing people as organizations hurts E-E-A-T.
+  author: /editorial|^lantle$/i.test(d.author) || d.author === SITE.name
+    ? { '@type': 'Organization', name: SITE.name, url: SITE.url }
+    : { '@type': 'Person', name: d.author, ...(d.authorBio ? { description: d.authorBio } : {}) },
+  image: d.thumbnail ? new URL(d.thumbnail, Astro.site).toString() : new URL('/og-default.png', Astro.site).toString(),
   publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
   mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).toString(),
 };
@@ -59,7 +74,7 @@ const jsonLd = {
         <p class="notice"><strong>Sponsored content.</strong> This article was paid for by the company featured in it. Our <a href="/about/">editorial policy</a> explains what we do and do not accept.</p>
       )}
 
-      <Content />
+      {sponsoredHtml ? <div set:html={sponsoredHtml} /> : <Content />}
       <hr />
       <div class="row">{d.tags.map((t) => <a class="pill" href={`/blog/tag/${slugify(t)}/`}>{t}</a>)}</div>
       {d.authorBio && <p class="notice"><strong>About the author.</strong> {d.authorBio}</p>}
