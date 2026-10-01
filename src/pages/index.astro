@@ -43,6 +43,7 @@ const tabs = [
   ...(deals.length ? [{ key: 'deals', label: 'Deals', items: deals, note: 'Offers vendors attached to their listing. Not a ranking input.' }] : []),
 ];
 const altTargets = [...all].sort(editorialRank).filter((t) => all.filter((x) => x.data.category === t.data.category).length - 1 >= 3).slice(0, 6);
+const tickerItems = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf() || a.data.name.localeCompare(b.data.name)).slice(0, 14);
 ---
 <Base title="AI tools directory: reviews and comparisons" description={SITE.description}>
   {/* Opening frame: the copy sits centred on its own. About a second later it glides left and the globe arrives on the right.
@@ -74,6 +75,13 @@ const altTargets = [...all].sort(editorialRank).filter((t) => all.filter((x) => 
       <HeroGlobe tools={all} scene="light" />
     </div>
   </section>
+
+  <div class="ticker" aria-label="Recently listed tools">
+    <div class="ticker-track">
+      {tickerItems.map((t) => <a href={`/tools/${t.id}/`}>{t.data.name} <span class="meta">{t.data.category}</span></a>)}
+      {tickerItems.map((t) => <a class="dup" href={`/tools/${t.id}/`} aria-hidden="true" tabindex="-1">{t.data.name} <span class="meta">{t.data.category}</span></a>)}
+    </div>
+  </div>
 
   <div class="home-grid">
     <aside class="rail rail-left" aria-label="Browse">
