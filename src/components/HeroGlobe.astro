@@ -1,0 +1,119 @@
+---
+/**
+ * Homepage hero visual: a rotating dotted globe with decorative arcs, floating tool chips
+ * and a "recently added" list built from real tools and their real listing dates. Nothing on it is simulated.
+ *
+ * Everything here is plain canvas and CSS. The only data is the land mask in src/data/landmask.ts.
+ * Set scene="deep" for the dark green variant.
+ */
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  tools: CollectionEntry<'tools'>[];
+  scene?: 'light' | 'deep';
+}
+const { tools, scene = 'light' } = Astro.props;
+
+// Chips: five well rated tools from different verticals, letter avatars (no third-party logo files to license)
+const seen = new Set<string>();
+const chips = [...tools]
+  .sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0) || Number(b.data.editorsPick) - Number(a.data.editorsPick))
+  .filter((t) => (seen.has(t.data.vertical) ? false : (seen.add(t.data.vertical), true)))
+  .slice(0, 5);
+const chipPos = ['left:2%; top:38%; animation-delay:-1s', 'left:58%; top:22%; animation-delay:-3s', 'left:66%; top:52%; animation-delay:-2s', 'left:8%; top:58%; animation-delay:-4.5s', 'left:40%; top:4%; animation-delay:-2.5s'];
+const chipColors = ['#111c18', '#156b52', '#2e9171', '#0e5240', '#3d4f47'];
+const short = (c: string) => c.split(' and ')[0].split(' ')[0];
+
+// Recently added: the four newest tools with their real listing dates. Rendered at build time, never animated as "live".
+const newest = [...tools].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf() || a.data.name.localeCompare(b.data.name)).slice(0, 4);
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+---
+<div class="globe-stage" id="globe-stage" data-scene={scene}>
+  <canvas id="globe-canvas" role="img" aria-label="Rotating globe with listings arriving from around the world"></canvas>
+  <div class="globe-stamp">{tools.length} tools reviewed</div>
+  <span class="globe-coord" style="left:6%; top:24%">455, 10</span>
+  <span class="globe-coord" style="left:62%; top:8%">1050, 345</span>
+  <span class="globe-coord" style="left:14%; top:70%">399, 395</span>
+  {chips.map((t, i) => (
+    <a class="globe-chip" href={`/tools/${t.id}/`} style={chipPos[i]}>
+      <i style={`background:${chipColors[i]}`}>{t.data.name.charAt(0).toUpperCase()}</i>{t.data.name} <small>{short(t.data.category)}</small>
+    </a>
+  ))}
+  <div class="globe-feed" id="globe-feed">
+    <div class="globe-feed-head"><span>Recently added</span></div>
+    {newest.map((t) => (
+      <a class="globe-ev" data-k="live" href={`/tools/${t.id}/`}>
+        <span class="dot"></span>
+        <span class="txt"><b>{t.data.name}</b><span>{t.data.category}</span></span>
+        <time datetime={t.data.addedDate.toISOString().slice(0, 10)}>{fmt(t.data.addedDate)}</time>
+      </a>
+    ))}
+  </div>
+</div>
+
+<script>
+  import { LAND_B64 } from '../data/landmask';
+
+  const stage = document.getElementById('globe-stage')!;
+  const canvas = document.getElementById('globe-canvas') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const deep = stage.dataset.scene === 'deep';
+  const DOT = deep ? '120,225,180' : '21,107,82';
+  const LINE = deep ? '79,211,159' : '21,107,82';
+
+  // Cities the arcs fly from, and the hub they fly to
+  const cities = [
+    { la: 37.8, lo: -122.4 }, { la: 40.7, lo: -74 }, { la: 43.7, lo: -79.4 }, { la: -23.5, lo: -46.6 }, { la: 51.5, lo: -0.1 }, { la: 52.5, lo: 13.4 },
+    { la: 6.5, lo: 3.4 }, { la: 25.2, lo: 55.3 }, { la: 12.97, lo: 77.6 }, { la: 1.35, lo: 103.8 }, { la: 35.7, lo: 139.7 }, { la: -33.9, lo: 151.2 },
+  ];
+  const hub = { la: 17.4, lo: 78.5 };
+  // east is to the right of the screen (z is negated), so the map is not mirrored
+  const toVec = (la: number, lo: number): [number, number, number] => { const a = la * Math.PI / 180, b = lo * Math.PI / 180; return [Math.cos(a) * Math.cos(b), Math.sin(a), -Math.cos(a) * Math.sin(b)]; };
+  const maskBytes = Uint8Array.from(atob(LAND_B64), (c) => c.charCodeAt(0));
+  const MW = 720, MH = 360;
+  const isLand = (la: number, lo: number) => { const col = Math.min(MW - 1, Math.max(0, Math.floor((lo + 180) / 360 * MW))); const row = Math.min(MH - 1, Math.max(0, Math.floor((90 - la) / 180 * MH))); const i = row * MW + col; return (maskBytes[i >> 3] >> (7 - (i & 7))) & 1; };
+  // Dots: dense on land, sparse and faint on the ocean
+  const N = 11000; const dots: [number, number, number][] = []; const ocean: [number, number, number][] = [];
+  for (let i = 0; i < N; i++) { const y = 1 - (i / (N - 1)) * 2; const r = Math.sqrt(1 - y * y); const th = i * 2.399963; const la = Math.asin(y) * 180 / Math.PI; const lo = Math.atan2(Math.sin(th) * r, Math.cos(th) * r) * 180 / Math.PI; const v = toVec(la, lo); if (isLand(la, lo)) dots.push(v); else if (i % 7 === 0) ocean.push(v); }
+  const tilt = 22 * Math.PI / 180; const ct = Math.cos(tilt), st = Math.sin(tilt);
+  let rot = 0.6; let W = 0, H = 0, R = 0, CX = 0, CY = 0;
+  function resize() { const r = canvas.getBoundingClientRect(); const dpr = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); R = Math.min(W, H) * 0.36; CX = W * 0.48; CY = H * 0.5; }
+  window.addEventListener('resize', resize); resize();
+  function project(v: [number, number, number]) { const [x, y, z] = v; const cr = Math.cos(rot), sr = Math.sin(rot); const x1 = x * cr - z * sr, z1 = x * sr + z * cr; const y2 = y * ct - z1 * st, z2 = y * st + z1 * ct; return { x: CX + x1 * R, y: CY - y2 * R, z: z2 }; }
+  type Arc = { a: { la: number; lo: number }; b: { la: number; lo: number }; t: number; speed: number; fade: number; ambient: boolean };
+  const arcs: Arc[] = [];
+  function slerp(a: number[], b: number[], t: number): [number, number, number] { const d = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2])); const om = Math.acos(d); if (om < 1e-4) return a as [number, number, number]; const s1 = Math.sin((1 - t) * om) / Math.sin(om), s2 = Math.sin(t * om) / Math.sin(om); return [a[0] * s1 + b[0] * s2, a[1] * s1 + b[1] * s2, a[2] * s1 + b[2] * s2]; }
+  function arcPoint(a: number[], b: number[], t: number): [number, number, number] { const p = slerp(a, b, t); const lift = 1 + 0.28 * Math.sin(Math.PI * t); return [p[0] * lift, p[1] * lift, p[2] * lift]; }
+
+  let visible = true; let last = performance.now(); let raf = 0;
+  function frame(now: number) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now; if (!reduced) rot -= dt * 0.13; // west to east, like the real Earth
+    ctx.clearRect(0, 0, W, H);
+    const g = ctx.createRadialGradient(CX, CY, R * 0.8, CX, CY, R * 1.35); g.addColorStop(0, `rgba(${LINE},0.10)`); g.addColorStop(1, `rgba(${LINE},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(CX, CY, R * 1.35, 0, Math.PI * 2); ctx.fill();
+    for (const d of dots) { const p = project(d); if (p.z >= 0) continue; ctx.fillStyle = `rgba(${DOT},${0.06 + 0.06 * (p.z + 1)})`; ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, 6.283); ctx.fill(); }
+    ctx.strokeStyle = `rgba(${LINE},0.35)`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI * 2); ctx.stroke();
+    for (const d of ocean) { const p = project(d); if (p.z < 0) continue; ctx.fillStyle = `rgba(${DOT},${0.07 + 0.08 * p.z})`; ctx.beginPath(); ctx.arc(p.x, p.y, 0.9, 0, 6.283); ctx.fill(); }
+    for (const d of dots) { const p = project(d); if (p.z < 0) continue; ctx.fillStyle = `rgba(${DOT},${0.35 + 0.6 * p.z})`; ctx.beginPath(); ctx.arc(p.x, p.y, 1.25 + 0.75 * p.z, 0, 6.283); ctx.fill(); }
+    for (const a of arcs) {
+      a.t = Math.min(1, a.t + dt * a.speed);
+      const va = toVec(a.a.la, a.a.lo), vb = toVec(a.b.la, a.b.lo);
+      ctx.lineWidth = a.ambient ? 1 : 1.8; ctx.beginPath(); let started = false;
+      for (let i = 0; i <= 60; i++) { const t = i / 60 * a.t; const p = project(arcPoint(va, vb, t)); if (p.z < -0.15) { started = false; continue; } if (!started) { ctx.moveTo(p.x, p.y); started = true; } else ctx.lineTo(p.x, p.y); }
+      ctx.strokeStyle = `rgba(${LINE},${(a.ambient ? 0.45 : 0.9) * (1 - a.fade)})`; ctx.stroke();
+      const head = project(arcPoint(va, vb, a.t)); if (head.z > -0.15) { ctx.fillStyle = `rgba(${LINE},${1 - a.fade})`; ctx.beginPath(); ctx.arc(head.x, head.y, 3, 0, 6.283); ctx.fill(); }
+      if (a.t >= 1) a.fade = Math.min(1, a.fade + dt * 0.8);
+    }
+    for (let i = arcs.length - 1; i >= 0; i--) if (arcs[i].fade >= 1) arcs.splice(i, 1);
+    for (const c of [...cities, hub]) { const p = project(toVec(c.la, c.lo)); if (p.z < 0) continue; const isHub = c === hub; ctx.fillStyle = `rgba(${LINE},${0.5 + 0.5 * p.z})`; ctx.beginPath(); ctx.arc(p.x, p.y, isHub ? 4 : 2.2, 0, 6.283); ctx.fill(); if (isHub) { ctx.strokeStyle = `rgba(${LINE},${0.35 * p.z})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x, p.y, 8 + 4 * Math.sin(now / 300), 0, 6.283); ctx.stroke(); } }
+    if (visible && !reduced) raf = requestAnimationFrame(frame);
+  }
+  // Only animate while the hero is on screen and the tab is visible
+  const start = () => { if (!raf && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } };
+  const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
+  if (reduced) requestAnimationFrame(frame); else start();
+  if ('IntersectionObserver' in window) new IntersectionObserver((es) => { visible = es[0].isIntersecting; visible ? start() : stop(); }, { threshold: 0.05 }).observe(stage);
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+  if (!reduced) setInterval(() => { if (document.hidden || !visible) return; const a = cities[Math.floor(Math.random() * cities.length)]; const toHub = Math.random() < 0.6; const b = toHub ? hub : cities[Math.floor(Math.random() * cities.length)]; if (a !== b) arcs.push({ a, b, t: 0, speed: 0.35 + Math.random() * 0.25, fade: 0, ambient: true }); }, 1400);
+
+</script>

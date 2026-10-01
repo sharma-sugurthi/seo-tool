@@ -4,6 +4,7 @@ import ToolRow from '../components/ToolRow.astro';
 import ToolCard from '../components/ToolCard.astro';
 import PostCard from '../components/PostCard.astro';
 import Newsletter from '../components/Newsletter.astro';
+import HeroGlobe from '../components/HeroGlobe.astro';
 import { getCollection } from 'astro:content';
 import { SITE, REVIEW_SLA, INSTANT_PRICE, ADVERTISE_PRICES } from '../site.config';
 import { VERTICALS } from '../data/taxonomy';
@@ -44,7 +45,10 @@ const tabs = [
 const altTargets = [...all].sort(editorialRank).filter((t) => all.filter((x) => x.data.category === t.data.category).length - 1 >= 3).slice(0, 6);
 ---
 <Base title="AI tools directory: reviews and comparisons" description={SITE.description}>
-  <section class="home-hero">
+  {/* Opening frame: the copy sits centred on its own. About a second later it glides left and the globe arrives on the right.
+      The whole sequence is one class toggle (.settled) driven by a FLIP transform; reduced-motion and small screens settle at once. */}
+  <section class="home-hero intro" id="home-hero">
+    <div class="hero-copy" id="hero-copy">
     <p class="meta eyebrow">Independent software reviews. Finance and accounting first.</p>
     <h1>Software reviewed by people, compared on facts.</h1>
     <p class="lead">{all.length} tools across {verticals.filter((v) => (counts.get(v.slug) ?? 0) > 0).length} categories, each read by an editor before it is listed. Side-by-side comparisons built from the vendors' own pricing pages, alternatives ranked by rating alone, and every paid placement labelled.</p>
@@ -65,6 +69,10 @@ const altTargets = [...all].sort(editorialRank).filter((t) => all.filter((x) => 
       <li><b>{verified.length}</b> pricing checks logged{verified.length < all.length ? `, ${all.length - verified.length} to go` : ''}</li>
       <li><b>0</b> ratings for sale</li>
     </ul>
+    </div>
+    <div class="hero-globe-slot" id="hero-globe" aria-hidden="true">
+      <HeroGlobe tools={all} scene="light" />
+    </div>
   </section>
 
   <div class="home-grid">
@@ -223,6 +231,38 @@ const altTargets = [...all].sort(editorialRank).filter((t) => all.filter((x) => 
   </section>
 
   <script>
+    // Hero intro: centred copy first, then a FLIP slide to the left column while the globe fades in on the right.
+    (() => {
+      const hero = document.getElementById('home-hero');
+      const copy = document.getElementById('hero-copy');
+      if (!hero || !copy) return;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const narrow = window.matchMedia('(max-width: 900px)').matches;
+      let done = false;
+      const settle = () => {
+        if (done) return; done = true;
+        if (reduced || narrow) { hero.classList.remove('intro'); hero.classList.add('settled'); return; }
+        const first = copy.getBoundingClientRect();
+        hero.classList.remove('intro'); hero.classList.add('settled');
+        const last = copy.getBoundingClientRect();
+        const dx = first.left + first.width / 2 - (last.left + last.width / 2);
+        const dy = first.top - last.top;
+        const sx = first.width / last.width;
+        copy.style.transition = 'none';
+        copy.style.transformOrigin = 'top center';
+        copy.style.transform = `translate(${dx}px, ${dy}px) scale(${sx})`;
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          copy.style.transition = 'transform 1s cubic-bezier(.16,1,.3,1)';
+          copy.style.transform = 'none';
+          hero.classList.add('globe-in');
+        }));
+      };
+      // Hold the opening frame briefly, but never make someone wait: any scroll, key or pointer settles it immediately.
+      const t = setTimeout(settle, 1400);
+      const early = () => { clearTimeout(t); settle(); };
+      ['scroll', 'wheel', 'keydown', 'pointerdown', 'touchstart'].forEach((e) => window.addEventListener(e, early, { once: true, passive: true }));
+    })();
+
     // Tabs: server-rendered panels, one visible at a time. Deep-linkable via #tab-<key>.
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('.tab')];
     const panels = [...document.querySelectorAll<HTMLElement>('.tab-panel')];
