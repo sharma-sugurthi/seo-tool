@@ -2,7 +2,7 @@
 
 A content site plus directory for AI and software tools across every business function (finance and accounting first), with pages that sell sponsored posts, link insertions, featured listings and done-for-you growth services (Reddit, LinkedIn, SEO content, directory placement, outreach).
 
-Built with [Astro](https://astro.build). Hosts free on Cloudflare Pages, Netlify or Vercel. Content is loaded at build time from the backend database (Supabase via Lantle Backend). Features data-driven category pages, public API, Deals rail, and an MCP server for AI agents.
+Built with [Astro](https://astro.build). Hosts free on Cloudflare Pages, Netlify or Vercel. Content is loaded at build time from the backend database (Supabase via Lantle Backend). Features data-driven category pages, public API, Deals rail, and an MCP server for AI agents
 
 ## Run it
 
