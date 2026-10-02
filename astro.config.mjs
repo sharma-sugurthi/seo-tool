@@ -49,6 +49,7 @@ export default defineConfig({
       filter: (page) => !noindexPaths.some((p) => page.endsWith(p)),
     }),
   ],
+  prefetch: true,
   trailingSlash: 'always',
   build: { format: 'directory' },
 });

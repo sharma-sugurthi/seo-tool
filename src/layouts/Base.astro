@@ -8,6 +8,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Search from '../components/Search.astro';
 import { SITE } from '../site.config';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -56,6 +57,7 @@ const ld = [org, website, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex,follow" />}
+    <ClientRouter />
 
     <!-- Fonts are self-hosted (@fontsource, imported above): no render-blocking cross-origin stylesheet, no third-party IP logging. -->
 
@@ -98,89 +100,86 @@ const ld = [org, website, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd
     </button>
 
     <script>
-      // Scroll-to-top button
-      const scrollBtn = document.getElementById('scroll-top');
-      const toggleScrollBtn = () => {
-        scrollBtn?.classList.toggle('visible', window.scrollY > 400);
-      };
-      window.addEventListener('scroll', toggleScrollBtn, { passive: true });
-      toggleScrollBtn();
-      scrollBtn?.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-
-      // ---- Motion (see "Motion system" in global.css) ----
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      // Scroll reveals: .fade-in and .reveal appear as they enter the viewport; .reveal-stagger children follow one another.
-      // Content is never hidden before this script runs: anything already on screen is marked .in first, and only then
-      // is the html element "armed" (CSS hides .fade-in:not(.in) under .reveal-armed). First paint and LCP are unaffected,
-      // crawlers and screenshots see the full page, and only below-the-fold sections animate in as the reader scrolls.
-      const targets = document.querySelectorAll<HTMLElement>('.fade-in, .reveal, .reveal-stagger');
-      targets.forEach((el) => { if (el.classList.contains('reveal-stagger')) [...el.children].forEach((c, i) => (c as HTMLElement).style.setProperty('--i', String(Math.min(i, 11)))); });
-      if ('IntersectionObserver' in window && !reduced) {
-        const vh = window.innerHeight;
-        const below: HTMLElement[] = [];
-        targets.forEach((el) => { if (el.getBoundingClientRect().top < vh * 1.1) el.classList.add('in'); else below.push(el); });
-        if (below.length) {
-          document.documentElement.classList.add('reveal-armed');
-          const io = new IntersectionObserver((entries) => {
-            for (const e of entries) {
-              if (e.isIntersecting || e.boundingClientRect.top < 0) { e.target.classList.add('in'); io.unobserve(e.target); }
-            }
-          }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
-          below.forEach((el) => io.observe(el));
-        }
-      } else {
-        targets.forEach((el) => el.classList.add('in'));
-      }
-
-      // Count-up numbers: any element with data-count
-      const counters = document.querySelectorAll<HTMLElement>('[data-count]');
-      const runCount = (el: HTMLElement) => {
-        const end = Number(el.dataset.count || el.textContent) || 0;
-        if (reduced || end < 4) { el.textContent = String(end); return; }
-        const t0 = performance.now(); const dur = 1100;
-        const step = (now: number) => { const p = Math.min(1, (now - t0) / dur); const eased = 1 - Math.pow(1 - p, 3); el.textContent = String(Math.round(end * eased)); if (p < 1) requestAnimationFrame(step); };
-        requestAnimationFrame(step);
-      };
-      if ('IntersectionObserver' in window) {
-        const cio = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { runCount(e.target as HTMLElement); cio.unobserve(e.target); } }, { threshold: 0.5 });
-        counters.forEach((el) => cio.observe(el));
-      } else counters.forEach(runCount);
-
-      // Spotlight: cards and tiles light up under the pointer
-      if (window.matchMedia('(hover: hover)').matches) {
-        document.addEventListener('pointermove', (e) => {
-          const c = (e.target as Element).closest<HTMLElement>('.card, .tile');
-          if (!c) return;
-          const r = c.getBoundingClientRect();
-          c.style.setProperty('--mx', `${e.clientX - r.left}px`);
-          c.style.setProperty('--my', `${e.clientY - r.top}px`);
-        }, { passive: true });
-      }
-
-      // Reading progress on long articles
-      const bar = document.getElementById('read-progress');
-      const article = document.querySelector<HTMLElement>('.article-layout article, .tool-layout article');
-      if (bar && article) {
-        bar.hidden = false;
-        const onProgress = () => {
-          const r = article.getBoundingClientRect();
-          const total = r.height - window.innerHeight * 0.6;
-          const done = Math.min(1, Math.max(0, -r.top / (total || 1)));
-          bar.style.width = `${done * 100}%`;
+      document.addEventListener('astro:page-load', () => {
+        // Scroll-to-top button
+        const scrollBtn = document.getElementById('scroll-top');
+        const toggleScrollBtn = () => {
+          scrollBtn?.classList.toggle('visible', window.scrollY > 400);
         };
-        window.addEventListener('scroll', onProgress, { passive: true });
-        onProgress();
-      }
+        window.addEventListener('scroll', toggleScrollBtn, { passive: true });
+        toggleScrollBtn();
+        scrollBtn?.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
 
-      // Forms: show a loading state on the submit button (the form still posts normally)
-      document.querySelectorAll<HTMLFormElement>('form[action]').forEach((f) => f.addEventListener('submit', () => {
-        const b = f.querySelector<HTMLButtonElement>('button[type="submit"], .btn[type="submit"]');
-        if (b && f.checkValidity()) { b.classList.add('is-loading'); b.setAttribute('aria-busy', 'true'); }
-      }));
+        // ---- Motion (see "Motion system" in global.css) ----
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+        const targets = document.querySelectorAll<HTMLElement>('.fade-in, .reveal, .reveal-stagger');
+        targets.forEach((el) => { if (el.classList.contains('reveal-stagger')) [...el.children].forEach((c, i) => (c as HTMLElement).style.setProperty('--i', String(Math.min(i, 11)))); });
+        if ('IntersectionObserver' in window && !reduced) {
+          const vh = window.innerHeight;
+          const below: HTMLElement[] = [];
+          targets.forEach((el) => { if (el.getBoundingClientRect().top < vh * 1.1) el.classList.add('in'); else below.push(el); });
+          if (below.length) {
+            document.documentElement.classList.add('reveal-armed');
+            const io = new IntersectionObserver((entries) => {
+              for (const e of entries) {
+                if (e.isIntersecting || e.boundingClientRect.top < 0) { e.target.classList.add('in'); io.unobserve(e.target); }
+              }
+            }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
+            below.forEach((el) => io.observe(el));
+          }
+        } else {
+          targets.forEach((el) => el.classList.add('in'));
+        }
+
+        // Count-up numbers: any element with data-count
+        const counters = document.querySelectorAll<HTMLElement>('[data-count]');
+        const runCount = (el: HTMLElement) => {
+          const end = Number(el.dataset.count || el.textContent) || 0;
+          if (reduced || end < 4) { el.textContent = String(end); return; }
+          const t0 = performance.now(); const dur = 1100;
+          const step = (now: number) => { const p = Math.min(1, (now - t0) / dur); const eased = 1 - Math.pow(1 - p, 3); el.textContent = String(Math.round(end * eased)); if (p < 1) requestAnimationFrame(step); };
+          requestAnimationFrame(step);
+        };
+        if ('IntersectionObserver' in window) {
+          const cio = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { runCount(e.target as HTMLElement); cio.unobserve(e.target); } }, { threshold: 0.5 });
+          counters.forEach((el) => cio.observe(el));
+        } else counters.forEach(runCount);
+
+        // Spotlight: cards and tiles light up under the pointer
+        if (window.matchMedia('(hover: hover)').matches) {
+          document.addEventListener('pointermove', (e) => {
+            const c = (e.target as Element).closest<HTMLElement>('.card, .tile');
+            if (!c) return;
+            const r = c.getBoundingClientRect();
+            c.style.setProperty('--mx', `${e.clientX - r.left}px`);
+            c.style.setProperty('--my', `${e.clientY - r.top}px`);
+          }, { passive: true });
+        }
+
+        // Reading progress on long articles
+        const bar = document.getElementById('read-progress');
+        const article = document.querySelector<HTMLElement>('.article-layout article, .tool-layout article');
+        if (bar && article) {
+          bar.hidden = false;
+          const onProgress = () => {
+            const r = article.getBoundingClientRect();
+            const total = r.height - window.innerHeight * 0.6;
+            const done = Math.min(1, Math.max(0, -r.top / (total || 1)));
+            bar.style.width = `${done * 100}%`;
+          };
+          window.addEventListener('scroll', onProgress, { passive: true });
+          onProgress();
+        }
+
+        // Forms: show a loading state on the submit button (the form still posts normally)
+        document.querySelectorAll<HTMLFormElement>('form[action]').forEach((f) => f.addEventListener('submit', () => {
+          const b = f.querySelector<HTMLButtonElement>('button[type="submit"], .btn[type="submit"]');
+          if (b && f.checkValidity()) { b.classList.add('is-loading'); b.setAttribute('aria-busy', 'true'); }
+        }));
+      });
     </script>
   </body>
 </html>
