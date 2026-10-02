@@ -124,9 +124,7 @@ const mark = (m: 'yes' | 'no' | 'unknown') => (m === 'yes' ? '<span class="mark 
     <h1>{a.name} vs {b.name}</h1>
     <p class="lead"><strong>Short answer:</strong> {shortAnswer}</p>
     <p class="meta">
-      {verdict?.data.reviewedAt ? `Editorial verdict reviewed ${fmtDate(verdict.data.reviewedAt)}. ` : ''}
-      {lastChecked ? `Pricing and features checked against both vendors' sites on ${fmtDate(lastChecked)}.` : 'Pricing and features come from each vendor\'s published pages and are re-checked by our editors; the date appears here once that check is logged.'}
-      {!sameCategory && ` ${a.name} is listed under ${a.category} and ${b.name} under ${b.category}; people compare them because they overlap in practice.`}
+      {verdict?.data.reviewedAt ? `Reviewed ${fmtDate(verdict.data.reviewedAt)}` : lastChecked ? `Reviewed ${fmtDate(lastChecked)}` : ''}
     </p>
   </section>
 
@@ -203,10 +201,10 @@ const mark = (m: 'yes' | 'no' | 'unknown') => (m === 'yes' ? '<span class="mark 
         {pickB.length ? <ul class="pick-list">{pickB.map((x) => <li>{x}</li>)}</ul> : <p class="muted">Best for {midSentence(b.bestFor)}.</p>}
       </div>
     </div>
-    <div class="prose">
+    <div class="prose" style="text-align: justify; max-width: 100%;">
       {verdict ? (
         <>
-          {winnerName && <p class="our-call"><strong>Our call: {winnerName}.</strong> {verdict.data.winnerReason}</p>}
+          {winnerName && <p class="our-call"><strong>Our pick: {winnerName}.</strong> Why? {verdict.data.winnerReason}</p>}
           <div set:html={verdict.data.verdictHtml} />
         </>
       ) : (

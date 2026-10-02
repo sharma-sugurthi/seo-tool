@@ -50,9 +50,9 @@ const tickerItems = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.
       The whole sequence is one class toggle (.settled) driven by a FLIP transform; reduced-motion and small screens settle at once. */}
   <section class="home-hero intro" id="home-hero">
     <div class="hero-copy" id="hero-copy">
-    <p class="meta eyebrow">Independent software reviews. Finance and accounting first.</p>
+    <p class="meta eyebrow">Independent software reviews across all categories.</p>
     <h1>Software reviewed by people, compared on facts.</h1>
-    <p class="lead">{all.length} tools across {verticals.filter((v) => (counts.get(v.slug) ?? 0) > 0).length} categories, each read by an editor before it is listed. Side-by-side comparisons built from the vendors' own pricing pages, alternatives ranked by rating alone, and every paid placement labelled.</p>
+    <p class="lead">Discover {all.length} tools across {verticals.filter((v) => (counts.get(v.slug) ?? 0) > 0).length} categories, each individually reviewed by our team. We build side-by-side comparisons directly from vendor data and rank alternatives purely by rating.</p>
     <button type="button" class="home-search" data-search-open aria-label="Search the directory">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <span>Search {all.length} tools, {comparePages} comparisons and every guide</span>
@@ -61,7 +61,7 @@ const tickerItems = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.
     <div class="row home-cta">
       <a class="btn" href="/tools/">Browse the directory</a>
       <a class="btn ghost" href="/submit-tool/">List your tool, free</a>
-      <span class="meta">Reviewed within {REVIEW_SLA}. Instant publish {INSTANT_PRICE}.</span>
+      <span class="meta">Reviewed within {REVIEW_SLA}.</span>
     </div>
     <ul class="trust-strip" aria-label="What the directory holds">
       <li><b>{all.length}</b> reviews written by a person</li>
@@ -133,7 +133,9 @@ const tickerItems = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.
             {pairs.slice(0, 6).map((p) => (
               <li class="card vs-card">
                 <a class="vs-pair" href={`/tools/compare/${p.id}/`}>{p.a!.data.name} <em>vs</em> {p.b!.data.name}</a>
-                <p class="muted" style="margin:.35rem 0 0; font-size:.93rem;">{p.winner ? `Our call: ${p.winner.data.name}. ${p.reason ?? ''}` : 'No clear winner: it depends on your team.'}</p>
+                <p class="muted" style="margin:.35rem 0 0; font-size:.93rem;">
+                  {p.winner ? <><strong>Our pick: {p.winner.data.name}.</strong> Why? {p.reason ?? ''}</> : 'No clear winner: it depends on your team.'}
+                </p>
                 {p.reviewedAt && <span class="meta">Reviewed {fmtDate(p.reviewedAt)}</span>}
               </li>
             ))}
@@ -176,19 +178,18 @@ const tickerItems = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.
       <section class="rail-block offer-card">
         <h2 class="rail-title">List your tool</h2>
         <ul class="offer-list">
-          <li><span>Free listing</span><b>$0</b></li>
-          <li><span>Instant publish, live in 24h</span><b>{INSTANT_PRICE}</b></li>
-          <li><span>Featured, 12 months</span><b>{featuredPrice.price}</b></li>
-          <li><span>Sponsored article</span><b>{sponsoredPrice.price}</b></li>
+          <li><span>Basic</span><b>Free</b></li>
+          <li><span>Featured</span><b>$99</b></li>
+          <li><span>Sponsored Article</span><b>$129</b></li>
         </ul>
-        <p class="meta" style="margin:.25rem 0 .75rem;">Preview before you pay. Edit for free, forever. Paid links are tagged rel=sponsored, as Google requires.</p>
-        <a class="btn" href="/submit-tool/" style="width:100%; justify-content:center;">Start a listing</a>
+        <p class="meta" style="margin:.25rem 0 .75rem;">Every listing is read by an editor within 2 business days. Approved tools get a dedicated review page, appear in their category, and are included in the compare and alternatives pages automatically. You see the listing before you pay, you can edit it for free forever, and ratings are never for sale.</p>
+        <a class="btn" href="/submit-tool/" style="width:100%; justify-content:center;">See options & start a listing</a>
       </section>
 
       <section class="rail-block">
         <h2 class="rail-title">Directory package</h2>
-        <p class="meta" style="margin:0 0 .5rem;">Manual submission to 62 directories, every domain rating published before you pay, indexed-link report at 30 days.</p>
-        <a class="link-more" href="/directory-package/">See every directory and its DR</a>
+        <p class="meta" style="margin:0 0 .5rem;">Boost your SEO with manual submissions to 100+ high-DR sites. See the full list before you pay, backed by a 30-day indexed link report.</p>
+        <a class="link-more" href="/directory-package/">View the directory package details</a>
       </section>
 
       {posts.length > 0 && (
@@ -214,11 +215,11 @@ const tickerItems = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.
   </div>
 
   <section class="section how">
-    <div class="section-head"><h2>How a listing works</h2><span class="meta">The same three steps for free and paid listings</span></div>
+    <div class="section-head"><h2>How getting listed works</h2><span class="meta">A simple, transparent process for both free and paid listings</span></div>
     <ol class="how-steps">
-      <li><span class="how-n">1</span><h3>Submit</h3><p>Name, site, category, a tagline and a short description. You see the card exactly as it will appear before you send it, and before you pay for anything.</p></li>
-      <li><span class="how-n">2</span><h3>A person reads it</h3><p>Within {REVIEW_SLA}. The editor checks the product exists and does what the listing says, trims the marketing words, and files it under the right category.</p></li>
-      <li><span class="how-n">3</span><h3>Published with proof</h3><p>Your review page shows when it was listed, when pricing was last checked, the link type, and every compare and alternatives page it appears on. Edit it for free, forever.</p></li>
+      <li><span class="how-n">1</span><h3>Fast Submission</h3><p>Provide your basic details. You'll see a live preview of your exact listing before you hit submit or choose a plan.</p></li>
+      <li><span class="how-n">2</span><h3>Editor Review</h3><p>Within {REVIEW_SLA}, an editor verifies your product. We check accuracy, cut the marketing fluff, and assign the right category.</p></li>
+      <li><span class="how-n">3</span><h3>Live & Transparent</h3><p>Your listing goes live. Buyers see your verified pricing and comparisons, and you can edit your page for free, forever.</p></li>
     </ol>
   </section>
 

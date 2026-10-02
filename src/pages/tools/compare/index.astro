@@ -29,17 +29,19 @@ const jsonLd = [breadcrumbList(Astro.site, [{ name: 'Tools', path: '/tools/' }, 
   <section class="hero">
     <nav class="meta eyebrow" aria-label="Breadcrumb"><a href="/tools/">Tools</a> / Compare</nav>
     <h1>Compare tools side by side</h1>
-    <p class="lead">{total} comparison pages. Each one puts two tools' starting price, free plan, trial, platforms and feature list in one table, from the vendors' own pages. {editorial.length} pairs with real search demand also carry a hand-written verdict.</p>
+    <p class="lead">Compare {total} tools side by side. We pull pricing, free plans, and core features directly from the vendors into one simple table. For the top {editorial.length} matchups, our editors break down exactly which one you should pick.</p>
   </section>
 
   {editorial.length > 0 && (
     <section class="section fade-in">
-      <div class="section-head"><h2>Editorial verdicts</h2><span class="meta">Written by an editor; the winner is our call, never a vendor's</span></div>
+      <div class="section-head"><h2>Editorial verdicts</h2></div>
       <ul class="vs-grid">
         {editorial.map((p) => (
           <li class="card vs-card">
             <a class="vs-pair" href={`/tools/compare/${p.id}/`}>{p.a!.data.name} <em>vs</em> {p.b!.data.name}</a>
-            <p class="muted" style="margin:.35rem 0 0; font-size:.93rem;">{p.winner ? `Our call: ${p.winner.data.name}. ${p.reason ?? ''}` : 'No clear winner: it depends on your team.'}</p>
+            <p class="muted" style="margin:.35rem 0 0; font-size:.93rem;">
+              {p.winner ? <><strong>Our pick: {p.winner.data.name}.</strong> Why? {p.reason ?? ''}</> : 'No clear winner: it depends on your team.'}
+            </p>
             {p.reviewedAt && <span class="meta">Reviewed {fmtDate(p.reviewedAt)}</span>}
           </li>
         ))}

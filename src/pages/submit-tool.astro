@@ -13,11 +13,11 @@ const comparePages = (() => { let n = 0; const byCat = new Map<string, number>()
 const categoryOptions = VERTICALS.map((v) => ({ slug: v.slug, name: v.name }));
 const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the notes)'];
 ---
-<Base title="List your tool: free, instant or featured" description={`List any software or AI tool. Free listings are reviewed within ${REVIEW_SLA}; instant publish goes live in 24 hours. Every tool gets a review page, a category place and compare pages.`}>
+<Base title="List your tool: free or featured" description={`List any software or AI tool. Free listings are reviewed within ${REVIEW_SLA}. Every tool gets a review page, a category place and compare pages.`}>
   <section class="hero">
     <p class="meta eyebrow">For the people who build software</p>
     <h1>List your tool</h1>
-    <p class="lead">Every listing is read by an editor within {REVIEW_SLA}, or goes live within 24 hours with instant publish. Approved tools get a dedicated review page, appear in their category, and are included in the compare and alternatives pages automatically. You see the listing before you pay, you can edit it for free forever, and ratings are never for sale.</p>
+    <p class="lead">Every listing is read by an editor within {REVIEW_SLA}. Approved tools get a dedicated review page, appear in their category, and are included in the compare and alternatives pages automatically. You see the listing before you pay, you can edit it for free forever, and ratings are never for sale.</p>
     <div class="stats-bar">
       <div class="stat"><span class="stat-number" data-count={tools.length}>{tools.length}</span><span class="stat-label">Tools listed</span></div>
       <div class="stat"><span class="stat-number" data-count={comparePages}>{comparePages}</span><span class="stat-label">Compare pages</span></div>
@@ -37,17 +37,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       </ul>
       <button class="btn ghost plan-pick" type="button" data-pick="basic">Start a free listing</button>
     </div>
-    <div class="card plan-card" data-plan="instant">
-      <h3>Instant publish</h3>
-      <div class="price">{INSTANT_PRICE} <small>one time</small></div>
-      <ul>
-        <li>Skip the queue: live within 24 hours of payment</li>
-        <li>Same page, category place and compare pages as a free listing</li>
-        <li>Nofollow link; an editor still reads it after it is live</li>
-        <li>Refunded in full if the editor declines it</li>
-      </ul>
-      <button class="btn ghost plan-pick" type="button" data-pick="instant">Publish now</button>
-    </div>
+
     <div class="card plan-card" data-plan="featured">
       <span class="pill">Most chosen</span>
       <h3>Featured listing</h3>
@@ -205,7 +195,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
   </section>
 
   <section class="section reveal">
-    <div class="grid">
+    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
       <div class="card"><h3>What the editor checks</h3><p class="muted desc">That the product exists and does what the listing says, that the category is right, and that the description reads like a review, not an advert. Marketing words are edited out.</p></div>
       <div class="card"><h3>What paid placement buys</h3><p class="muted desc">Position and a followed link (tagged rel="sponsored", as Google requires for paid placement). Not the rating, not the verdict on a compare page, not a place in an alternatives ranking. Those come from editorial data only.</p></div>
       <div class="card"><h3>If a listing is declined</h3><p class="muted desc">You get the reason by email and a link to fix it. A paid listing that cannot be fixed is refunded in full.</p></div>
@@ -236,8 +226,8 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
     let plan: 'basic' | 'instant' | 'featured' | 'sponsored' = 'featured';
     let step = 1;
     const totalSteps = () => (plan === 'basic' ? 2 : 1);
-    // "basic-only" fields are the listing fields: shown for the free and the instant plan (both publish what you type)
-    const listingPlan = () => plan === 'basic' || plan === 'instant';
+    // "basic-only" fields are the listing fields
+    const listingPlan = () => plan === 'basic';
 
     // ── Live preview card ──────────────────────────────────
     const pv = (id: string) => document.getElementById(id) as HTMLElement;
@@ -308,9 +298,6 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
       if (plan === 'basic') {
         title.textContent = 'Free listing';
         sub.textContent = `Two steps. Step 2 is optional - submit early for a basic profile or complete it for the full profile with sidebar and comparison pages. Reviewed within ${sla}.`;
-      } else if (plan === 'instant') {
-        title.textContent = `Instant publish · ${instantPrice}`;
-        sub.textContent = 'One step, then checkout. Your listing goes live within 24 hours of payment, exactly as previewed below. An editor reads it afterwards; if it is declined you are refunded in full.';
       } else if (plan === 'featured') {
         title.textContent = `Featured listing · ${featuredPrice}`;
         sub.textContent = 'One step, then checkout. We build the full profile page for you within 3 business days.';
@@ -382,7 +369,7 @@ const subcategoryOptions = [...VERTICALS[0].categories, 'Other (tell us in the n
 
     // Pre-select plan from URL ?plan=featured, ?plan=sponsored or ?plan=instant
     const wanted = new URLSearchParams(location.search).get('plan');
-    if (wanted === 'basic' || wanted === 'featured' || wanted === 'sponsored' || wanted === 'instant') plan = wanted;
+    if (wanted === 'basic' || wanted === 'featured' || wanted === 'sponsored') plan = wanted;
 
     // ── Subcategory + feature options follow the category ──
     const taxonomy: Record<string, string[]> = JSON.parse(document.getElementById('taxonomy-data')?.textContent || '{}');

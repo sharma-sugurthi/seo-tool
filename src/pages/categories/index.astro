@@ -18,10 +18,10 @@ const ordered = [...VERTICALS].sort((a, b) => (counts.get(b.slug) ?? 0) - (count
       {ordered.map((v) => {
         const n = counts.get(v.slug) ?? 0;
         return (
-          <div class="card">
+          <div class="card" style="justify-content: flex-start;">
             <span class="pill">{n > 0 ? `${n} ${n === 1 ? 'tool' : 'tools'}` : 'Open for listings'}</span>
             <h3><a href={`/categories/${v.slug}/`}>{v.name}</a></h3>
-            <p class="muted" style="flex:1; font-size:.93rem;">{v.blurb}</p>
+            <p class="muted" style="font-size:.93rem; margin-bottom: .75rem;">{v.blurb}</p>
             <p class="meta" style="margin:0;">{v.categories.slice(0, 4).join(', ')}{v.categories.length > 4 ? ` and ${v.categories.length - 4} more` : ''}</p>
           </div>
         );

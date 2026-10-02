@@ -50,16 +50,23 @@ const more = sortedLive.slice(5);
       </div>
       
       <div class="grid" style="margin-bottom: 1.5rem;">
-        {v.tools.slice(0, 3).map((t) => <ToolCard tool={t} />)}
+        {v.tools.map((t, i) => <ToolCard tool={t} data-overflow={i >= 4 ? 'true' : undefined} />)}
       </div>
 
-      <div style="text-align: right; border-top: 1px solid var(--border); padding-top: 1rem;">
-        <a href={`/categories/${v.slug}/`} style="font-weight: 500; color: var(--accent);">
-          View all &rarr;
-        </a>
-      </div>
+      {v.tools.length > 4 && (
+        <div style="text-align: right; border-top: 1px solid var(--border); padding-top: 1rem;">
+          <a href={`/categories/${v.slug}/`} style="font-weight: 500; color: var(--accent);">
+            View all {v.tools.length} &rarr;
+          </a>
+        </div>
+      )}
     </section>
   ))}
+
+  <style>
+    [data-overflow="true"] { display: none; }
+    body.is-searching [data-overflow="true"] { display: flex; /* overridden by inline style if no match */ }
+  </style>
 
 
 
@@ -119,12 +126,20 @@ const more = sortedLive.slice(5);
 
     search?.addEventListener('input', () => {
       const q = search.value.toLowerCase().trim();
+      const isSearching = q.length > 0;
+      
+      document.body.classList.toggle('is-searching', isSearching);
+
       if (pills[0]) setActive(pills[0]);
       applyFilter('all');
       
       cards.forEach((c) => {
         const hay = `${c.dataset.name || ''} ${c.textContent || ''}`.toLowerCase();
-        c.style.display = !q || hay.includes(q) ? '' : 'none';
+        if (isSearching) {
+          c.style.display = hay.includes(q) ? '' : 'none';
+        } else {
+          c.style.display = '';
+        }
       });
 
       // Hide sections if all their cards are hidden by search

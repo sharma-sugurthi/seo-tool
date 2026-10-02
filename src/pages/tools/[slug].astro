@@ -58,7 +58,7 @@ const allTools = await getCollection('tools');
 const rank = (a: any, b: any) => Number(b.data.featured) - Number(a.data.featured) || Number(b.data.editorsPick) - Number(a.data.editorsPick);
 const sameCategory = allTools.filter((t) => t.data.category === d.category && t.id !== tool.id).sort(rank);
 const sameVertical = allTools.filter((t) => t.data.vertical === d.vertical && t.data.category !== d.category && t.id !== tool.id).sort(rank);
-const similar = [...sameCategory, ...sameVertical].slice(0, 3);
+const similar = [...sameCategory, ...sameVertical].slice(0, 4);
 // Compare links use the editorial ranking (rating, then editor's pick), never paid placement.
 const comparePeers = [...sameCategory].sort(editorialRank).slice(0, 3);
 // "About this listing": the facts a founder checks before paying and a buyer checks before trusting. All real, all from the data.
