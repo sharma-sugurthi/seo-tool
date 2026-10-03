@@ -2,8 +2,42 @@
 import Base from '../layouts/Base.astro';
 ---
 <Base title="Page not found" noindex>
-  <section class="hero" style="padding:6rem 0; max-width:36rem;">
-    <h1 style="font-size:1.5rem; font-family:var(--font); font-weight:700; font-style:normal;">Page not found</h1>
-    <p class="lead" style="font-size:1rem;">That page has moved or never existed. Try the <a href="/tools/">tool directory</a>, the <a href="/blog/">blog</a>, or head <a href="/">home</a>.</p>
+  <section class="hero" style="padding:5rem 0 2rem; text-align:center;">
+    <div style="margin-bottom:1.5rem; color:var(--accent); display:flex; justify-content:center;">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+      </svg>
+    </div>
+    <p class="meta eyebrow" style="margin-bottom:.5rem; justify-content:center;">404 Error</p>
+    <h1 style="margin-left:auto; margin-right:auto;">We couldn't find this page</h1>
+    <p class="lead" style="max-width:38rem; margin-left:auto; margin-right:auto;">The page you are looking for doesn't exist or has been moved, but these resources might help you find what you need.</p>
+  </section>
+
+  <section class="section">
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; max-width:56rem; margin:0 auto;">
+      
+      <a href="/tools/" style="display:block; padding:1.5rem; border:1px solid var(--border); border-radius:12px; text-decoration:none; color:inherit; background:var(--surface); transition:border-color .15s, transform .15s;">
+        <strong style="display:block; font-size:1.05rem; margin-bottom:.25rem; color:var(--text);">Tool Directory &rarr;</strong>
+        <p class="muted" style="margin:0; font-size:.9rem; line-height:1.5;">Browse our full database of reviewed software and tools.</p>
+      </a>
+
+      <a href="/categories/" style="display:block; padding:1.5rem; border:1px solid var(--border); border-radius:12px; text-decoration:none; color:inherit; background:var(--surface); transition:border-color .15s, transform .15s;">
+        <strong style="display:block; font-size:1.05rem; margin-bottom:.25rem; color:var(--text);">Categories &rarr;</strong>
+        <p class="muted" style="margin:0; font-size:.9rem; line-height:1.5;">Find tools organized by vertical and specific use cases.</p>
+      </a>
+
+      <a href="/learn/" style="display:block; padding:1.5rem; border:1px solid var(--border); border-radius:12px; text-decoration:none; color:inherit; background:var(--surface); transition:border-color .15s, transform .15s;">
+        <strong style="display:block; font-size:1.05rem; margin-bottom:.25rem; color:var(--text);">Learn & Resources &rarr;</strong>
+        <p class="muted" style="margin:0; font-size:.9rem; line-height:1.5;">Calculators, scorecards, and checklists for buyers and founders.</p>
+      </a>
+
+      <a href="/contact/" style="display:block; padding:1.5rem; border:1px solid var(--border); border-radius:12px; text-decoration:none; color:inherit; background:var(--surface); transition:border-color .15s, transform .15s;">
+        <strong style="display:block; font-size:1.05rem; margin-bottom:.25rem; color:var(--text);">Contact Support &rarr;</strong>
+        <p class="muted" style="margin:0; font-size:.9rem; line-height:1.5;">Can't find what you're looking for? Reach out to us directly.</p>
+      </a>
+
+    </div>
   </section>
 </Base>
+

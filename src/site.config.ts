@@ -141,7 +141,5 @@ export const DISTRIBUTION_SERVICES: Price[] = [
       'One time fee, listings replaced if removed within 90 days (5 to 7 days turnaround)',
     ],
     itemKey: 'directory',
-    buyHref: '/directory-package/',
-    buyLabel: 'See every directory and its DR',
   },
 ];

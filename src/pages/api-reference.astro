@@ -13,34 +13,101 @@ const ex = (path: string) => `${api}${path}`;
 
   <section class="section prose fade-in">
     <h2 style="margin-top:0">Endpoints</h2>
-    <table class="compare-table">
-      <thead><tr><th>Endpoint</th><th>Returns</th></tr></thead>
-      <tbody>
-        <tr><td><code>GET /api/v1/tools</code></td><td>Published tools. Filters: <code>q</code> (name or tagline), <code>vertical</code>, <code>category</code>, <code>pricing</code> (Free, Freemium, Paid, Enterprise), <code>limit</code> (max 200).</td></tr>
-        <tr><td><code>GET /api/v1/tools/:slug</code></td><td>One tool with pricing, free plan, trial, platforms, integrations, pros, cons, verdict line and the date its data was last checked.</td></tr>
-        <tr><td><code>GET /api/v1/tools/:slug/alternatives</code></td><td>Same-category alternatives in editorial order (rating, then editor's pick). Paid placement never changes this order.</td></tr>
-        <tr><td><code>GET /api/v1/compare?a=slug&amp;b=slug</code></td><td>Both tools side by side plus the editorial verdict when one exists.</td></tr>
-        <tr><td><code>GET /api/v1/deals</code></td><td>Live vendor offers attached to listings: text, code, end date and the page where each applies.</td></tr>
-        <tr><td><code>GET /api/v1/categories</code></td><td>Verticals, their categories and the number of published tools in each.</td></tr>
-      </tbody>
-    </table>
+    
+    <div style="display:grid; gap:1.5rem; margin-bottom:2rem;">
+      <!-- Endpoint 1 -->
+      <div style="border:1px solid var(--border); border-radius:12px; padding:1.25rem; background:var(--surface);">
+        <div style="margin-bottom:.5rem; display:flex; align-items:center; gap:.75rem;">
+          <span style="background:#10b981; color:#fff; padding:.2rem .6rem; border-radius:6px; font-weight:700; font-size:.75rem; letter-spacing:.05em;">GET</span>
+          <code style="background:transparent; padding:0; font-size:1.05rem; color:var(--text); font-weight:600;">/api/v1/tools</code>
+        </div>
+        <p class="muted" style="margin:0;">Published tools. Filters: <code>q</code> (name or tagline), <code>vertical</code>, <code>category</code>, <code>pricing</code> (Free, Freemium, Paid, Enterprise), <code>limit</code> (max 200).</p>
+      </div>
+
+      <!-- Endpoint 2 -->
+      <div style="border:1px solid var(--border); border-radius:12px; padding:1.25rem; background:var(--surface);">
+        <div style="margin-bottom:.5rem; display:flex; align-items:center; gap:.75rem;">
+          <span style="background:#10b981; color:#fff; padding:.2rem .6rem; border-radius:6px; font-weight:700; font-size:.75rem; letter-spacing:.05em;">GET</span>
+          <code style="background:transparent; padding:0; font-size:1.05rem; color:var(--text); font-weight:600;">/api/v1/tools/:slug</code>
+        </div>
+        <p class="muted" style="margin:0;">One tool with pricing, free plan, trial, platforms, integrations, pros, cons, verdict line and the date its data was last checked.</p>
+      </div>
+
+      <!-- Endpoint 3 -->
+      <div style="border:1px solid var(--border); border-radius:12px; padding:1.25rem; background:var(--surface);">
+        <div style="margin-bottom:.5rem; display:flex; align-items:center; gap:.75rem;">
+          <span style="background:#10b981; color:#fff; padding:.2rem .6rem; border-radius:6px; font-weight:700; font-size:.75rem; letter-spacing:.05em;">GET</span>
+          <code style="background:transparent; padding:0; font-size:1.05rem; color:var(--text); font-weight:600;">/api/v1/tools/:slug/alternatives</code>
+        </div>
+        <p class="muted" style="margin:0;">Same-category alternatives in editorial order (rating, then editor's pick). Paid placement never changes this order.</p>
+      </div>
+      
+      <!-- Endpoint 4 -->
+      <div style="border:1px solid var(--border); border-radius:12px; padding:1.25rem; background:var(--surface);">
+        <div style="margin-bottom:.5rem; display:flex; align-items:center; gap:.75rem;">
+          <span style="background:#10b981; color:#fff; padding:.2rem .6rem; border-radius:6px; font-weight:700; font-size:.75rem; letter-spacing:.05em;">GET</span>
+          <code style="background:transparent; padding:0; font-size:1.05rem; color:var(--text); font-weight:600;">/api/v1/compare?a=slug&b=slug</code>
+        </div>
+        <p class="muted" style="margin:0;">Both tools side by side plus the editorial verdict when one exists.</p>
+      </div>
+      <!-- Endpoint 5 -->
+      <div style="border:1px solid var(--border); border-radius:12px; padding:1.25rem; background:var(--surface);">
+        <div style="margin-bottom:.5rem; display:flex; align-items:center; gap:.75rem;">
+          <span style="background:#10b981; color:#fff; padding:.2rem .6rem; border-radius:6px; font-weight:700; font-size:.75rem; letter-spacing:.05em;">GET</span>
+          <code style="background:transparent; padding:0; font-size:1.05rem; color:var(--text); font-weight:600;">/api/v1/deals</code>
+        </div>
+        <p class="muted" style="margin:0;">Live vendor offers attached to listings: text, code, end date and the page where each applies.</p>
+      </div>
+
+      <!-- Endpoint 6 -->
+      <div style="border:1px solid var(--border); border-radius:12px; padding:1.25rem; background:var(--surface);">
+        <div style="margin-bottom:.5rem; display:flex; align-items:center; gap:.75rem;">
+          <span style="background:#10b981; color:#fff; padding:.2rem .6rem; border-radius:6px; font-weight:700; font-size:.75rem; letter-spacing:.05em;">GET</span>
+          <code style="background:transparent; padding:0; font-size:1.05rem; color:var(--text); font-weight:600;">/api/v1/categories</code>
+        </div>
+        <p class="muted" style="margin:0;">Verticals, their categories and the number of published tools in each.</p>
+      </div>
+    </div>
+
     <p class="meta">Every tool object carries <code>url</code> (the review page) and <code>website</code> (the vendor). Fields that are not verified are omitted rather than guessed; <code>dataCheckedAt</code> is present only when a person has checked pricing and features against the vendor's site.</p>
 
-    <h2>Example</h2>
-    <pre><code>curl "{ex('/api/v1/tools?vertical=finance&pricing=Freemium&limit=5')}"</code></pre>
-    <pre><code>curl "{ex('/api/v1/compare?a=brex&b=ramp')}"</code></pre>
+    <h2>Example Usage</h2>
+    <div style="background:#111; border-radius:12px; padding:1.5rem; overflow-x:auto; margin-bottom:1.5rem;">
+      <pre style="margin:0; background:transparent; padding:0;"><code style="color:#a78bfa;">curl</code> <code style="color:#34d399;">"{ex('/api/v1/tools?vertical=finance&pricing=Freemium&limit=5')}"</code></pre>
+      <pre style="margin:1rem 0 0; background:transparent; padding:0;"><code style="color:#a78bfa;">curl</code> <code style="color:#34d399;">"{ex('/api/v1/compare?a=brex&b=ramp')}"</code></pre>
+    </div>
+
+    <h2>Sample Response</h2>
+    <div style="background:#111; border-radius:12px; padding:1.5rem; overflow-x:auto;">
+<pre style="margin:0; background:transparent; padding:0; color:#e2e8f0; font-size:0.9rem;"><code>&#123;
+  <span style="color:#93c5fd;">"tools"</span>: [
+    &#123;
+      <span style="color:#93c5fd;">"name"</span>: <span style="color:#34d399;">"Brex"</span>,
+      <span style="color:#93c5fd;">"slug"</span>: <span style="color:#34d399;">"brex"</span>,
+      <span style="color:#93c5fd;">"tagline"</span>: <span style="color:#34d399;">"Corporate cards and spend management"</span>,
+      <span style="color:#93c5fd;">"rating"</span>: <span style="color:#fcd34d;">4.8</span>,
+      <span style="color:#93c5fd;">"pricing"</span>: <span style="color:#34d399;">"Freemium"</span>,
+      <span style="color:#93c5fd;">"url"</span>: <span style="color:#34d399;">"https://lantle.ai/tools/brex/"</span>,
+      <span style="color:#93c5fd;">"website"</span>: <span style="color:#34d399;">"https://brex.com"</span>
+    &#125;
+  ]
+&#125;</code></pre>
+    </div>
 
     <h2>MCP server</h2>
     <p>The MCP server exposes five tools to any MCP-capable assistant: <code>lantle_find_tools</code>, <code>lantle_tool_details</code>, <code>lantle_alternatives</code>, <code>lantle_compare</code> and <code>lantle_deals</code>. It runs over stdio and calls the public API above, so it needs no credentials.</p>
-    <pre><code>{`{
-  "mcpServers": {
-    "lantle": {
-      "command": "npx",
-      "args": ["-y", "lantle-mcp"],
-      "env": { "LANTLE_API_BASE": "${api}" }
-    }
-  }
-}`}</code></pre>
+    
+    <div style="background:#111; border-radius:12px; padding:1.5rem; overflow-x:auto; margin-bottom:1rem;">
+<pre style="margin:0; background:transparent; padding:0; color:#e2e8f0; font-size:0.9rem;"><code>&#123;
+  <span style="color:#93c5fd;">"mcpServers"</span>: &#123;
+    <span style="color:#93c5fd;">"lantle"</span>: &#123;
+      <span style="color:#93c5fd;">"command"</span>: <span style="color:#34d399;">"npx"</span>,
+      <span style="color:#93c5fd;">"args"</span>: [<span style="color:#34d399;">"-y"</span>, <span style="color:#34d399;">"lantle-mcp"</span>],
+      <span style="color:#93c5fd;">"env"</span>: &#123; <span style="color:#93c5fd;">"LANTLE_API_BASE"</span>: <span style="color:#34d399;">"${api}"</span> &#125;
+    &#125;
+  &#125;
+&#125;</code></pre>
+    </div>
     <p class="meta">The server source lives in the backend repository under <code>src/mcp/</code>. Until it is published to npm, run it from a checkout with <code>npm run build &amp;&amp; node dist/mcp/server.js</code>.</p>
 
     <h2>Terms</h2>

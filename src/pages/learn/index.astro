@@ -3,64 +3,253 @@ import Base from '../../layouts/Base.astro';
 import PostCard from '../../components/PostCard.astro';
 import { getCollection } from 'astro:content';
 const guides = (await getCollection('blog', ({ data }) => !data.draft && data.tags.some((t) => ['how to', 'AI policy', 'directories', 'launch'].includes(t))))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 3);
 
-const groups = [
+const buyerTools = [
   {
-    title: 'For anyone choosing a tool',
-    items: [
-      { pill: 'Scorecard', href: '/learn/tool-evaluation-scorecard/', name: 'Tool evaluation scorecard', text: 'Eight weighted criteria, up to three tools side by side, one number at the end. Set the weights before the demo.' },
-      { pill: 'Calculator', href: '/learn/software-cost-calculator/', name: 'Software cost calculator', text: 'Seat growth, add-ons, implementation and the annual billing question, rolled into a three year total and a real cost per seat.' },
-      { pill: 'Checklist', href: '/learn/ai-vendor-security-checklist/', name: 'AI vendor security and data checklist', text: 'Twenty-eight questions on training data, retention, SSO, SOC 2, model behaviour and exit. The ones vendors go quiet on.' },
-      { pill: 'Reference', href: '/learn/glossary/', name: 'Glossary', text: 'Finance, AI and search terms defined in a sentence or two each, with links to where they matter on this site.' },
-    ],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
+    type: 'Scorecard',
+    href: '/learn/tool-evaluation-scorecard/',
+    name: 'Tool evaluation scorecard',
+    text: 'Score up to three tools across eight weighted criteria. Get one clear number before the demo.',
+    cta: 'Open scorecard',
   },
   {
-    title: 'For finance teams',
-    items: [
-      { pill: 'Calculator', href: '/learn/bookkeeping-automation-roi-calculator/', name: 'Bookkeeping automation savings', text: 'Transactions, minutes per transaction, hourly cost and an automation rate. Out comes hours and money saved per month and per year.' },
-      { pill: 'Checklist', href: '/learn/month-end-close-checklist/', name: 'Month end close checklist', text: 'Thirty items across pre close, close and review. Tick them in the browser, progress is remembered on this device.' },
-    ],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`,
+    type: 'Calculator',
+    href: '/learn/software-cost-calculator/',
+    name: 'Software cost calculator',
+    text: 'Model seats, add-ons, implementation and annual billing. Get a 3-year total and real cost per seat.',
+    cta: 'Run numbers',
   },
   {
-    title: 'For founders launching a tool',
-    items: [
-      { pill: 'Checklist', href: '/learn/tool-launch-checklist/', name: 'Tool launch checklist', text: 'Assets to prepare, where to list, what social proof to collect and what to do in the 30 days after launch.' },
-    ],
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    type: 'Checklist',
+    href: '/learn/ai-vendor-security-checklist/',
+    name: 'AI vendor security checklist',
+    text: '28 questions on training data, retention, SSO and SOC 2. The questions vendors go quiet on.',
+    cta: 'View checklist',
   },
 ];
+
+const financeTools = [
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+    type: 'Calculator',
+    href: '/learn/bookkeeping-automation-roi-calculator/',
+    name: 'Bookkeeping automation ROI',
+    text: 'Enter transactions, time per entry and hourly cost. See exactly how much automation saves per month and year.',
+    cta: 'Calculate savings',
+  },
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+    type: 'Checklist',
+    href: '/learn/month-end-close-checklist/',
+    name: 'Month-end close checklist',
+    text: '30 items across pre-close, close and review. Tick them in the browser. Progress is remembered on this device.',
+    cta: 'Start checklist',
+  },
+];
+
+const founderTools = [
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    type: 'Checklist',
+    href: '/learn/tool-launch-checklist/',
+    name: 'Tool launch checklist',
+    text: 'Assets to prepare, where to list, what social proof to collect, and what to do in the 30 days after launch.',
+    cta: 'Open checklist',
+  },
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+    type: 'Reference',
+    href: '/learn/glossary/',
+    name: 'Glossary',
+    text: 'Finance, AI and search terms in plain English. Understand what vendors and review sites mean before you commit.',
+    cta: 'Browse glossary',
+  },
+];
+
+const pillColor: Record<string, string> = {
+  Scorecard: '#7c3aed',
+  Calculator: '#0369a1',
+  Checklist: '#065f46',
+  Reference: '#92400e',
+};
 ---
 <Base title="Free tools for choosing and launching software" description="A tool evaluation scorecard, a software cost calculator, a vendor security checklist, a launch checklist, finance team tools and a plain English glossary. Free, no signup.">
+
   <section class="hero">
-    <h1>Learn</h1>
-    <p class="lead">Free, practical resources for teams choosing software and for founders trying to get their tools found. No signup, no gated PDFs. Everything runs in your browser and nothing you type leaves it.</p>
+    <p class="meta eyebrow" style="margin-bottom:.4rem">Free resources, no signup required</p>
+    <h1>Practical tools that run in your browser</h1>
+    <p class="lead" style="max-width:48rem;">Every tool on this page is free and private. Nothing you type is sent anywhere. Pick your role below and start.</p>
   </section>
 
-  {groups.map((g) => (
-    <section class="section reveal">
-      <h2 style="margin-top:0">{g.title}</h2>
-      <div class="grid reveal-stagger">
-        {g.items.map((it) => (
-          <div class="card">
-            <span class="pill">{it.pill}</span>
-            <h3><a href={it.href}>{it.name}</a></h3>
-            <p class="muted" style="flex:1">{it.text}</p>
-          </div>
-        ))}
+  <!-- Buyers -->
+  <section class="section reveal" style="padding-top:0">
+    <div class="learn-section-head">
+      <div class="learn-audience-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Buying software
       </div>
-    </section>
-  ))}
+      <h2>Evaluate, cost and secure your next purchase</h2>
+      <p class="muted" style="max-width:42rem; margin:.25rem 0 0;">Three tools that help you compare options, model the real price, and ask vendors the hard questions.</p>
+    </div>
+    <div class="learn-tool-grid">
+      {buyerTools.map((t) => (
+        <a class="learn-card" href={t.href}>
+          <div class="learn-card-icon" set:html={t.icon} />
+          <div class="learn-card-body">
+            <span class="learn-type-pill" style={`background:${pillColor[t.type]}18; color:${pillColor[t.type]};`}>{t.type}</span>
+            <strong class="learn-card-name">{t.name}</strong>
+            <p class="muted learn-card-text">{t.text}</p>
+          </div>
+          <span class="learn-card-cta">{t.cta} &rarr;</span>
+        </a>
+      ))}
+    </div>
+  </section>
 
+  <!-- Finance -->
   <section class="section reveal">
-    <h2 style="margin-top:0">Guides</h2>
+    <div class="learn-section-head">
+      <div class="learn-audience-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Finance teams
+      </div>
+      <h2>Automate and close the books faster</h2>
+      <p class="muted" style="max-width:42rem; margin:.25rem 0 0;">Calculate what automation saves you in real money, then run the month-end close without missing a step.</p>
+    </div>
+    <div class="learn-tool-grid">
+      {financeTools.map((t) => (
+        <a class="learn-card" href={t.href}>
+          <div class="learn-card-icon" set:html={t.icon} />
+          <div class="learn-card-body">
+            <span class="learn-type-pill" style={`background:${pillColor[t.type]}18; color:${pillColor[t.type]};`}>{t.type}</span>
+            <strong class="learn-card-name">{t.name}</strong>
+            <p class="muted learn-card-text">{t.text}</p>
+          </div>
+          <span class="learn-card-cta">{t.cta} &rarr;</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Founders -->
+  <section class="section reveal">
+    <div class="learn-section-head">
+      <div class="learn-audience-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Founders
+      </div>
+      <h2>Launch and get found</h2>
+      <p class="muted" style="max-width:42rem; margin:.25rem 0 0;">Everything to prepare, where to list, and a glossary so you understand what the review sites are actually measuring.</p>
+    </div>
+    <div class="learn-tool-grid">
+      {founderTools.map((t) => (
+        <a class="learn-card" href={t.href}>
+          <div class="learn-card-icon" set:html={t.icon} />
+          <div class="learn-card-body">
+            <span class="learn-type-pill" style={`background:${pillColor[t.type]}18; color:${pillColor[t.type]};`}>{t.type}</span>
+            <strong class="learn-card-name">{t.name}</strong>
+            <p class="muted learn-card-text">{t.text}</p>
+          </div>
+          <span class="learn-card-cta">{t.cta} &rarr;</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Latest guides -->
+  <section class="section reveal">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:1.5rem;">
+      <h2 style="margin:0">Latest guides</h2>
+      <a class="link-more" href="/blog/">All articles &rarr;</a>
+    </div>
     <div class="grid reveal-stagger">
       {guides.map((g) => <PostCard post={g} hideTags />)}
     </div>
-    <p style="margin-top:1rem"><a href="/blog/">All articles</a></p>
   </section>
 
+  <!-- CTA strip -->
   <section class="section reveal">
-    <h2 style="margin-top:0">Something missing?</h2>
-    <p class="muted">Tell us what would help: a template, a comparison, a definition. <a href="/contact/">Contact us</a> and we will build it if enough people ask.</p>
+    <div style="border:1px solid var(--border); border-radius:14px; padding:2rem; background:var(--surface); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1.5rem;">
+      <div>
+        <strong style="font-size:1.1rem; display:block; margin-bottom:.3rem;">Something missing?</strong>
+        <p class="muted" style="margin:0; max-width:36rem;">Tell us what would help: a template, a calculator, a comparison. We build it if enough people ask.</p>
+      </div>
+      <a class="btn" href="/contact/">Request a resource</a>
+    </div>
   </section>
+
 </Base>
+
+<style>
+.learn-section-head { margin-bottom: 1.75rem; }
+.learn-audience-label {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: .5rem;
+}
+.learn-tool-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.learn-card {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .18s, transform .18s, box-shadow .18s;
+}
+.learn-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.07);
+  text-decoration: none;
+}
+.learn-card-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.learn-card-body { display: flex; flex-direction: column; gap: .35rem; flex: 1; }
+.learn-type-pill {
+  display: inline-block;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .2rem .55rem;
+  border-radius: 20px;
+  width: fit-content;
+}
+.learn-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.learn-card-text {
+  margin: 0;
+  font-size: .88rem;
+  line-height: 1.55;
+}
+.learn-card-cta {
+  font-size: .83rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: auto;
+}
+</style>
