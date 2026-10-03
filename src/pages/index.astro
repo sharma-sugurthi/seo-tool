@@ -50,9 +50,9 @@ const tickerItems = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.
       The whole sequence is one class toggle (.settled) driven by a FLIP transform; reduced-motion and small screens settle at once. */}
   <section class="home-hero intro" id="home-hero">
     <div class="hero-copy" id="hero-copy">
-    <p class="meta eyebrow">Independent software reviews across all categories.</p>
-    <h1>Software reviewed by people, compared on facts.</h1>
-    <p class="lead">Discover {all.length} tools across {verticals.filter((v) => (counts.get(v.slug) ?? 0) > 0).length} categories, each individually reviewed by our team. We build side-by-side comparisons directly from vendor data and rank alternatives purely by rating.</p>
+    <p class="meta eyebrow">The industry standard for software discovery.</p>
+    <h1>Honest reviews. High-impact distribution.</h1>
+    <p class="lead">Discover {all.length} top-rated tools across {verticals.filter((v) => (counts.get(v.slug) ?? 0) > 0).length} categories. Every product is individually vetted by our experts to provide side-by-side comparisons built directly from vendor data, ranked purely by honest ratings.</p>
     <button type="button" class="home-search" data-search-open aria-label="Search the directory">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <span>Search {all.length} tools, {comparePages} comparisons and every guide</span>
@@ -177,12 +177,20 @@ const tickerItems = [...all].sort((a, b) => b.data.addedDate.valueOf() - a.data.
 
       <section class="rail-block offer-card">
         <h2 class="rail-title">List your tool</h2>
-        <ul class="offer-list">
-          <li><span>Basic</span><b>Free</b></li>
-          <li><span>Featured</span><b>$99</b></li>
-          <li><span>Sponsored Article</span><b>$129</b></li>
+        <ul style="list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: .4rem;">
+          <li style="display: flex; gap: .4rem; align-items: flex-start;">
+            <svg style="width:16px; height:16px; flex-shrink:0; margin-top:3px; color:var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span style="font-size: .9rem; color:var(--text-2);">Get discovered by active B2B buyers</span>
+          </li>
+          <li style="display: flex; gap: .4rem; align-items: flex-start;">
+            <svg style="width:16px; height:16px; flex-shrink:0; margin-top:3px; color:var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span style="font-size: .9rem; color:var(--text-2);">Dedicated SEO-optimized review page</span>
+          </li>
+          <li style="display: flex; gap: .4rem; align-items: flex-start;">
+            <svg style="width:16px; height:16px; flex-shrink:0; margin-top:3px; color:var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span style="font-size: .9rem; color:var(--text-2);">Automatic inclusion in Alternatives lists</span>
         </ul>
-        <p class="meta" style="margin:.25rem 0 .75rem;">Every listing is read by an editor within 2 business days. Approved tools get a dedicated review page, appear in their category, and are included in the compare and alternatives pages automatically. You see the listing before you pay, you can edit it for free forever, and ratings are never for sale.</p>
+        <p class="muted" style="margin:.25rem 0 .75rem; font-size:.9rem; line-height:1.5;">Every listing is reviewed by an editor. Preview your page before paying, and edit it for free, forever.</p>
         <a class="btn" href="/submit-tool/" style="width:100%; justify-content:center;">See options & start a listing</a>
       </section>
 
